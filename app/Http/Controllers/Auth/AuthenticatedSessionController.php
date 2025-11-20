@@ -21,6 +21,7 @@ class AuthenticatedSessionController extends Controller
 
     /**
      * Handle an incoming authentication request.
+     * Routes users to correct dashboard based on user_type.
      */
     public function store(LoginRequest $request): RedirectResponse
     {
@@ -28,6 +29,24 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Get authenticated user's profile to determine type
+        $user = Auth::user();
+        $profile = $user->profile;
+
+        // Route based on user type
+        if ($profile) {
+            if ($profile->user_type === 'elderly') {
+                // Check if profile is completed
+                if (!$profile->profile_completed) {
+                    return redirect()->route('profile.completion');
+                }
+                return redirect()->route('dashboard');
+            } elseif ($profile->user_type === 'caregiver') {
+                return redirect()->route('caregiver.dashboard');
+            }
+        }
+
+        // Fallback to default dashboard if profile doesn't exist yet
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

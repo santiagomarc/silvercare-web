@@ -69,9 +69,4 @@ class HealthMetric extends Model
     {
         return $query->where('type', 'steps');
     }
-
-    public function scopeCalories(Builder $query): Builder
-    {
-        return $query->where('type', 'calories');
-    }
 }

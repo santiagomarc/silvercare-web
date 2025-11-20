@@ -4,16 +4,29 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\UserProfile;
+use App\Services\UserService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use Illuminate\Support\Str;
 
 class RegisteredUserController extends Controller
 {
+    protected $userService;
+
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
+
     /**
      * Display the registration view.
      */
@@ -23,28 +36,122 @@ class RegisteredUserController extends Controller
     }
 
     /**
-     * Handle an incoming registration request.
+     * Handle an incoming registration request for ELDERLY users.
+     * Optionally creates a caregiver account and sends password reset email.
      *
      * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
+        // Validate elderly registration data
+        $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'username' => ['required', 'string', 'max:255'],
+            'phone_number' => ['required', 'string', 'max:20'],
+            'sex' => ['required', 'in:Male,Female,Other'],
+            
+            // Optional caregiver invitation
+            'add_caregiver' => ['nullable', 'boolean'],
+            'caregiver_name' => ['required_if:add_caregiver,true', 'string', 'max:255'],
+            'caregiver_email' => ['required_if:add_caregiver,true', 'email', 'max:255', 'unique:'.User::class],
+            'caregiver_relationship' => ['required_if:add_caregiver,true', 'in:Spouse,Child,Professional Caregiver'],
         ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+        try {
+            DB::beginTransaction();
+
+            // Create elderly user account
+            $elderlyUser = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+            ]);
+
+            // Create elderly profile
+            $elderlyProfile = UserProfile::create([
+                'user_id' => $elderlyUser->id,
+                'user_type' => 'elderly',
+                'username' => $validated['username'],
+                'phone_number' => $validated['phone_number'],
+                'sex' => $validated['sex'],
+                'profile_completed' => false,
+                'is_active' => true,
+            ]);
+
+            // Handle caregiver invitation if requested
+            $caregiverId = null;
+            if ($request->boolean('add_caregiver')) {
+                $caregiverId = $this->createCaregiverAccount(
+                    elderlyProfileId: $elderlyProfile->id,
+                    caregiverName: $validated['caregiver_name'],
+                    caregiverEmail: $validated['caregiver_email'],
+                    relationship: $validated['caregiver_relationship']
+                );
+            }
+
+            // Link caregiver if created
+            if ($caregiverId) {
+                $elderlyProfile->update(['caregiver_id' => $caregiverId]);
+            }
+
+            event(new Registered($elderlyUser));
+
+            DB::commit();
+
+            // Log in the elderly user
+            Auth::login($elderlyUser);
+
+            // Redirect to profile completion
+            return redirect()->route('profile.completion')->with('success', 
+                $caregiverId 
+                    ? 'Account created! A password reset email has been sent to your caregiver.' 
+                    : 'Account created! Please complete your profile.'
+            );
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Registration failed: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Create caregiver account and send password reset email
+     */
+    protected function createCaregiverAccount(
+        int $elderlyProfileId,
+        string $caregiverName,
+        string $caregiverEmail,
+        string $relationship
+    ): int {
+        // Generate temporary secure password
+        $tempPassword = Str::random(16);
+
+        // Create caregiver user account
+        $caregiverUser = User::create([
+            'name' => $caregiverName,
+            'email' => $caregiverEmail,
+            'password' => Hash::make($tempPassword), // Temporary password
         ]);
 
-        event(new Registered($user));
+        // Create caregiver profile
+        $caregiverProfile = UserProfile::create([
+            'user_id' => $caregiverUser->id,
+            'user_type' => 'caregiver',
+            'relationship' => $relationship,
+            'profile_completed' => true, // Caregivers don't need profile completion
+            'is_active' => true,
+        ]);
 
-        Auth::login($user);
+        // Send password reset email to caregiver
+        try {
+            Password::sendResetLink(['email' => $caregiverEmail]);
+        } catch (\Exception $e) {
+            // Log error but don't fail registration
+            Log::error('Failed to send caregiver password reset email: ' . $e->getMessage());
+        }
 
-        return redirect(route('dashboard', absolute: false));
+        return $caregiverProfile->id;
     }
 }

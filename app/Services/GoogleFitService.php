@@ -55,16 +55,6 @@ class GoogleFitService
     }
 
     /**
-     * Fetch calories data from Google Fit
-     * TODO: Implement API call
-     */
-    public function fetchCalories(int $userId, Carbon $date): ?int
-    {
-        // Will implement API integration
-        return null;
-    }
-
-    /**
      * Fetch sleep data from Google Fit
      * TODO: Implement API call
      */
@@ -84,7 +74,6 @@ class GoogleFitService
         
         // Placeholder - will implement API calls
         $steps = $this->fetchSteps($userId, $today);
-        $calories = $this->fetchCalories($userId, $today);
         $sleep = $this->fetchSleep($userId, $today);
 
         $synced = [];
@@ -95,17 +84,6 @@ class GoogleFitService
                 'type' => 'steps',
                 'value' => $steps,
                 'unit' => 'steps',
-                'measured_at' => $today,
-                'source' => 'google_fit',
-            ]);
-        }
-
-        if ($calories !== null) {
-            $synced['calories'] = HealthMetric::create([
-                'elderly_id' => $elderlyProfileId,
-                'type' => 'calories',
-                'value' => $calories,
-                'unit' => 'kcal',
                 'measured_at' => $today,
                 'source' => 'google_fit',
             ]);
