@@ -65,10 +65,10 @@ All migrations based on Flutter models:
 - Fields: task, category, due_date
 - Completion tracking: is_completed, completed_at
 
-### 7. **caregiver_elderly** (Pivot Table)
-- Many-to-many relationship
-- Tracks when caregiver was assigned
-- Unique constraint prevents duplicates
+### 7. **user_profiles** - 1:1 Relationship
+- Each elderly has ONE caregiver (caregiver_id field)
+- Each caregiver has ONE elderly (reverse relationship)
+- Matches Flutter app design exactly
 
 ### 8. **notifications** (Activity Feed)
 - Notification history/activity feed
@@ -108,13 +108,30 @@ All models with relationships and casts:
 - ✅ Added mood, steps, calories, sleep, weight types to HealthMetric
 - ✅ Added value_text field for mood (happy, sad, anxious, etc.)
 - ✅ All Flutter features supported
-- ✅ Caregiver-elderly many-to-many relationship (more flexible than Flutter's 1:1)
+- ✅ Caregiver-elderly 1:1 relationship (matches Flutter app exactly)
 
 **See:** `MODEL_ALIGNMENT_CHECK.md` for complete comparison
 
+### 6. Service Classes Created ✅
+
+All business logic services matching Flutter app:
+- ✅ `UserService` - User/profile management, caregiver-elderly linking (1:1)
+- ✅ `MedicationService` - Medication CRUD, dose tracking, adherence calculation
+- ✅ `HealthMetricService` - All vitals (heart rate, blood pressure, mood, steps, calories, etc.)
+- ✅ `ChecklistService` - Daily tasks, completion tracking
+- ✅ `CalendarService` - Events and appointments
+- ✅ `NotificationService` - Activity feed, notification history
+- ✅ `GoogleFitService` - OAuth token storage, sync placeholder (TODO: implement API calls)
+
+**Service Features:**
+- Business logic separated from controllers (thin controllers pattern)
+- Reusable methods across the application
+- Type hints and return types for better IDE support
+- Matching Flutter service functionality
+
 ---
 
-## 🔄 Current Status: Ready for PostgreSQL Setup
+## 🔄 Current Status: Services Complete, Ready for Controllers
 
 **What's Done:**
 - ✅ All code files ready
