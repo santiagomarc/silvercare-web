@@ -50,12 +50,12 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'username' => ['required', 'string', 'max:255'],
             'phone_number' => ['required', 'string', 'max:20'],
-            'sex' => ['required', 'in:Male,Female,Other'],
+            'sex' => ['required', 'in:Male,Female,male,female'],
             
             // Optional caregiver invitation
             'add_caregiver' => ['nullable', 'boolean'],
             'caregiver_name' => ['required_if:add_caregiver,true', 'string', 'max:255'],
-            'caregiver_email' => ['required_if:add_caregiver,true', 'email', 'max:255', 'unique:'.User::class],
+            'caregiver_email' => ['required_if:add_caregiver,true', 'email', 'max:255', 'unique:users,email'],
             'caregiver_relationship' => ['required_if:add_caregiver,true', 'in:Spouse,Child,Professional Caregiver'],
         ]);
 
@@ -75,7 +75,7 @@ class RegisteredUserController extends Controller
                 'user_type' => 'elderly',
                 'username' => $validated['username'],
                 'phone_number' => $validated['phone_number'],
-                'sex' => $validated['sex'],
+                'sex' => ucfirst(strtolower($validated['sex'])),
                 'profile_completed' => false,
                 'is_active' => true,
             ]);

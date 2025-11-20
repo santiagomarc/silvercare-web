@@ -1,198 +1,196 @@
-<x-guest-layout>
-    <div class="mb-6">
-        <h2 class="text-2xl font-bold text-gray-800 text-center">Complete Your Profile</h2>
-        <p class="text-sm text-gray-600 text-center mt-2">Help us personalize your experience</p>
-    </div>
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Complete Profile - SilverCare</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-    <div x-data="{
-        currentStep: 1,
-        formData: {
-            age: '',
-            weight: '',
-            height: '',
-            emergency_name: '',
-            emergency_phone: '',
-            emergency_relationship: '',
-            conditions: '',
-            medications: '',
-            allergies: ''
-        },
-        nextStep() {
-            if (this.currentStep < 3) this.currentStep++;
-        },
-        prevStep() {
-            if (this.currentStep > 1) this.currentStep--;
-        }
-    }">
-        
-        <!-- Progress Indicator -->
-        <div class="mb-8">
-            <div class="flex justify-between items-center">
-                <!-- Step 1 -->
-                <div class="flex flex-col items-center flex-1">
-                    <div class="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
-                         :class="currentStep >= 1 ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-500'">
-                        1
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+        body { font-family: 'Montserrat', sans-serif; }
+    </style>
+</head>
+<body class="antialiased bg-[#DEDEDE] min-h-screen">
+
+    <div class="min-h-screen flex items-center justify-center px-4 py-12">
+        <div class="w-full max-w-2xl">
+            
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-[900] text-gray-900 tracking-tight mb-2">Complete Your Profile</h1>
+                <p class="text-gray-600 font-medium">Help us personalize your SilverCare experience</p>
+            </div>
+
+            <div x-data="{
+                currentStep: 1,
+                nextStep() { if (this.currentStep < 3) this.currentStep++; },
+                prevStep() { if (this.currentStep > 1) this.currentStep--; }
+            }" class="bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] p-8">
+                
+                <!-- Progress Bar -->
+                <div class="mb-10">
+                    <div class="flex justify-between items-center relative">
+                        
+                        <div class="flex flex-col items-center flex-1 z-10">
+                            <div class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 font-bold text-lg"
+                                 :class="currentStep >= 1 ? 'bg-[#000080] text-white shadow-[0_4px_12px_rgba(0,0,128,0.3)]' : 'bg-gray-200 text-gray-400'">
+                                1
+                            </div>
+                            <span class="text-xs mt-2 font-bold transition-colors" :class="currentStep >= 1 ? 'text-[#000080]' : 'text-gray-400'">Personal</span>
+                        </div>
+                        
+                        <div class="absolute top-6 left-0 right-0 h-1 bg-gray-200 -z-0" style="margin: 0 25%;"></div>
+                        <div class="absolute top-6 h-1 bg-[#000080] transition-all duration-500 -z-0" 
+                             :style="`left: 25%; width: ${(currentStep - 1) * 25}%;`"></div>
+                        
+                        <div class="flex flex-col items-center flex-1 z-10">
+                            <div class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 font-bold text-lg"
+                                 :class="currentStep >= 2 ? 'bg-[#000080] text-white shadow-[0_4px_12px_rgba(0,0,128,0.3)]' : 'bg-gray-200 text-gray-400'">
+                                2
+                            </div>
+                            <span class="text-xs mt-2 font-bold transition-colors" :class="currentStep >= 2 ? 'text-[#000080]' : 'text-gray-400'">Emergency</span>
+                        </div>
+                        
+                        <div class="flex flex-col items-center flex-1 z-10">
+                            <div class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 font-bold text-lg"
+                                 :class="currentStep >= 3 ? 'bg-[#000080] text-white shadow-[0_4px_12px_rgba(0,0,128,0.3)]' : 'bg-gray-200 text-gray-400'">
+                                3
+                            </div>
+                            <span class="text-xs mt-2 font-bold transition-colors" :class="currentStep >= 3 ? 'text-[#000080]' : 'text-gray-400'">Medical</span>
+                        </div>
                     </div>
-                    <span class="text-xs mt-2" :class="currentStep >= 1 ? 'text-indigo-600 font-semibold' : 'text-gray-500'">Personal</span>
                 </div>
-                
-                <!-- Connector -->
-                <div class="flex-1 h-0.5" :class="currentStep >= 2 ? 'bg-indigo-600' : 'bg-gray-200'"></div>
-                
-                <!-- Step 2 -->
-                <div class="flex flex-col items-center flex-1">
-                    <div class="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
-                         :class="currentStep >= 2 ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-500'">
-                        2
+
+                <form method="POST" action="{{ route('profile.completion.store') }}">
+                    @csrf
+
+                    <!-- Step 1: Personal Info -->
+                    <div x-show="currentStep === 1" 
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 transform translate-x-8"
+                         x-transition:enter-end="opacity-100 transform translate-x-0"
+                         class="space-y-5">
+                        
+                        <div>
+                            <label for="age" class="block text-sm font-bold text-gray-700 mb-2">Age (Optional)</label>
+                            <input id="age" type="number" name="age" value="{{ old('age') }}"
+                                   class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#000080] focus:ring-2 focus:ring-[#000080]/20 transition-all duration-200 font-medium"
+                                   placeholder="65">
+                        </div>
+
+                        <div>
+                            <label for="weight" class="block text-sm font-bold text-gray-700 mb-2">Weight (kg, Optional)</label>
+                            <input id="weight" type="number" step="0.1" name="weight" value="{{ old('weight') }}"
+                                   class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#000080] focus:ring-2 focus:ring-[#000080]/20 transition-all duration-200 font-medium"
+                                   placeholder="70.5">
+                        </div>
+
+                        <div>
+                            <label for="height" class="block text-sm font-bold text-gray-700 mb-2">Height (cm, Optional)</label>
+                            <input id="height" type="number" step="0.1" name="height" value="{{ old('height') }}"
+                                   class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#000080] focus:ring-2 focus:ring-[#000080]/20 transition-all duration-200 font-medium"
+                                   placeholder="170.0">
+                        </div>
                     </div>
-                    <span class="text-xs mt-2" :class="currentStep >= 2 ? 'text-indigo-600 font-semibold' : 'text-gray-500'">Emergency</span>
-                </div>
-                
-                <!-- Connector -->
-                <div class="flex-1 h-0.5" :class="currentStep >= 3 ? 'bg-indigo-600' : 'bg-gray-200'"></div>
-                
-                <!-- Step 3 -->
-                <div class="flex flex-col items-center flex-1">
-                    <div class="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
-                         :class="currentStep >= 3 ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-500'">
-                        3
+
+                    <!-- Step 2: Emergency Contact -->
+                    <div x-show="currentStep === 2"
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 transform translate-x-8"
+                         x-transition:enter-end="opacity-100 transform translate-x-0"
+                         class="space-y-5">
+                        
+                        <div>
+                            <label for="emergency_name" class="block text-sm font-bold text-gray-700 mb-2">Emergency Contact Name</label>
+                            <input id="emergency_name" type="text" name="emergency_name" value="{{ old('emergency_name') }}"
+                                   class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#000080] focus:ring-2 focus:ring-[#000080]/20 transition-all duration-200 font-medium"
+                                   placeholder="John Doe">
+                        </div>
+
+                        <div>
+                            <label for="emergency_phone" class="block text-sm font-bold text-gray-700 mb-2">Emergency Contact Phone</label>
+                            <input id="emergency_phone" type="tel" name="emergency_phone" value="{{ old('emergency_phone') }}"
+                                   class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#000080] focus:ring-2 focus:ring-[#000080]/20 transition-all duration-200 font-medium"
+                                   placeholder="+1234567890">
+                        </div>
+
+                        <div>
+                            <label for="emergency_relationship" class="block text-sm font-bold text-gray-700 mb-2">Relationship</label>
+                            <input id="emergency_relationship" type="text" name="emergency_relationship" value="{{ old('emergency_relationship') }}"
+                                   class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#000080] focus:ring-2 focus:ring-[#000080]/20 transition-all duration-200 font-medium"
+                                   placeholder="Spouse, Child, etc.">
+                        </div>
                     </div>
-                    <span class="text-xs mt-2" :class="currentStep >= 3 ? 'text-indigo-600 font-semibold' : 'text-gray-500'">Medical</span>
-                </div>
+
+                    <!-- Step 3: Medical Info -->
+                    <div x-show="currentStep === 3"
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 transform translate-x-8"
+                         x-transition:enter-end="opacity-100 transform translate-x-0"
+                         class="space-y-5">
+                        
+                        <div>
+                            <label for="conditions" class="block text-sm font-bold text-gray-700 mb-2">Medical Conditions (comma-separated)</label>
+                            <textarea id="conditions" name="conditions" rows="3"
+                                      class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#000080] focus:ring-2 focus:ring-[#000080]/20 transition-all duration-200 font-medium"
+                                      placeholder="Diabetes, Hypertension">{{ old('conditions') }}</textarea>
+                        </div>
+
+                        <div>
+                            <label for="medications" class="block text-sm font-bold text-gray-700 mb-2">Current Medications (comma-separated)</label>
+                            <textarea id="medications" name="medications" rows="3"
+                                      class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#000080] focus:ring-2 focus:ring-[#000080]/20 transition-all duration-200 font-medium"
+                                      placeholder="Aspirin, Metformin">{{ old('medications') }}</textarea>
+                        </div>
+
+                        <div>
+                            <label for="allergies" class="block text-sm font-bold text-gray-700 mb-2">Allergies (comma-separated)</label>
+                            <textarea id="allergies" name="allergies" rows="3"
+                                      class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#000080] focus:ring-2 focus:ring-[#000080]/20 transition-all duration-200 font-medium"
+                                      placeholder="Penicillin, Peanuts">{{ old('allergies') }}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <div class="flex justify-between items-center mt-8 pt-6 border-t-2 border-gray-100">
+                        <button type="button" @click="prevStep" 
+                                x-show="currentStep > 1"
+                                class="px-6 py-3 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition-all duration-200">
+                            ← Back
+                        </button>
+
+                        <a href="{{ route('profile.completion.skip') }}" 
+                           class="text-sm text-gray-500 hover:text-gray-700 font-semibold transition-colors">
+                            Skip for now
+                        </a>
+
+                        <button type="button" @click="nextStep" 
+                                x-show="currentStep < 3"
+                                class="group relative">
+                            <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg opacity-50 blur transition duration-200 group-hover:opacity-75"></div>
+                            <div class="relative px-8 py-3 bg-[#000080] text-white font-bold rounded-lg transition-all duration-200">
+                                Next →
+                            </div>
+                        </button>
+
+                        <button type="submit" 
+                                x-show="currentStep === 3"
+                                class="group relative">
+                            <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg opacity-50 blur transition duration-200 group-hover:opacity-75"></div>
+                            <div class="relative px-8 py-3 bg-[#000080] text-white font-[800] text-lg rounded-lg shadow-[0_4px_12px_rgba(0,0,128,0.3)] transition-all duration-200">
+                                Complete Profile
+                            </div>
+                        </button>
+                    </div>
+                </form>
+
             </div>
         </div>
-
-        <form method="POST" action="{{ route('profile.completion.store') }}">
-            @csrf
-
-            <!-- Step 1: Personal Details -->
-            <div x-show="currentStep === 1" x-transition>
-                <h3 class="text-lg font-semibold text-gray-700 mb-4">📋 Personal Details</h3>
-                
-                <div class="space-y-4">
-                    <div>
-                        <x-input-label for="age" value="Age (optional)" />
-                        <x-text-input id="age" type="number" name="age" x-model="formData.age" 
-                                      class="block mt-1 w-full" min="1" max="150" />
-                        <x-input-error :messages="$errors->get('age')" class="mt-2" />
-                    </div>
-
-                    <div>
-                        <x-input-label for="weight" value="Weight (kg, optional)" />
-                        <x-text-input id="weight" type="number" step="0.1" name="weight" x-model="formData.weight"
-                                      class="block mt-1 w-full" min="1" max="500" />
-                        <x-input-error :messages="$errors->get('weight')" class="mt-2" />
-                    </div>
-
-                    <div>
-                        <x-input-label for="height" value="Height (cm, optional)" />
-                        <x-text-input id="height" type="number" step="0.1" name="height" x-model="formData.height"
-                                      class="block mt-1 w-full" min="1" max="300" />
-                        <x-input-error :messages="$errors->get('height')" class="mt-2" />
-                    </div>
-                </div>
-            </div>
-
-            <!-- Step 2: Emergency Contact -->
-            <div x-show="currentStep === 2" x-transition>
-                <h3 class="text-lg font-semibold text-gray-700 mb-4">🚨 Emergency Contact</h3>
-                
-                <div class="space-y-4">
-                    <div>
-                        <x-input-label for="emergency_name" value="Contact Name (optional)" />
-                        <x-text-input id="emergency_name" type="text" name="emergency_name" x-model="formData.emergency_name"
-                                      class="block mt-1 w-full" />
-                        <x-input-error :messages="$errors->get('emergency_name')" class="mt-2" />
-                    </div>
-
-                    <div>
-                        <x-input-label for="emergency_phone" value="Contact Phone (optional)" />
-                        <x-text-input id="emergency_phone" type="tel" name="emergency_phone" x-model="formData.emergency_phone"
-                                      class="block mt-1 w-full" />
-                        <x-input-error :messages="$errors->get('emergency_phone')" class="mt-2" />
-                    </div>
-
-                    <div>
-                        <x-input-label for="emergency_relationship" value="Relationship (optional)" />
-                        <x-text-input id="emergency_relationship" type="text" name="emergency_relationship" x-model="formData.emergency_relationship"
-                                      class="block mt-1 w-full" placeholder="e.g., Daughter, Son, Friend" />
-                        <x-input-error :messages="$errors->get('emergency_relationship')" class="mt-2" />
-                    </div>
-                </div>
-            </div>
-
-            <!-- Step 3: Medical Info -->
-            <div x-show="currentStep === 3" x-transition>
-                <h3 class="text-lg font-semibold text-gray-700 mb-4">💊 Medical Information</h3>
-                
-                <div class="space-y-4">
-                    <div>
-                        <x-input-label for="conditions" value="Medical Conditions (optional)" />
-                        <textarea id="conditions" name="conditions" x-model="formData.conditions"
-                                  rows="3" 
-                                  class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                                  placeholder="Separate with commas: e.g., Diabetes, Hypertension"></textarea>
-                        <p class="text-xs text-gray-500 mt-1">List any medical conditions</p>
-                        <x-input-error :messages="$errors->get('conditions')" class="mt-2" />
-                    </div>
-
-                    <div>
-                        <x-input-label for="medications" value="Current Medications (optional)" />
-                        <textarea id="medications" name="medications" x-model="formData.medications"
-                                  rows="3"
-                                  class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                                  placeholder="Separate with commas: e.g., Aspirin, Metformin"></textarea>
-                        <p class="text-xs text-gray-500 mt-1">List current medications</p>
-                        <x-input-error :messages="$errors->get('medications')" class="mt-2" />
-                    </div>
-
-                    <div>
-                        <x-input-label for="allergies" value="Allergies (optional)" />
-                        <textarea id="allergies" name="allergies" x-model="formData.allergies"
-                                  rows="2"
-                                  class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                                  placeholder="Separate with commas: e.g., Penicillin, Peanuts"></textarea>
-                        <p class="text-xs text-gray-500 mt-1">List any known allergies</p>
-                        <x-input-error :messages="$errors->get('allergies')" class="mt-2" />
-                    </div>
-                </div>
-            </div>
-
-            <!-- Navigation Buttons -->
-            <div class="flex justify-between mt-8">
-                <!-- Back Button -->
-                <button type="button" 
-                        x-show="currentStep > 1"
-                        @click="prevStep()"
-                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">
-                    ← Back
-                </button>
-
-                <!-- Skip Button -->
-                <a href="{{ route('profile.completion.skip') }}"
-                   x-show="currentStep < 3"
-                   class="px-4 py-2 text-sm text-gray-500 hover:text-gray-700">
-                    Skip for now
-                </a>
-
-                <div class="flex-1"></div>
-
-                <!-- Next Button -->
-                <button type="button"
-                        x-show="currentStep < 3"
-                        @click="nextStep()"
-                        class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">
-                    Next →
-                </button>
-
-                <!-- Submit Button -->
-                <button type="submit"
-                        x-show="currentStep === 3"
-                        class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">
-                    Complete Profile ✓
-                </button>
-            </div>
-        </form>
     </div>
-</x-guest-layout>
+
+</body>
+</html>

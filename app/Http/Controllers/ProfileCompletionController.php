@@ -12,7 +12,7 @@ class ProfileCompletionController extends Controller
     /**
      * Display the profile completion form (3-step wizard).
      */
-    public function show(): View
+    public function show(): View|RedirectResponse
     {
         $user = Auth::user();
         $profile = $user->profile;

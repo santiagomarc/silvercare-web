@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 // Welcome landing page
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('welcome');
 
 // Elderly Dashboard
 Route::get('/dashboard', function () {
