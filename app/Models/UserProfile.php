@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class UserProfile extends Model
 {
@@ -21,6 +21,7 @@ class UserProfile extends Model
         'emergency_contact',
         'medical_info',
         'relationship',
+        'caregiver_id', // 1:1 relationship
         'profile_completed',
         'is_active',
         'last_login_at',
@@ -65,18 +66,16 @@ class UserProfile extends Model
         return $this->hasMany(Notification::class, 'elderly_id');
     }
 
-    // Many-to-many: Caregivers caring for elderly
-    public function caregivers(): BelongsToMany
+    // 1:1 Relationship: Elderly belongs to ONE caregiver
+    public function caregiver(): BelongsTo
     {
-        return $this->belongsToMany(UserProfile::class, 'caregiver_elderly', 'elderly_id', 'caregiver_id')
-            ->withTimestamps();
+        return $this->belongsTo(UserProfile::class, 'caregiver_id');
     }
 
-    // Many-to-many: Elderly users under caregiver's care
-    public function elderlyUsers(): BelongsToMany
+    // 1:1 Relationship: Caregiver has ONE elderly user
+    public function elderly(): HasOne
     {
-        return $this->belongsToMany(UserProfile::class, 'caregiver_elderly', 'caregiver_id', 'elderly_id')
-            ->withTimestamps();
+        return $this->hasOne(UserProfile::class, 'caregiver_id');
     }
 
     // Helper methods

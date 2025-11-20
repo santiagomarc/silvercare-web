@@ -33,6 +33,9 @@ return new class extends Migration
             // Caregiver-specific fields
             $table->string('relationship')->nullable(); // For caregivers
             
+            // 1:1 Relationship: Each elderly has ONE caregiver (nullable)
+            $table->foreignId('caregiver_id')->nullable()->constrained('user_profiles')->onDelete('set null');
+            
             // Common fields
             $table->boolean('profile_completed')->default(false);
             $table->boolean('is_active')->default(true);
