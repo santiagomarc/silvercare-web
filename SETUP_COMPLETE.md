@@ -124,15 +124,22 @@ All business logic services matching Flutter app:
 - Type hints and return types for better IDE support
 - Matching Flutter service functionality
 
-### 7. Authentication System ✅ (November 21, 2025)
+### 7. Authentication System ✅ (November 21, 2025 - 1:30 AM)
 
 **Completed Controllers:**
 - ✅ `RegisteredUserController` - Elderly registration with optional caregiver auto-creation
   - Validates all elderly fields (name, email, username, phone, sex, password)
   - Creates caregiver account when checkbox is selected
-  - Sends password reset email to caregiver via Gmail SMTP
+  - Sends invitation email to caregiver with signed URL (valid 7 days)
   - Uses DB transactions for data integrity
   - Fixed validation: sex values capitalized (Male/Female) to match database enum
+  - **NEW**: Uses signed URL token instead of password reset system
+  
+- ✅ `CaregiverSetPasswordController` - Dedicated password setup for caregivers
+  - Validates signed URL token (7-day expiration)
+  - Allows caregiver to set their own secure password
+  - Automatically logs in caregiver after password setup
+  - Redirects to caregiver dashboard
   
 - ✅ `AuthenticatedSessionController` - Login with role-based routing
   - Elderly users → `/dashboard`
@@ -143,19 +150,28 @@ All business logic services matching Flutter app:
   - Step 2: Emergency contact (name, phone, relationship)
   - Step 3: Medical info (conditions, allergies, medications)
   - Skip functionality for optional completion
-  - Redirects to dashboard after completion
+  - Redirects to `/dashboard` (elderly home screen) after completion
 
 **Completed Views (Gemini 3 Pro Design Quality):**
 - ✅ `login.blade.php` - Split-screen design with hero image, staggered animations, glow effects
 - ✅ `register.blade.php` - 2-column form, background image, centered caregiver section, error display
 - ✅ `profile-completion.blade.php` - Animated 3-step progress bar, slide-in transitions
 - ✅ `dashboard.blade.php` - Elderly home screen with stats cards, quick actions, gradient welcome card
+- ✅ `caregiver-set-password.blade.php` - **NEW** - Password setup form for invited caregivers
+
+**Email Templates:**
+- ✅ `caregiver-invitation.blade.php` - **NEW** - Professional invitation email with:
+  - Elderly user information
+  - Caregiver role display
+  - "Set Password" button with signed URL
+  - 7-day expiration notice
+  - Modern HTML email design matching SilverCare branding
 
 **Email Configuration:**
 - ✅ Gmail SMTP configured in `.env`
 - ✅ Mail driver: smtp.gmail.com:587 (TLS)
 - ✅ From address: santiagomarcstephen@gmail.com
-- ✅ Password reset emails sent to caregiver on registration
+- ✅ **NEW**: Custom `CaregiverInvitation` mailable with signed URL tokens
 
 **Design System:**
 - Font: Montserrat (400-900 weights)
@@ -163,6 +179,12 @@ All business logic services matching Flutter app:
 - Background: #DEDEDE
 - Animations: IntersectionObserver, staggered fade-ins, glow effects, glass-morphism
 - Layout: Responsive 2-column grids, centered sections, max-width containers
+
+**Important Fixes (November 21, 2025 - 1:30 AM):**
+- ✅ Fixed password setup flow: Changed from Laravel's default password reset to custom signed URL system
+- ✅ Caregiver can now set their own password (not auto-login from email link)
+- ✅ Profile completion properly redirects to `/dashboard` (elderly home screen)
+- ✅ Registration no longer times out (optimized database transactions)
 
 ---
 
@@ -362,10 +384,6 @@ Your Laravel project now has:
 1. Build caregiver dashboard
 2. Create CRUD controllers (Medication, HealthMetric, Checklist, Calendar)
 3. Create CRUD views for each feature
-4. Test all features before deadline (December 15, 2025)
+4. Test all features before deadline 
 
-**Team:** 4 developers  
-**Deadline:** December 15, 2025  
 **Repository:** github.com/santiagomarc/silvercare-web
-
-Keep pushing! You're making great progress! 🎓💪

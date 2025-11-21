@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\UserProfile;
 use App\Services\UserService;
+use App\Mail\CaregiverInvitation;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 use Illuminate\Support\Str;
@@ -84,7 +85,7 @@ class RegisteredUserController extends Controller
             $caregiverId = null;
             if ($request->boolean('add_caregiver')) {
                 $caregiverId = $this->createCaregiverAccount(
-                    elderlyProfileId: $elderlyProfile->id,
+                    elderlyUser: $elderlyUser,
                     caregiverName: $validated['caregiver_name'],
                     caregiverEmail: $validated['caregiver_email'],
                     relationship: $validated['caregiver_relationship']
@@ -106,7 +107,7 @@ class RegisteredUserController extends Controller
             // Redirect to profile completion
             return redirect()->route('profile.completion')->with('success', 
                 $caregiverId 
-                    ? 'Account created! A password reset email has been sent to your caregiver.' 
+                    ? 'Account created! An invitation email has been sent to your caregiver to set their password.' 
                     : 'Account created! Please complete your profile.'
             );
 
@@ -117,10 +118,10 @@ class RegisteredUserController extends Controller
     }
 
     /**
-     * Create caregiver account and send password reset email
+     * Create caregiver account and send invitation email
      */
     protected function createCaregiverAccount(
-        int $elderlyProfileId,
+        User $elderlyUser,
         string $caregiverName,
         string $caregiverEmail,
         string $relationship
@@ -144,12 +145,14 @@ class RegisteredUserController extends Controller
             'is_active' => true,
         ]);
 
-        // Send password reset email to caregiver
+        // Send caregiver invitation email with set password link
         try {
-            Password::sendResetLink(['email' => $caregiverEmail]);
+            Mail::to($caregiverEmail)->send(
+                new CaregiverInvitation($caregiverUser, $elderlyUser)
+            );
         } catch (\Exception $e) {
             // Log error but don't fail registration
-            Log::error('Failed to send caregiver password reset email: ' . $e->getMessage());
+            Log::error('Failed to send caregiver invitation email: ' . $e->getMessage());
         }
 
         return $caregiverProfile->id;

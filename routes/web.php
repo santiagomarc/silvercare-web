@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\CaregiverSetPasswordController;
 use App\Http\Controllers\ProfileCompletionController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -8,6 +9,13 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
+
+// Caregiver Password Setup (Signed Route - No Auth Required)
+Route::get('/caregiver/set-password/{userId}', [CaregiverSetPasswordController::class, 'show'])
+    ->name('caregiver.password.show');
+
+Route::post('/caregiver/set-password/{userId}', [CaregiverSetPasswordController::class, 'store'])
+    ->name('caregiver.password.store');
 
 // Elderly Dashboard
 Route::get('/dashboard', function () {
