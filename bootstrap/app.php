@@ -12,7 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Register custom middleware aliases
+        $middleware->alias([
+            'elderly' => \App\Http\Middleware\EnsureUserIsElderly::class,
+            'caregiver' => \App\Http\Middleware\EnsureUserIsCaregiver::class,
+            'role.redirect' => \App\Http\Middleware\RedirectBasedOnRole::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

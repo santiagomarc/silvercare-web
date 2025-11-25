@@ -1,6 +1,6 @@
 # SilverCare Web - Setup Progress 🚀
 
-**Last Updated:** November 21, 2025 - 1:00 AM  
+**Last Updated:** Nov 25, 2025
 
 ## ✅ Completed Steps
 
@@ -25,58 +25,16 @@
 
 All migrations based on Flutter models:
 
-### 1. **user_profiles** (Extends Laravel's users table)
-- Links to `users` table via foreign key
-- Stores user_type (elderly/caregiver)
-- Elderly-specific: username, phone, sex, age, weight, height
-- JSON fields: emergency_contact, medical_info
-- Caregiver-specific: relationship
-- Common: profile_completed, is_active, last_login_at
-
-### 2. **medications**
-- Links to elderly and caregiver profiles
-- Fields: name, dosage, instructions
-- Scheduling: days_of_week, specific_dates, times_of_day (JSON)
-- Date range: start_date, end_date
-- Status: is_active
-
-### 3. **medication_logs** (Dose Completions)
-- Tracks each medication dose instance
-- Fields: scheduled_time, is_taken, taken_at
-- Indexed for performance
-
-### 4. **health_metrics**
-- Stores all vital signs
-- Types: blood_pressure, heart_rate, sugar_level, temperature
-- Fields: value, unit, measured_at
-- Source tracking: manual, google_fit, device
-
-### 5. **calendar_events**
-- Title, description, event_date
-- Event types: Reminder, Appointment, Medication, etc.
-
-### 6. **checklists**
-- Daily tasks for elderly users
-- Fields: task, category, due_date
-- Completion tracking: is_completed, completed_at
-
-### 7. **user_profiles** - 1:1 Relationship
-- Each elderly has ONE caregiver (caregiver_id field)
-- Each caregiver has ONE elderly (reverse relationship)
-- Matches Flutter app design exactly
-
-### 8. **notifications** (Activity Feed)
-- Notification history/activity feed
-- Types: medication_reminder, medication_taken, medication_missed, etc.
-- Severity levels: positive, negative, reminder, warning
-- JSON metadata for additional context
-- Custom ID for duplicate prevention
-
-### 9. **google_fit_tokens**
-- OAuth token storage
-- Encrypted access_token and refresh_token
-- Expiration tracking
-- Scopes storage (JSON)
+| Table | Description |
+|-------|-------------|
+| **user_profiles** | Extends users table - user_type (elderly/caregiver), JSON fields for emergency_contact, medical_info |
+| **medications** | name, dosage, instructions, days_of_week (JSON), times_of_day (JSON), start/end dates |
+| **medication_logs** | Tracks dose completions - scheduled_time, is_taken, taken_at |
+| **health_metrics** | All vitals - blood_pressure, heart_rate, sugar_level, temperature, mood |
+| **calendar_events** | Title, description, event_date, event types |
+| **checklists** | task, category, due_date, due_time, priority, notes, is_completed |
+| **notifications** | Activity feed with types, severity levels, JSON metadata |
+| **google_fit_tokens** | OAuth token storage (encrypted) |
 
 ### 5. Eloquent Models Created ✅
 
@@ -84,306 +42,308 @@ All models with relationships and casts:
 - ✅ `UserProfile` - User profiles with elderly/caregiver type
 - ✅ `Medication` - Medication tracking with schedules
 - ✅ `MedicationLog` - Dose completion records with helper methods
-- ✅ `HealthMetric` - All vitals + mood (blood pressure, heart rate, sugar, temp, mood, steps, calories)
+- ✅ `HealthMetric` - All vitals + mood
 - ✅ `CalendarEvent` - Calendar and appointments
-- ✅ `Checklist` - Daily tasks
+- ✅ `Checklist` - Daily tasks with priority and notes
 - ✅ `Notification` - Activity feed/notification history  
 - ✅ `GoogleFitToken` - OAuth tokens (auto-encrypted)
 
-**Model Features:**
-- Eloquent relationships configured
-- Automatic type casting (JSON, dates, booleans)
-- Helper methods (isElderly(), isCaregiver(), wasTakenLate(), isMissed())
-- Query scopes for filtering (heartRate(), bloodPressure(), mood(), steps())
-- Google Fit tokens auto-encrypted/decrypted
-
-### 6. Models Verified Against Flutter ✅
-
-- ✅ Checked alignment with Flutter models
-- ✅ Added mood, steps, calories, sleep, weight types to HealthMetric
-- ✅ Added value_text field for mood (happy, sad, anxious, etc.)
-- ✅ All Flutter features supported
-- ✅ Caregiver-elderly 1:1 relationship (matches Flutter app exactly)
-
-**See:** `MODEL_ALIGNMENT_CHECK.md` for complete comparison
-
 ### 6. Service Classes Created ✅
 
-All business logic services matching Flutter app:
-- ✅ `UserService` - User/profile management, caregiver-elderly linking (1:1)
-- ✅ `MedicationService` - Medication CRUD, dose tracking, adherence calculation
-- ✅ `HealthMetricService` - All vitals (heart rate, blood pressure, mood, steps, calories, etc.)
+All business logic services:
+- ✅ `UserService` - User/profile management, caregiver-elderly linking
+- ✅ `MedicationService` - Medication CRUD, dose tracking
+- ✅ `HealthMetricService` - All vitals management
 - ✅ `ChecklistService` - Daily tasks, completion tracking
 - ✅ `CalendarService` - Events and appointments
-- ✅ `NotificationService` - Activity feed, notification history
-- ✅ `GoogleFitService` - OAuth token storage, sync placeholder (TODO: implement API calls)
+- ✅ `NotificationService` - Activity feed
+- ✅ `GoogleFitService` - OAuth token storage
 
-**Service Features:**
-- Business logic separated from controllers (thin controllers pattern)
-- Reusable methods across the application
-- Type hints and return types for better IDE support
-- Matching Flutter service functionality
+### 7. Authentication System ✅
 
-### 7. Authentication System ✅ (November 21, 2025 - 1:30 AM)
-
-**Completed Controllers:**
+**Controllers:**
 - ✅ `RegisteredUserController` - Elderly registration with optional caregiver auto-creation
-  - Validates all elderly fields (name, email, username, phone, sex, password)
-  - Creates caregiver account when checkbox is selected
-  - Sends invitation email to caregiver with signed URL (valid 7 days)
-  - Uses DB transactions for data integrity
-  - Fixed validation: sex values capitalized (Male/Female) to match database enum
-  - **NEW**: Uses signed URL token instead of password reset system
-  
-- ✅ `CaregiverSetPasswordController` - Dedicated password setup for caregivers
-  - Validates signed URL token (7-day expiration)
-  - Allows caregiver to set their own secure password
-  - Automatically logs in caregiver after password setup
-  - Redirects to caregiver dashboard
-  
+- ✅ `CaregiverSetPasswordController` - Password setup for invited caregivers (7-day signed URL)
 - ✅ `AuthenticatedSessionController` - Login with role-based routing
-  - Elderly users → `/dashboard`
-  - Caregiver users → `/caregiver/dashboard`
-  
 - ✅ `ProfileCompletionController` - 3-step wizard for elderly profile
-  - Step 1: Age, weight, height
-  - Step 2: Emergency contact (name, phone, relationship)
-  - Step 3: Medical info (conditions, allergies, medications)
-  - Skip functionality for optional completion
-  - Redirects to `/dashboard` (elderly home screen) after completion
 
-**Completed Views (Gemini 3 Pro Design Quality):**
-- ✅ `login.blade.php` - Split-screen design with hero image, staggered animations, glow effects
-- ✅ `register.blade.php` - 2-column form, background image, centered caregiver section, error display
-- ✅ `profile-completion.blade.php` - Animated 3-step progress bar, slide-in transitions
-- ✅ `dashboard.blade.php` - Elderly home screen with stats cards, quick actions, gradient welcome card
-- ✅ `caregiver-set-password.blade.php` - **NEW** - Password setup form for invited caregivers
+**Views:**
+- ✅ `login.blade.php` - Split-screen design with animations
+- ✅ `register.blade.php` - 2-column form with caregiver section
+- ✅ `profile-completion.blade.php` - Animated 3-step progress bar
+- ✅ `caregiver-set-password.blade.php` - Password setup form
 
-**Email Templates:**
-- ✅ `caregiver-invitation.blade.php` - **NEW** - Professional invitation email with:
-  - Elderly user information
-  - Caregiver role display
-  - "Set Password" button with signed URL
-  - 7-day expiration notice
-  - Modern HTML email design matching SilverCare branding
-
-**Email Configuration:**
-- ✅ Gmail SMTP configured in `.env`
-- ✅ Mail driver: smtp.gmail.com:587 (TLS)
-- ✅ From address: santiagomarcstephen@gmail.com
-- ✅ **NEW**: Custom `CaregiverInvitation` mailable with signed URL tokens
-
-**Design System:**
-- Font: Montserrat (400-900 weights)
-- Primary color: #000080 (Navy Blue)
-- Background: #DEDEDE
-- Animations: IntersectionObserver, staggered fade-ins, glow effects, glass-morphism
-- Layout: Responsive 2-column grids, centered sections, max-width containers
-
-**Important Fixes (November 21, 2025 - 1:30 AM):**
-- ✅ Fixed password setup flow: Changed from Laravel's default password reset to custom signed URL system
-- ✅ Caregiver can now set their own password (not auto-login from email link)
-- ✅ Profile completion properly redirects to `/dashboard` (elderly home screen)
-- ✅ Registration no longer times out (optimized database transactions)
+**Email:**
+- ✅ Gmail SMTP configured
+- ✅ `CaregiverInvitation` mailable with signed URL tokens
 
 ---
 
-## 🔄 Current Status: Authentication Complete, CRUD Features Next
+### 8. Role-Based Access Control (RBAC) ✅ (NOV 2025)
 
-**What's Done:**
-- ✅ All code files ready
-- ✅ Migrations created and updated
-- ✅ Models configured and verified
-- ✅ Google OAuth integrated
-- ✅ Models aligned with Flutter version
-- ✅ Authentication system complete (registration, login, profile completion)
-- ✅ Elderly dashboard created
-- ✅ Gmail SMTP configured for password reset emails
-- ✅ UI upgraded to Gemini 3 Pro quality (animations, modern design)
+**Custom Middleware Created:**
+
+```
+app/Http/Middleware/
+├── EnsureUserIsElderly.php     # Protects elderly-only routes
+├── EnsureUserIsCaregiver.php   # Protects caregiver-only routes  
+└── RedirectBasedOnRole.php     # Redirects logged-in users to correct dashboard
+```
+
+**How It Works:**
+- `EnsureUserIsElderly` - Checks `profile->user_type === 'elderly'`, redirects caregivers away
+- `EnsureUserIsCaregiver` - Checks `profile->user_type === 'caregiver'`, redirects elderly away
+- `RedirectBasedOnRole` - On welcome page, redirects logged-in users to their dashboard
+
+**Middleware Registration (Laravel 11 - bootstrap/app.php):**
+```php
+->withMiddleware(function (Middleware $middleware) {
+    $middleware->alias([
+        'elderly' => \App\Http\Middleware\EnsureUserIsElderly::class,
+        'caregiver' => \App\Http\Middleware\EnsureUserIsCaregiver::class,
+        'role.redirect' => \App\Http\Middleware\RedirectBasedOnRole::class,
+    ]);
+})
+```
+
+**Route Protection:**
+```php
+// Welcome page - redirect logged-in users
+Route::get('/', ...)->middleware('role.redirect');
+
+// Elderly routes - only elderly users
+Route::middleware(['auth', 'verified', 'elderly'])->group(function () { ... });
+
+// Caregiver routes - only caregivers
+Route::middleware(['auth', 'verified', 'caregiver'])->prefix('caregiver')->group(function () { ... });
+```
+
+**Security Features:**
+- ✅ Users cannot access interfaces not meant for their role
+- ✅ Proper error messages when accessing wrong area
+- ✅ Graceful handling of users without profiles
+
+---
+
+### 9. Caregiver Dashboard & CRUD ✅ (NOV 25 2025)
+
+**MedicationController (Full CRUD):**
+- ✅ List all medications for linked elderly
+- ✅ Create form with day-of-week selector (Mon-Sun toggle pills)
+- ✅ Time slot picker (add/remove multiple times)
+- ✅ Edit with pre-filled values
+- ✅ Soft delete (sets is_active = false)
+
+**Medication Views:**
+```
+resources/views/caregiver/medications/
+├── index.blade.php   # List with schedule display (days + times)
+├── create.blade.php  # Day pills + time slots + active toggle
+├── edit.blade.php    # Same as create, pre-populated
+└── show.blade.php    # Details view
+```
+
+**ChecklistController (Full CRUD):**
+- ✅ List all checklists grouped by category
+- ✅ Create form with category picker, date/time, priority
+- ✅ Edit with completion status toggle
+- ✅ Toggle completion via AJAX
+
+**Checklist Views:**
+```
+resources/views/caregiver/checklists/
+├── index.blade.php   # Grouped by category
+├── create.blade.php  # Category selector + priority + quick templates
+└── edit.blade.php    # Same as create + completion toggle
+```
+
+**Checklist Categories:**
+| Emoji | Category | Description |
+|-------|----------|-------------|
+| 💊 | Medical | Medication and health tasks |
+| 🍎 | Daily | Daily living activities |
+| 🏠 | Home | Household tasks |
+| 📋 | Other | Miscellaneous |
+
+---
+
+### 10. Elderly Dashboard & Views ✅ (NOV 25ry 2025)
+
+**ElderlyDashboardController:**
+- ✅ `index()` - Dashboard with today's medications and tasks
+- ✅ `medications()` - View all assigned medications
+- ✅ `checklists()` - View all assigned tasks  
+- ✅ `toggleChecklist()` - Mark tasks complete/incomplete
+
+**Elderly Views:**
+```
+resources/views/elderly/
+├── dashboard.blade.php     # Welcome + today's meds + today's tasks
+├── medications.blade.php   # List of all medications (view only)
+└── checklists.blade.php    # List of tasks with completion toggle
+```
+
+**Features:**
+- Quick stats cards (medications today, pending tasks)
+- Today's medications with status indicators
+- Today's tasks with completion checkboxes
+- Caregiver contact info display
+
+---
+
+### 11. Role-Aware Navigation ✅ (NOV 25nuary 2025)
+
+**navigation.blade.php Updated:**
+- ✅ Dynamic dashboard link based on user role
+- ✅ Role-specific navigation items
+- ✅ Role badge next to username
+- ✅ Responsive mobile menu
+
+**Navigation Links by Role:**
+
+| Role | Links |
+|------|-------|
+| Caregiver | Dashboard, Medications, Checklists |
+| Elderly | Dashboard, My Medications, My Tasks |
+
+---
+
+## 🔄 Current Status: Core Features Complete
+
+### Project Structure
 
 ```
 silvercare_web/
 ├── app/
 │   ├── Http/
-│   │   └── Controllers/
-│   │       └── Auth/        # ✅ Authentication complete!
-│   │           ├── RegisteredUserController.php
-│   │           ├── AuthenticatedSessionController.php
-│   │           └── ProfileCompletionController.php
-│   ├── Models/              # ✅ Eloquent models complete!
+│   │   ├── Controllers/
+│   │   │   ├── Auth/
+│   │   │   │   ├── RegisteredUserController.php
+│   │   │   │   ├── AuthenticatedSessionController.php
+│   │   │   │   ├── CaregiverSetPasswordController.php
+│   │   │   │   └── ProfileCompletionController.php
+│   │   │   ├── CaregiverDashboardController.php
+│   │   │   ├── CaregiverProfileController.php
+│   │   │   ├── ElderlyDashboardController.php      # ✅ NEW
+│   │   │   ├── MedicationController.php            # ✅ Full CRUD
+│   │   │   └── ChecklistController.php             # ✅ Full CRUD
+│   │   └── Middleware/
+│   │       ├── EnsureUserIsElderly.php             # ✅ NEW
+│   │       ├── EnsureUserIsCaregiver.php           # ✅ NEW
+│   │       └── RedirectBasedOnRole.php             # ✅ NEW
+│   ├── Models/
 │   │   ├── User.php
 │   │   ├── UserProfile.php
 │   │   ├── Medication.php
 │   │   ├── MedicationLog.php
 │   │   ├── HealthMetric.php
 │   │   ├── CalendarEvent.php
-│   │   ├── Checklist.php
+│   │   ├── Checklist.php (with priority, notes)
 │   │   ├── Notification.php
 │   │   └── GoogleFitToken.php
-│   └── Services/            # ✅ Business logic complete!
-│       ├── UserService.php
-│       ├── MedicationService.php
-│       ├── HealthMetricService.php
-│       ├── ChecklistService.php
-│       ├── CalendarService.php
-│       ├── NotificationService.php
-│       └── GoogleFitService.php
+│   └── Services/
+│       └── (7 service classes)
+├── bootstrap/
+│   └── app.php                                      # ✅ Middleware aliases
 ├── database/
-│   └── migrations/          # ✅ Complete!
-├── resources/
-│   └── views/               # ✅ Auth views complete!
-│       └── auth/
-│           ├── login.blade.php
-│           ├── register.blade.php
-│           └── profile-completion.blade.php
-│       └── dashboard.blade.php  # ✅ Elderly dashboard
-├── routes/
-│   └── web.php             # ✅ Auth routes configured
-├── config/
-│   └── services.php        # ✅ Google OAuth configured!
-└── .env                    # ✅ Gmail SMTP + Google credentials!
+│   └── migrations/                                  # ✅ With priority/notes
+├── resources/views/
+│   ├── layouts/
+│   │   └── navigation.blade.php                     # ✅ Role-aware
+│   ├── auth/
+│   │   ├── login.blade.php
+│   │   ├── register.blade.php
+│   │   ├── profile-completion.blade.php
+│   │   └── caregiver-set-password.blade.php
+│   ├── caregiver/
+│   │   ├── dashboard.blade.php
+│   │   ├── medications/
+│   │   │   ├── index.blade.php
+│   │   │   ├── create.blade.php
+│   │   │   ├── edit.blade.php
+│   │   │   └── show.blade.php
+│   │   └── checklists/
+│   │       ├── index.blade.php
+│   │       ├── create.blade.php
+│   │       └── edit.blade.php
+│   └── elderly/                                     # ✅ NEW
+│       ├── dashboard.blade.php
+│       ├── medications.blade.php
+│       └── checklists.blade.php
+└── routes/
+    └── web.php                                      # ✅ Role-protected routes
 ```
 
 ---
 
-## 🎯 Next Steps (Priority Order)
+## 🎯 Next Steps
 
-### Immediate Tasks (Before December 15, 2025)
+### Immediate Tasks
 
-**1. Caregiver Dashboard** (High Priority)
-- [ ] Create `resources/views/caregiver/dashboard.blade.php`
-- [ ] Display linked elderly user info
-- [ ] Show medication schedule for elderly
-- [ ] Display recent health metrics
-- [ ] Notification feed for caregiver
+| Priority | Feature | Status |
+|----------|---------|--------|
+| High | Health Metrics CRUD | ⏳ TODO |
+| High | Calendar/Events | ⏳ TODO |
+| Medium | Notifications/Activity Feed | ⏳ TODO |
+| Medium | Analytics Dashboard (Charts) | ⏳ TODO |
+| Low | Google Fit OAuth | ⏳ TODO |
+| Low | PDF Export | ⏳ TODO |
 
-**2. CRUD Controllers** (Core Features)
-- [ ] `MedicationController` - Add/edit/delete medications, view schedule
-- [ ] `HealthMetricController` - Manual entry of vitals (blood pressure, heart rate, sugar, temp)
-- [ ] `ChecklistController` - Daily tasks management
-- [ ] `CalendarController` - Events and appointments
+### Testing Checklist
 
-**3. CRUD Views** (Elderly Side)
-- [ ] Medication management pages (list, create, edit)
-- [ ] Health metrics entry form and history
-- [ ] Checklist view with completion tracking
-- [ ] Calendar view with events
-
-**4. Testing & Validation**
-- [ ] Test registration flow with caregiver email delivery
-- [ ] Test profile completion wizard
-- [ ] Test elderly-caregiver linking (1:1 relationship)
-- [ ] Verify all CRUD operations work correctly
-
-**5. Final Polish**
-- [ ] Responsive design for mobile
-- [ ] Add loading states and animations
-- [ ] Error handling improvements
-- [ ] Deploy to production (optional)
+- [ ] Test registration with caregiver email
+- [ ] Test role-based routing (elderly can't access `/caregiver/*`)
+- [ ] Test caregiver can't access `/dashboard` (elderly dashboard)
+- [ ] Test medication CRUD
+- [ ] Test checklist CRUD with toggle
 
 ---
 
-## 📋 Development Workflow (Adjusted)
+## 🎯 Development Commands
 
-**Completed:**
-- ✅ User authentication (registration, login, profile completion)
-- ✅ Elderly dashboard
-- ✅ Email notifications (password reset to caregiver)
-- ✅ UI design upgraded to modern quality
+### Start Servers
+```bash
+# Terminal 1 - Laravel
+cd silvercare_web && php artisan serve
 
-**In Progress:**
-- 🚧 CRUD features (medications, health metrics, checklists, calendar)
-- 🚧 Caregiver dashboard
+# Terminal 2 - Vite (Tailwind)
+cd silvercare_web && npm run dev
 
-**Upcoming:**
-- ⏳ Google Fit OAuth flow
-- ⏳ Real-time updates (Reverb)
-- ⏳ Analytics charts (Chart.js)
-- ⏳ PDF export functionality
+# Terminal 3 - Reverb (Real-time, optional)
+cd silvercare_web && php artisan reverb:start
+```
+
+### Run Migrations
+```bash
+php artisan migrate
+```
+
+### Clear Cache
+```bash
+php artisan route:clear && php artisan config:clear && php artisan cache:clear
+```
 
 ---
-
-## 🎯 Development Commands Reference
-
-### 1. Start Development Servers
-
-Terminal 1 - Laravel:
-```bash
-cd silvercare_web
-php artisan serve
-```
-
-Terminal 2 - Vite (Tailwind):
-```bash
-cd silvercare_web
-npm run dev
-```
-
-Terminal 3 - Reverb (Real-time):
-```bash
-cd csilvercare_web
-php artisan reverb:start
-```
-
-### 2. Create Next Controllers (CRUD)
-
-```bash
-php artisan make:controller MedicationController --resource
-php artisan make:controller HealthMetricController --resource
-php artisan make:controller ChecklistController --resource
-php artisan make:controller CalendarController --resource
-```
-
-### 3. Set Up Routes
-
-Edit `routes/web.php` to add CRUD routes (medications, health metrics, checklists, calendar).
-
----
-
-## 🏗️ Project Structure
-
-| Flutter | Laravel Web |
-|---------|-------------|
-| Firestore collections | PostgreSQL tables |
-| Firestore listeners | Laravel Broadcasting (Reverb) |
-| Push notifications | Email notifications |
-| `MedicationService.dart` | `MedicationService.php` + Eloquent |
-| `StreamBuilder` | Livewire or Echo (JavaScript) |
-| Local notifications | Notification history page |
 
 ## 🔐 Security Notes
 
-- Passwords are hashed with bcrypt (Laravel default)
-- Google Fit tokens should be encrypted (use Laravel encryption)
-- CSRF protection is enabled by default
-- Remember to validate all user inputs
+- ✅ Passwords hashed with bcrypt
+- ✅ CSRF protection enabled
+- ✅ **Role-based middleware protects all routes**
+- ✅ **Users cannot access interfaces not meant for their role**
+- ✅ Signed URLs for caregiver invitations (7-day expiry)
 
-## 🚀 Project Status Summary
+---
 
-Your Laravel project now has:
-- ✅ Complete database schema matching Flutter models (8 tables)
-- ✅ All Eloquent models with relationships (8 models)
-- ✅ All service classes (7 services)
-- ✅ Authentication system complete (registration, login, profile completion)
-- ✅ Elderly dashboard with stats and quick actions
-- ✅ Modern UI design (Gemini 3 Pro quality)
-- ✅ Gmail SMTP for password reset emails
-- ✅ Real-time capabilities ready (Reverb)
-- ✅ PDF generation ready (DomPDF)
-- ✅ Google OAuth configured (Socialite)
-- ✅ Chart visualization ready (Chart.js)
+## 🚀 What's Working
 
-**What's Working:**
-- Registration flow with caregiver auto-creation ✅
-- Password reset email to caregiver ✅
-- Login with role-based routing (elderly/caregiver) ✅
-- Profile completion 3-step wizard ✅
-- Elderly dashboard ✅
-
-**Next Priority:**
-1. Build caregiver dashboard
-2. Create CRUD controllers (Medication, HealthMetric, Checklist, Calendar)
-3. Create CRUD views for each feature
-4. Test all features before deadline 
+| Feature | Caregiver | Elderly |
+|---------|-----------|---------|
+| Registration | Via invitation email | Direct |
+| Login | Role-based redirect | Role-based redirect |
+| Dashboard | Stats + quick actions | Today's meds + tasks |
+| Medications | Full CRUD | View only |
+| Checklists | Full CRUD | View + toggle completion |
+| Navigation | Role-aware links | Role-aware links |
 
 **Repository:** github.com/santiagomarc/silvercare-web

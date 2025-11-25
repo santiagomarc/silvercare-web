@@ -13,6 +13,8 @@ class Medication extends Model
         'caregiver_id',
         'name',
         'dosage',
+        'dosage_unit',
+        'frequency',
         'instructions',
         'days_of_week',
         'specific_dates',
@@ -20,6 +22,9 @@ class Medication extends Model
         'start_date',
         'end_date',
         'is_active',
+        'track_inventory',
+        'current_stock',
+        'low_stock_threshold',
     ];
 
     protected $casts = [
@@ -29,6 +34,7 @@ class Medication extends Model
         'start_date' => 'date',
         'end_date' => 'date',
         'is_active' => 'boolean',
+        'track_inventory' => 'boolean',
     ];
 
     public function elderly(): BelongsTo

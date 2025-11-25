@@ -11,8 +11,14 @@ class Checklist extends Model
         'elderly_id',
         'caregiver_id',
         'task',
+        'description',
         'category',
         'due_date',
+        'due_time',
+        'priority',
+        'notes',
+        'frequency',
+        'is_recurring',
         'is_completed',
         'completed_at',
     ];
@@ -21,6 +27,7 @@ class Checklist extends Model
         'due_date' => 'date',
         'is_completed' => 'boolean',
         'completed_at' => 'datetime',
+        'is_recurring' => 'boolean',
     ];
 
     public function elderly(): BelongsTo
