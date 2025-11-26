@@ -1,6 +1,6 @@
 # SilverCare Web - Setup Progress 🚀
 
-**Last Updated:** Nov 25, 2025
+**Last Updated:** Nov 26, 2025
 
 ## ✅ Completed Steps
 
@@ -64,11 +64,11 @@ All business logic services:
 **Controllers:**
 - ✅ `RegisteredUserController` - Elderly registration with optional caregiver auto-creation
 - ✅ `CaregiverSetPasswordController` - Password setup for invited caregivers (7-day signed URL)
-- ✅ `AuthenticatedSessionController` - Login with role-based routing
+- ✅ `AuthenticatedSessionController` - Login with role-based routing + session security
 - ✅ `ProfileCompletionController` - 3-step wizard for elderly profile
 
 **Views:**
-- ✅ `login.blade.php` - Split-screen design with animations
+- ✅ `login.blade.php` - Split-screen design with animations, autocomplete for credentials
 - ✅ `register.blade.php` - 2-column form with caregiver section
 - ✅ `profile-completion.blade.php` - Animated 3-step progress bar
 - ✅ `caregiver-set-password.blade.php` - Password setup form
@@ -76,6 +76,11 @@ All business logic services:
 **Email:**
 - ✅ Gmail SMTP configured
 - ✅ `CaregiverInvitation` mailable with signed URL tokens
+
+**Session Security (Nov 26):**
+- ✅ `PreventBackHistory` middleware - Prevents browser back button after logout
+- ✅ Cache-Control headers on authenticated pages
+- ✅ Session regeneration on login/logout
 
 ---
 
@@ -87,13 +92,15 @@ All business logic services:
 app/Http/Middleware/
 ├── EnsureUserIsElderly.php     # Protects elderly-only routes
 ├── EnsureUserIsCaregiver.php   # Protects caregiver-only routes  
-└── RedirectBasedOnRole.php     # Redirects logged-in users to correct dashboard
+├── RedirectBasedOnRole.php     # Redirects logged-in users to correct dashboard
+└── PreventBackHistory.php      # Prevents browser back after logout ✅ NEW
 ```
 
 **How It Works:**
 - `EnsureUserIsElderly` - Checks `profile->user_type === 'elderly'`, redirects caregivers away
 - `EnsureUserIsCaregiver` - Checks `profile->user_type === 'caregiver'`, redirects elderly away
 - `RedirectBasedOnRole` - On welcome page, redirects logged-in users to their dashboard
+- `PreventBackHistory` - Sets cache headers to prevent back-button access after logout
 
 **Middleware Registration (Laravel 11 - bootstrap/app.php):**
 ```php
@@ -102,6 +109,7 @@ app/Http/Middleware/
         'elderly' => \App\Http\Middleware\EnsureUserIsElderly::class,
         'caregiver' => \App\Http\Middleware\EnsureUserIsCaregiver::class,
         'role.redirect' => \App\Http\Middleware\RedirectBasedOnRole::class,
+        'no.back' => \App\Http\Middleware\PreventBackHistory::class,
     ]);
 })
 ```
@@ -122,6 +130,7 @@ Route::middleware(['auth', 'verified', 'caregiver'])->prefix('caregiver')->group
 - ✅ Users cannot access interfaces not meant for their role
 - ✅ Proper error messages when accessing wrong area
 - ✅ Graceful handling of users without profiles
+- ✅ Back button disabled after logout (cache-control headers)
 
 ---
 
@@ -167,31 +176,48 @@ resources/views/caregiver/checklists/
 
 ---
 
-### 10. Elderly Dashboard & Views ✅ (NOV 25ry 2025)
+### 10. Elderly Dashboard & Views ✅ (NOV 26 2025 - ENHANCED)
 
 **ElderlyDashboardController:**
-- ✅ `index()` - Dashboard with today's medications and tasks
+- ✅ `index()` - Dashboard with today's medications, tasks, and vitals progress
 - ✅ `medications()` - View all assigned medications
 - ✅ `checklists()` - View all assigned tasks  
-- ✅ `toggleChecklist()` - Mark tasks complete/incomplete
+- ✅ `toggleChecklist()` - Mark tasks complete/incomplete (AJAX)
+- ✅ `takeMedication()` - Mark medication dose as taken (with 60-min grace window)
+- ✅ `undoMedication()` - Undo medication dose
 
 **Elderly Views:**
 ```
 resources/views/elderly/
-├── dashboard.blade.php     # Welcome + today's meds + today's tasks
+├── dashboard.blade.php     # Full featured dashboard (see below)
 ├── medications.blade.php   # List of all medications (view only)
 └── checklists.blade.php    # List of tasks with completion toggle
 ```
 
-**Features:**
-- Quick stats cards (medications today, pending tasks)
-- Today's medications with status indicators
-- Today's tasks with completion checkboxes
-- Caregiver contact info display
+**Dashboard Features (Nov 26):**
+- ✅ **Mood Tracker** - Slider with emoji feedback, auto-saves
+- ✅ **Daily Goals Progress** - Circular progress combining:
+  - Tasks (40% weight)
+  - Medications (40% weight)
+  - Vitals (20% weight)
+- ✅ **Health Vitals Grid** - 4 vital cards (Blood Pressure, Sugar, Temp, Heart Rate)
+- ✅ **Medications Card** - Clickable card linking to full medications page
+  - Dose time buttons with status (Taken ✓, Missed !, Active ●)
+  - 60-minute grace window before/after scheduled time
+  - Late dose tracking
+  - Undo functionality
+- ✅ **Checklists Card** - Enhanced task display with:
+  - Priority badges (High 🔴, Medium 🟡, Low 🟢)
+  - Category icons
+  - Due time display
+  - Notes/description preview
+  - Completion toggle with confetti animation
+- ✅ **Silver background** (#C0C0C0) for better contrast
+- ✅ **Real-time progress updates** - JavaScript updates Daily Goals when tasks/meds are toggled
 
 ---
 
-### 11. Role-Aware Navigation ✅ (NOV 25nuary 2025)
+### 11. Role-Aware Navigation ✅ (NOV 25 2025)
 
 **navigation.blade.php Updated:**
 - ✅ Dynamic dashboard link based on user role
@@ -205,6 +231,30 @@ resources/views/elderly/
 |------|-------|
 | Caregiver | Dashboard, Medications, Checklists |
 | Elderly | Dashboard, My Medications, My Tasks |
+
+---
+
+### 12. UI/UX Improvements ✅ (NOV 26 2025)
+
+**Consistent Silver Theme:**
+- ✅ Elderly dashboard: `bg-[#C0C0C0]` (silver)
+- ✅ Caregiver layout: `bg-[#C0C0C0]` (silver) in layouts/app.blade.php
+- ✅ All caregiver views updated (removed inner bg-gray-50)
+- ✅ White cards provide good contrast on silver background
+
+**Enhanced Checklists Display:**
+- ✅ Priority badges with color coding
+- ✅ Category display with icons
+- ✅ Due time display
+- ✅ Notes/description preview
+- ✅ Recurring task indicator
+
+**Medication Dose Tracking:**
+- ✅ Time-window validation (60 minutes before/after)
+- ✅ Visual status indicators (taken, missed, active, upcoming)
+- ✅ Late dose tracking with warning
+- ✅ Undo functionality
+- ✅ MedicationLog model for persistent tracking
 
 ---
 
@@ -224,13 +274,14 @@ silvercare_web/
 │   │   │   │   └── ProfileCompletionController.php
 │   │   │   ├── CaregiverDashboardController.php
 │   │   │   ├── CaregiverProfileController.php
-│   │   │   ├── ElderlyDashboardController.php      # ✅ NEW
+│   │   │   ├── ElderlyDashboardController.php      # ✅ ENHANCED
 │   │   │   ├── MedicationController.php            # ✅ Full CRUD
 │   │   │   └── ChecklistController.php             # ✅ Full CRUD
 │   │   └── Middleware/
-│   │       ├── EnsureUserIsElderly.php             # ✅ NEW
-│   │       ├── EnsureUserIsCaregiver.php           # ✅ NEW
-│   │       └── RedirectBasedOnRole.php             # ✅ NEW
+│   │       ├── EnsureUserIsElderly.php
+│   │       ├── EnsureUserIsCaregiver.php
+│   │       ├── RedirectBasedOnRole.php
+│   │       └── PreventBackHistory.php              # ✅ NEW
 │   ├── Models/
 │   │   ├── User.php
 │   │   ├── UserProfile.php
@@ -249,25 +300,26 @@ silvercare_web/
 │   └── migrations/                                  # ✅ With priority/notes
 ├── resources/views/
 │   ├── layouts/
+│   │   ├── app.blade.php                            # ✅ Silver background
 │   │   └── navigation.blade.php                     # ✅ Role-aware
 │   ├── auth/
-│   │   ├── login.blade.php
+│   │   ├── login.blade.php                          # ✅ Autocomplete attrs
 │   │   ├── register.blade.php
 │   │   ├── profile-completion.blade.php
 │   │   └── caregiver-set-password.blade.php
 │   ├── caregiver/
-│   │   ├── dashboard.blade.php
+│   │   ├── dashboard.blade.php                      # ✅ No inner bg
 │   │   ├── medications/
-│   │   │   ├── index.blade.php
-│   │   │   ├── create.blade.php
-│   │   │   ├── edit.blade.php
+│   │   │   ├── index.blade.php                      # ✅ No inner bg
+│   │   │   ├── create.blade.php                     # ✅ No inner bg
+│   │   │   ├── edit.blade.php                       # ✅ No inner bg
 │   │   │   └── show.blade.php
 │   │   └── checklists/
-│   │       ├── index.blade.php
-│   │       ├── create.blade.php
-│   │       └── edit.blade.php
-│   └── elderly/                                     # ✅ NEW
-│       ├── dashboard.blade.php
+│   │       ├── index.blade.php                      # ✅ No inner bg
+│   │       ├── create.blade.php                     # ✅ No inner bg
+│   │       └── edit.blade.php                       # ✅ No inner bg
+│   └── elderly/
+│       ├── dashboard.blade.php                      # ✅ MAJOR UPDATE
 │       ├── medications.blade.php
 │       └── checklists.blade.php
 └── routes/
@@ -278,24 +330,43 @@ silvercare_web/
 
 ## 🎯 Next Steps
 
-### Immediate Tasks
+### Immediate Priority - Health Vitals
+
+| Priority | Feature | Status | Notes |
+|----------|---------|--------|-------|
+| **HIGH** | Health Metrics CRUD | ⏳ TODO | Manual input for BP, Sugar, Temp, Heart Rate |
+| **HIGH** | Vitals Recording UI | ⏳ TODO | Modal/form for each vital card on dashboard |
+| **HIGH** | HealthMetricController | ⏳ TODO | Store/update vitals for elderly |
+
+### Google Fit Integration
+
+| Priority | Feature | Status | Notes |
+|----------|---------|--------|-------|
+| **MEDIUM** | Google Fit OAuth Flow | ⏳ TODO | Connect Google Fit account |
+| **MEDIUM** | Heart Rate Sync | ⏳ TODO | Auto-fetch heart rate from Google Fit |
+| **MEDIUM** | Steps Sync | ⏳ TODO | Auto-fetch step count |
+| **LOW** | Activity Sync | ⏳ TODO | Auto-fetch activity data |
+
+### Other Features
 
 | Priority | Feature | Status |
 |----------|---------|--------|
-| High | Health Metrics CRUD | ⏳ TODO |
-| High | Calendar/Events | ⏳ TODO |
+| Medium | Calendar/Events | ⏳ TODO |
 | Medium | Notifications/Activity Feed | ⏳ TODO |
 | Medium | Analytics Dashboard (Charts) | ⏳ TODO |
-| Low | Google Fit OAuth | ⏳ TODO |
 | Low | PDF Export | ⏳ TODO |
 
 ### Testing Checklist
 
-- [ ] Test registration with caregiver email
-- [ ] Test role-based routing (elderly can't access `/caregiver/*`)
-- [ ] Test caregiver can't access `/dashboard` (elderly dashboard)
-- [ ] Test medication CRUD
-- [ ] Test checklist CRUD with toggle
+- [x] Test registration with caregiver email
+- [x] Test role-based routing (elderly can't access `/caregiver/*`)
+- [x] Test caregiver can't access `/dashboard` (elderly dashboard)
+- [x] Test medication CRUD
+- [x] Test checklist CRUD with toggle
+- [x] Test medication dose tracking (take/undo)
+- [x] Test session security (back button after logout)
+- [ ] Test vitals recording
+- [ ] Test Google Fit OAuth
 
 ---
 
@@ -320,7 +391,7 @@ php artisan migrate
 
 ### Clear Cache
 ```bash
-php artisan route:clear && php artisan config:clear && php artisan cache:clear
+php artisan route:clear && php artisan config:clear && php artisan cache:clear && php artisan view:clear
 ```
 
 ---
@@ -332,6 +403,8 @@ php artisan route:clear && php artisan config:clear && php artisan cache:clear
 - ✅ **Role-based middleware protects all routes**
 - ✅ **Users cannot access interfaces not meant for their role**
 - ✅ Signed URLs for caregiver invitations (7-day expiry)
+- ✅ **Session security** - Back button disabled after logout
+- ✅ **Cache-Control headers** on authenticated pages
 
 ---
 
@@ -341,9 +414,11 @@ php artisan route:clear && php artisan config:clear && php artisan cache:clear
 |---------|-----------|---------|
 | Registration | Via invitation email | Direct |
 | Login | Role-based redirect | Role-based redirect |
-| Dashboard | Stats + quick actions | Today's meds + tasks |
-| Medications | Full CRUD | View only |
-| Checklists | Full CRUD | View + toggle completion |
+| Session Security | ✅ No back after logout | ✅ No back after logout |
+| Dashboard | Stats + quick actions | Full featured (mood, vitals, progress) |
+| Medications | Full CRUD | View + dose tracking (take/undo) |
+| Checklists | Full CRUD | View + toggle (with priority/notes) |
+| Daily Goals | - | ✅ Combined progress (tasks + meds + vitals) |
 | Navigation | Role-aware links | Role-aware links |
 
 **Repository:** github.com/santiagomarc/silvercare-web

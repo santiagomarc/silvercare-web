@@ -62,7 +62,7 @@
                     <!-- Email -->
                     <div class="fade-in-section transition-delay-300">
                         <label for="email" class="block text-sm font-bold text-gray-700 mb-2">Email Address</label>
-                        <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus
+                        <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="email"
                                class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#000080] focus:ring-2 focus:ring-[#000080]/20 transition-all duration-200 font-medium"
                                placeholder="you@example.com">
                         @error('email')
@@ -73,7 +73,7 @@
                     <!-- Password -->
                     <div class="fade-in-section transition-delay-400">
                         <label for="password" class="block text-sm font-bold text-gray-700 mb-2">Password</label>
-                        <input id="password" type="password" name="password" required
+                        <input id="password" type="password" name="password" required autocomplete="current-password"
                                class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#000080] focus:ring-2 focus:ring-[#000080]/20 transition-all duration-200 font-medium"
                                placeholder="Enter your password">
                         @error('password')

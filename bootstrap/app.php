@@ -17,6 +17,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'elderly' => \App\Http\Middleware\EnsureUserIsElderly::class,
             'caregiver' => \App\Http\Middleware\EnsureUserIsCaregiver::class,
             'role.redirect' => \App\Http\Middleware\RedirectBasedOnRole::class,
+            'prevent.back' => \App\Http\Middleware\PreventBackHistory::class,
+        ]);
+
+        // Apply prevent back history to all authenticated routes
+        $middleware->appendToGroup('web', [
+            \App\Http\Middleware\PreventBackHistory::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

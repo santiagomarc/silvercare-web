@@ -29,6 +29,10 @@ Route::middleware(['auth', 'verified', 'elderly'])->group(function () {
     Route::get('/my-medications', [ElderlyDashboardController::class, 'medications'])->name('elderly.medications');
     Route::get('/my-checklists', [ElderlyDashboardController::class, 'checklists'])->name('elderly.checklists');
     Route::post('/my-checklists/{checklist}/toggle', [ElderlyDashboardController::class, 'toggleChecklist'])->name('elderly.checklists.toggle');
+    
+    // Medication dose tracking
+    Route::post('/my-medications/{medication}/take', [ElderlyDashboardController::class, 'takeMedication'])->name('elderly.medications.take');
+    Route::post('/my-medications/{medication}/undo', [ElderlyDashboardController::class, 'undoMedication'])->name('elderly.medications.undo');
 });
 
 // Caregiver Routes - Protected by 'caregiver' middleware

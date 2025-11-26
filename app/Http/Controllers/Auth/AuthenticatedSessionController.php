@@ -7,6 +7,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
@@ -52,15 +53,29 @@ class AuthenticatedSessionController extends Controller
 
     /**
      * Destroy an authenticated session.
+     * Properly invalidates session and clears all cookies to prevent back-button access.
      */
     public function destroy(Request $request): RedirectResponse
     {
+        // Logout the user
         Auth::guard('web')->logout();
 
+        // Invalidate the session completely
         $request->session()->invalidate();
 
+        // Regenerate the CSRF token
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        // Clear the remember me cookie if it exists
+        $cookie = Cookie::forget('remember_web_' . sha1(static::class));
+
+        // Redirect with cache-control headers to prevent back button access
+        return redirect('/')
+            ->withCookie($cookie)
+            ->withHeaders([
+                'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate',
+                'Pragma' => 'no-cache',
+                'Expires' => 'Sat, 01 Jan 2000 00:00:00 GMT',
+            ]);
     }
 }
