@@ -147,6 +147,25 @@ class ElderlyDashboardController extends Controller
             ];
         }
 
+        // Get today's steps from Google Fit (if connected)
+        $stepsData = null;
+        if ($elderlyId) {
+            $stepsMetric = HealthMetric::where('elderly_id', $elderlyId)
+                ->where('type', 'steps')
+                ->whereDate('measured_at', today())
+                ->orderBy('measured_at', 'desc')
+                ->first();
+            
+            if ($stepsMetric) {
+                $stepsData = [
+                    'value' => (int) $stepsMetric->value,
+                    'goal' => 6000, // Default daily step goal for seniors
+                    'source' => $stepsMetric->source,
+                    'synced_at' => $stepsMetric->measured_at,
+                ];
+            }
+        }
+
         return view('elderly.dashboard', compact(
             'medications',
             'todayMedications',
@@ -162,6 +181,7 @@ class ElderlyDashboardController extends Controller
             'totalRequiredVitals',
             'vitalsProgress',
             'vitalsData',
+            'stepsData',
             'takenMedicationDoses',
             'totalMedicationDoses',
             'medicationProgress',

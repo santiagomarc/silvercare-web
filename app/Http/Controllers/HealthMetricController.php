@@ -294,4 +294,87 @@ class HealthMetricController extends Controller
 
         return (string) intval($metric->value);
     }
+
+    /**
+     * Blood Pressure Screen - with history and manual entry
+     */
+    public function bloodPressureScreen()
+    {
+        return $this->vitalScreen('blood_pressure');
+    }
+
+    /**
+     * Sugar Level Screen - with history and manual entry
+     */
+    public function sugarLevelScreen()
+    {
+        return $this->vitalScreen('sugar_level');
+    }
+
+    /**
+     * Temperature Screen - with history and manual entry
+     */
+    public function temperatureScreen()
+    {
+        return $this->vitalScreen('temperature');
+    }
+
+    /**
+     * Heart Rate Screen - with history and manual entry
+     */
+    public function heartRateScreen()
+    {
+        return $this->vitalScreen('heart_rate');
+    }
+
+    /**
+     * Generic vital screen with history
+     */
+    private function vitalScreen(string $type)
+    {
+        $user = Auth::user();
+        $elderlyId = $user->profile?->id;
+        $config = self::VITAL_TYPES[$type] ?? null;
+
+        if (!$config) {
+            abort(404, 'Vital type not found');
+        }
+
+        // Check Google Fit connection status
+        $googleFitConnected = \App\Models\GoogleFitToken::where('user_id', $user->id)->exists();
+
+        // Vitals that support Google Fit sync (all except sugar_level)
+        $supportsGoogleFit = in_array($type, ['heart_rate', 'blood_pressure', 'temperature']);
+
+        // Get history for last 30 days
+        $metrics = collect();
+        if ($elderlyId) {
+            $metrics = HealthMetric::where('elderly_id', $elderlyId)
+                ->where('type', $type)
+                ->where('measured_at', '>=', Carbon::now()->subDays(30))
+                ->orderBy('measured_at', 'desc')
+                ->get();
+        }
+
+        // Calculate stats
+        $stats = [
+            'count' => $metrics->count(),
+            'latest' => $metrics->first(),
+        ];
+
+        if ($metrics->isNotEmpty() && $type !== 'blood_pressure') {
+            $stats['avg'] = round($metrics->avg('value'), 1);
+            $stats['min'] = $metrics->min('value');
+            $stats['max'] = $metrics->max('value');
+        }
+
+        return view('elderly.vitals.show', compact(
+            'type',
+            'config',
+            'metrics',
+            'stats',
+            'googleFitConnected',
+            'supportsGoogleFit'
+        ));
+    }
 }

@@ -42,6 +42,12 @@ Route::middleware(['auth', 'verified', 'elderly'])->group(function () {
     Route::get('/my-vitals/{type}/history', [HealthMetricController::class, 'history'])->name('elderly.vitals.history');
     Route::delete('/my-vitals/{metric}', [HealthMetricController::class, 'destroy'])->name('elderly.vitals.destroy');
 
+    // Individual Vital Screens (like Flutter version)
+    Route::get('/my-vitals/blood-pressure', [HealthMetricController::class, 'bloodPressureScreen'])->name('elderly.vitals.blood_pressure');
+    Route::get('/my-vitals/sugar-level', [HealthMetricController::class, 'sugarLevelScreen'])->name('elderly.vitals.sugar_level');
+    Route::get('/my-vitals/temperature', [HealthMetricController::class, 'temperatureScreen'])->name('elderly.vitals.temperature');
+    Route::get('/my-vitals/heart-rate', [HealthMetricController::class, 'heartRateScreen'])->name('elderly.vitals.heart_rate');
+
     // Google Fit Integration
     Route::get('/google-fit/connect', [GoogleFitController::class, 'connect'])->name('elderly.googlefit.connect');
     Route::get('/google-fit/callback', [GoogleFitController::class, 'callback'])->name('elderly.googlefit.callback');

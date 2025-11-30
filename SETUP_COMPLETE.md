@@ -1,6 +1,6 @@
 # SilverCare Web - Setup Progress 🚀
 
-**Last Updated:** Nov 30, 2025
+**Last Updated:** Nov 30, 2025 (Evening Session)
 
 ## ✅ Completed Steps
 
@@ -285,12 +285,12 @@ resources/views/elderly/
 
 ---
 
-### 14. Google Fit Integration ✅ (NOV 30 2025) - NEW!
+### 14. Google Fit Integration ✅ (NOV 30 2025) - ENHANCED!
 
 **GoogleFitController:**
 - ✅ `connect()` - Redirect to Google OAuth
 - ✅ `callback()` - Handle OAuth callback, store tokens
-- ✅ `sync()` - Fetch heart rate & steps from Google Fit API
+- ✅ `sync()` - Fetch heart rate, BP, temperature & steps from Google Fit API
 - ✅ `disconnect()` - Remove Google Fit connection
 
 **Features:**
@@ -298,13 +298,25 @@ resources/views/elderly/
 - ✅ **Token Storage** - Encrypted tokens in GoogleFitToken model
 - ✅ **Auto Token Refresh** - Refreshes expired access tokens
 - ✅ **Heart Rate Sync** - Fetches today's heart rate from Google Fit
+- ✅ **Blood Pressure Sync** - Fetches BP data (systolic/diastolic)
+- ✅ **Temperature Sync** - Fetches body temperature data
 - ✅ **Steps Sync** - Fetches today's step count
 - ✅ **Source Tracking** - Shows "Google Fit" badge for synced data
+- ✅ **Auto-Sync on Page Load** - Syncs once per session (sessionStorage)
+
+**Google Fit Scopes:**
+```
+fitness.heart_rate.read
+fitness.blood_pressure.read
+fitness.body_temperature.read
+fitness.activity.read
+fitness.body.read
+```
 
 **Dashboard UI:**
 - ✅ "Connect Google Fit" button (if not connected)
 - ✅ "Sync Google Fit" button (if connected)
-- ✅ Google Fit badge on heart rate card when synced
+- ✅ Google Fit badge on ALL synced vital cards (Heart Rate, BP, Temperature)
 
 **Routes:**
 ```php
@@ -316,7 +328,36 @@ Route::post('/google-fit/disconnect', ...); // Disconnect
 
 ---
 
-## 🔄 Current Status: Core Features Complete
+### 15. Health Status Badges ✅ (NOV 30 2025) - NEW!
+
+**Dashboard Vital Cards:**
+- ✅ **Color-coded status badges** on all 4 vital cards
+- ✅ **Google Fit source badges** on all synced vitals (Heart Rate, BP, Temperature)
+
+**Vitals Detail Page (`/vitals/{type}`):**
+- ✅ **Health status badges** on each history record
+- ✅ **Google Fit source badges** for synced records
+- ✅ **Auto-sync once per page load** (prevents excessive API calls)
+
+**Health Status Thresholds:**
+
+| Vital | Critical | High | Elevated | Normal | Low |
+|-------|----------|------|----------|--------|-----|
+| **Blood Pressure** | ≥180/120 | ≥140/90 | ≥130/80 | <130/80 | <90/60 |
+| **Sugar Level** | ≥250 | ≥180 | ≥126 | 70-125 | <70 |
+| **Temperature** | ≥39.5°C | ≥38.0°C | ≥37.3°C | 36.0-37.2°C | <36.0°C |
+| **Heart Rate** | ≥150 bpm | ≥100 bpm | - | 60-99 bpm | <60 bpm |
+
+**Badge Colors:**
+- 🔴 **Red** - Critical / Danger
+- 🟠 **Orange** - High / Warning
+- 🟡 **Yellow** - Elevated / Caution
+- 🟢 **Green** - Normal
+- 🔵 **Blue** - Low / Slow
+
+---
+
+## 🔄 Current Status: Core Features Complete + Google Fit Enhanced
 
 ### Project Structure
 
@@ -334,7 +375,7 @@ silvercare_web/
 │   │   │   ├── CaregiverProfileController.php
 │   │   │   ├── ElderlyDashboardController.php      # ✅ ENHANCED
 │   │   │   ├── HealthMetricController.php          # ✅ NEW
-│   │   │   ├── GoogleFitController.php             # ✅ NEW
+│   │   │   ├── GoogleFitController.php             # ✅ ENHANCED (BP, Temp)
 │   │   │   ├── MedicationController.php            # ✅ Full CRUD
 │   │   │   └── ChecklistController.php             # ✅ Full CRUD
 │   │   └── Middleware/
@@ -379,9 +420,11 @@ silvercare_web/
 │   │       ├── create.blade.php                     # ✅ No inner bg
 │   │       └── edit.blade.php                       # ✅ No inner bg
 │   └── elderly/
-│       ├── dashboard.blade.php                      # ✅ MAJOR UPDATE + VITALS
+│       ├── dashboard.blade.php                      # ✅ Health status badges
 │       ├── medications.blade.php
-│       └── checklists.blade.php
+│       ├── checklists.blade.php
+│       └── vitals/
+│           └── show.blade.php                       # ✅ NEW - Vitals detail page
 └── routes/
     └── web.php                                      # ✅ Vitals + Google Fit routes
 ```
@@ -395,16 +438,26 @@ silvercare_web/
 | Priority | Feature | Status | Notes |
 |----------|---------|--------|-------|
 | **HIGH** | Calendar/Events | ⏳ TODO | Appointment scheduling for elderly |
+| **HIGH** | Caregiver Vitals View | ⏳ TODO | Let caregivers view elderly's vitals |
 | **MEDIUM** | Notifications Feed | ⏳ TODO | Activity log for caregivers |
-| **MEDIUM** | Analytics Dashboard | ⏳ TODO | Charts for health trends |
+| **MEDIUM** | Analytics Dashboard | ⏳ TODO | Charts for health trends (Chart.js) |
+| **MEDIUM** | Steps Progress Card | ⏳ TODO | Display step count from Google Fit |
 | **LOW** | PDF Export | ⏳ TODO | Export health reports |
 
 ### Google Fit - Additional Data
 
 | Priority | Feature | Status | Notes |
 |----------|---------|--------|-------|
+| **MEDIUM** | Sugar Level Sync | ⏳ TODO | If available in Google Fit |
 | **LOW** | Activity Sync | ⏳ TODO | Auto-fetch activity data |
 | **LOW** | Sleep Sync | ⏳ TODO | Auto-fetch sleep data |
+
+### UI/UX Improvements
+
+| Priority | Feature | Status | Notes |
+|----------|---------|--------|-------|
+| **LOW** | Dark Mode | ⏳ TODO | Optional dark theme |
+| **LOW** | Responsive Improvements | ⏳ TODO | Better mobile experience |
 
 ### Testing Checklist
 
@@ -415,9 +468,13 @@ silvercare_web/
 - [x] Test checklist CRUD with toggle
 - [x] Test medication dose tracking (take/undo)
 - [x] Test session security (back button after logout)
-- [ ] Test vitals recording (BP, Sugar, Temp, Heart Rate)
-- [ ] Test Google Fit OAuth connection
-- [ ] Test Google Fit sync (heart rate, steps)
+- [x] Test vitals recording (BP, Sugar, Temp, Heart Rate)
+- [x] Test Google Fit OAuth connection
+- [x] Test Google Fit sync (heart rate, BP, temperature, steps)
+- [x] Test health status badges display correctly
+- [x] Test auto-sync limits (once per page load)
+- [ ] Test caregiver viewing elderly vitals
+- [ ] Test calendar event creation
 
 ---
 
@@ -471,8 +528,51 @@ php artisan route:clear && php artisan config:clear && php artisan cache:clear &
 | Medications | Full CRUD | View + dose tracking (take/undo) |
 | Checklists | Full CRUD | View + toggle (with priority/notes) |
 | **Health Vitals** | - | ✅ Record BP, Sugar, Temp, Heart Rate |
-| **Google Fit** | - | ✅ Connect + Sync (heart rate, steps) |
+| **Google Fit** | - | ✅ Connect + Sync (HR, BP, Temp, Steps) |
+| **Health Badges** | - | ✅ Status indicators on all vitals |
+| **Vitals History** | - | ✅ View past records with badges |
 | Daily Goals | - | ✅ Combined progress (tasks + meds + vitals) |
 | Navigation | Role-aware links | Role-aware links |
+
+---
+
+## 📝 Session Notes (Nov 30, 2025 - Evening)
+
+### What Was Done This Session:
+
+1. **Fixed SSL Certificate Issue**
+   - Downloaded `cacert.pem` and configured `php.ini`
+   - Fixed cURL error 60 for Google Fit API calls
+
+2. **Enhanced Google Fit Integration**
+   - Added scopes for blood pressure and temperature
+   - Now syncs: Heart Rate, Blood Pressure, Temperature, Steps
+   - Fixed data parsing for all vital types
+
+3. **Added Health Status Badges**
+   - Dashboard vital cards show status (Normal, High, Low, etc.)
+   - Vitals history page shows badges on each record
+   - Color-coded based on medical thresholds
+
+4. **Added Google Fit Source Badges**
+   - All synced vitals now show "Google Fit" badge
+   - Previously only Heart Rate had the badge
+
+5. **Fixed Auto-Sync Frequency**
+   - Was syncing every few seconds
+   - Now syncs once per page load using sessionStorage
+
+6. **Design Revert**
+   - Reverted "modern" design changes on vitals page
+   - Kept simpler, cleaner design
+   - Preserved all badge functionality
+
+### Known Issues:
+- None currently
+
+### Files Modified:
+- `resources/views/elderly/dashboard.blade.php` - Health badges, Google Fit badges
+- `resources/views/elderly/vitals/show.blade.php` - Health badges, auto-sync fix, design revert
+- `app/Http/Controllers/GoogleFitController.php` - BP, Temp scopes and parsing
 
 **Repository:** github.com/santiagomarc/silvercare-web

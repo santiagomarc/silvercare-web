@@ -8,6 +8,7 @@ use App\Services\GoogleFitService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class GoogleFitController extends Controller
@@ -15,12 +16,14 @@ class GoogleFitController extends Controller
     protected GoogleFitService $googleFitService;
 
     /**
-     * Google Fit API Scopes needed
+     * Google Fit API Scopes needed - includes all vital types
      */
     const SCOPES = [
         'https://www.googleapis.com/auth/fitness.heart_rate.read',
         'https://www.googleapis.com/auth/fitness.activity.read',
         'https://www.googleapis.com/auth/fitness.body.read',
+        'https://www.googleapis.com/auth/fitness.blood_pressure.read',
+        'https://www.googleapis.com/auth/fitness.body_temperature.read',
     ];
 
     public function __construct(GoogleFitService $googleFitService)
@@ -132,29 +135,73 @@ class GoogleFitController extends Controller
             }
 
             $synced = [];
+            $accessToken = $token->access_token;
 
-            // Fetch heart rate data
-            $heartRate = $this->fetchHeartRate($token->access_token);
-            if ($heartRate) {
-                $metric = HealthMetric::updateOrCreate(
-                    [
-                        'elderly_id' => $elderlyId,
-                        'type' => 'heart_rate',
-                        'source' => 'google_fit',
-                        'measured_at' => Carbon::today(),
-                    ],
-                    [
-                        'value' => $heartRate,
-                        'unit' => 'bpm',
-                    ]
-                );
-                $synced['heart_rate'] = $heartRate;
+            // Fetch and sync heart rate data
+            $heartRateData = $this->fetchHeartRateFromSources($accessToken);
+            if (!empty($heartRateData)) {
+                foreach ($heartRateData as $reading) {
+                    HealthMetric::updateOrCreate(
+                        [
+                            'elderly_id' => $elderlyId,
+                            'type' => 'heart_rate',
+                            'source' => 'google_fit',
+                            'measured_at' => $reading['timestamp'],
+                        ],
+                        [
+                            'value' => $reading['value'],
+                            'unit' => 'bpm',
+                        ]
+                    );
+                }
+                $synced['heart_rate'] = count($heartRateData) . ' readings';
             }
 
-            // Fetch steps data
-            $steps = $this->fetchSteps($token->access_token);
-            if ($steps !== null) {
-                $metric = HealthMetric::updateOrCreate(
+            // Fetch and sync blood pressure data
+            $bpData = $this->fetchBloodPressureFromSources($accessToken);
+            if (!empty($bpData)) {
+                foreach ($bpData as $reading) {
+                    HealthMetric::updateOrCreate(
+                        [
+                            'elderly_id' => $elderlyId,
+                            'type' => 'blood_pressure',
+                            'source' => 'google_fit',
+                            'measured_at' => $reading['timestamp'],
+                        ],
+                        [
+                            'value' => $reading['systolic'], // Store systolic as main value
+                            'value_text' => $reading['systolic'] . '/' . $reading['diastolic'],
+                            'unit' => 'mmHg',
+                        ]
+                    );
+                }
+                $synced['blood_pressure'] = count($bpData) . ' readings';
+            }
+
+            // Fetch and sync temperature data
+            $tempData = $this->fetchTemperatureFromSources($accessToken);
+            if (!empty($tempData)) {
+                foreach ($tempData as $reading) {
+                    HealthMetric::updateOrCreate(
+                        [
+                            'elderly_id' => $elderlyId,
+                            'type' => 'temperature',
+                            'source' => 'google_fit',
+                            'measured_at' => $reading['timestamp'],
+                        ],
+                        [
+                            'value' => $reading['value'],
+                            'unit' => '°C',
+                        ]
+                    );
+                }
+                $synced['temperature'] = count($tempData) . ' readings';
+            }
+
+            // Fetch and sync steps data
+            $steps = $this->fetchStepsAggregated($accessToken);
+            if ($steps !== null && $steps > 0) {
+                HealthMetric::updateOrCreate(
                     [
                         'elderly_id' => $elderlyId,
                         'type' => 'steps',
@@ -176,6 +223,7 @@ class GoogleFitController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            Log::error('Google Fit sync error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to sync: ' . $e->getMessage()
@@ -253,62 +301,225 @@ class GoogleFitController extends Controller
     }
 
     /**
-     * Fetch heart rate from Google Fit API
+     * Get all available data sources from Google Fit
      */
-    private function fetchHeartRate(string $accessToken): ?int
+    private function getDataSources(string $accessToken): array
     {
-        $now = Carbon::now();
-        $startOfDay = Carbon::today();
-
-        // Google Fit API uses nanoseconds
-        $startTimeNanos = $startOfDay->timestamp * 1000000000;
-        $endTimeNanos = $now->timestamp * 1000000000;
-
         try {
             $response = Http::withToken($accessToken)
-                ->post('https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate', [
-                    'aggregateBy' => [
-                        [
-                            'dataTypeName' => 'com.google.heart_rate.bpm',
-                        ]
-                    ],
-                    'bucketByTime' => [
-                        'durationMillis' => 86400000 // 24 hours
-                    ],
-                    'startTimeMillis' => $startOfDay->timestamp * 1000,
-                    'endTimeMillis' => $now->timestamp * 1000,
-                ]);
+                ->get('https://www.googleapis.com/fitness/v1/users/me/dataSources');
 
-            if (!$response->successful()) {
-                return null;
+            if ($response->successful()) {
+                return $response->json()['dataSource'] ?? [];
             }
-
-            $data = $response->json();
-
-            // Extract the average heart rate from response
-            foreach ($data['bucket'] ?? [] as $bucket) {
-                foreach ($bucket['dataset'] ?? [] as $dataset) {
-                    foreach ($dataset['point'] ?? [] as $point) {
-                        foreach ($point['value'] ?? [] as $value) {
-                            if (isset($value['fpVal'])) {
-                                return (int) round($value['fpVal']);
-                            }
-                        }
-                    }
-                }
-            }
-
-            return null;
-
         } catch (\Exception $e) {
-            return null;
+            Log::error('Failed to get data sources: ' . $e->getMessage());
         }
+
+        return [];
     }
 
     /**
-     * Fetch steps from Google Fit API
+     * Fetch heart rate data from direct data sources (raw data)
      */
-    private function fetchSteps(string $accessToken): ?int
+    private function fetchHeartRateFromSources(string $accessToken): array
+    {
+        $dataSources = $this->getDataSources($accessToken);
+        $allData = [];
+
+        // Time range: last 7 days to catch all recent data
+        $endTime = Carbon::now();
+        $startTime = Carbon::now()->subDays(7);
+
+        // Convert to nanoseconds for dataset ID
+        $startNanos = $startTime->timestamp * 1000000000;
+        $endNanos = $endTime->timestamp * 1000000000;
+
+        foreach ($dataSources as $source) {
+            $dataType = $source['dataType']['name'] ?? '';
+            
+            if ($dataType === 'com.google.heart_rate.bpm') {
+                $dataSourceId = $source['dataStreamId'];
+                $datasetId = "{$startNanos}-{$endNanos}";
+                
+                try {
+                    $response = Http::withToken($accessToken)
+                        ->get("https://www.googleapis.com/fitness/v1/users/me/dataSources/{$dataSourceId}/datasets/{$datasetId}");
+
+                    if ($response->successful()) {
+                        $points = $response->json()['point'] ?? [];
+                        
+                        foreach ($points as $point) {
+                            $values = $point['value'] ?? [];
+                            $startTimeNanos = $point['startTimeNanos'] ?? 0;
+                            
+                            if (!empty($values)) {
+                                $heartRate = $values[0]['fpVal'] ?? $values[0]['intVal'] ?? null;
+                                
+                                if ($heartRate && $heartRate > 0 && $heartRate < 300) {
+                                    $timestamp = Carbon::createFromTimestampMs((int)($startTimeNanos / 1000000));
+                                    
+                                    $allData[] = [
+                                        'value' => (int) round($heartRate),
+                                        'timestamp' => $timestamp,
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                } catch (\Exception $e) {
+                    Log::warning("Failed to fetch heart rate from source {$dataSourceId}: " . $e->getMessage());
+                }
+            }
+        }
+
+        // Also try aggregated data as fallback
+        $aggregatedData = $this->fetchHeartRateAggregated($accessToken);
+        if ($aggregatedData) {
+            $allData[] = [
+                'value' => $aggregatedData,
+                'timestamp' => Carbon::now(),
+            ];
+        }
+
+        // Remove duplicates (within same minute)
+        $uniqueData = [];
+        $seenTimestamps = [];
+        
+        foreach ($allData as $data) {
+            $key = $data['timestamp']->format('Y-m-d H:i');
+            if (!isset($seenTimestamps[$key])) {
+                $seenTimestamps[$key] = true;
+                $uniqueData[] = $data;
+            }
+        }
+
+        return $uniqueData;
+    }
+
+    /**
+     * Fetch blood pressure from direct data sources (raw data)
+     */
+    private function fetchBloodPressureFromSources(string $accessToken): array
+    {
+        $dataSources = $this->getDataSources($accessToken);
+        $allData = [];
+
+        // Time range: last 7 days
+        $endTime = Carbon::now();
+        $startTime = Carbon::now()->subDays(7);
+
+        $startNanos = $startTime->timestamp * 1000000000;
+        $endNanos = $endTime->timestamp * 1000000000;
+
+        foreach ($dataSources as $source) {
+            $dataType = $source['dataType']['name'] ?? '';
+            
+            if ($dataType === 'com.google.blood_pressure') {
+                $dataSourceId = $source['dataStreamId'];
+                $datasetId = "{$startNanos}-{$endNanos}";
+                
+                try {
+                    $response = Http::withToken($accessToken)
+                        ->get("https://www.googleapis.com/fitness/v1/users/me/dataSources/{$dataSourceId}/datasets/{$datasetId}");
+
+                    if ($response->successful()) {
+                        $points = $response->json()['point'] ?? [];
+                        
+                        foreach ($points as $point) {
+                            $values = $point['value'] ?? [];
+                            $startTimeNanos = $point['startTimeNanos'] ?? 0;
+                            
+                            // Blood pressure format:
+                            // values[0] = systolic (fpVal)
+                            // values[1] = diastolic (fpVal)
+                            if (count($values) >= 2) {
+                                $systolic = $values[0]['fpVal'] ?? null;
+                                $diastolic = $values[1]['fpVal'] ?? null;
+                                
+                                if ($systolic && $diastolic && $systolic > 0 && $diastolic > 0) {
+                                    $timestamp = Carbon::createFromTimestampMs((int)($startTimeNanos / 1000000));
+                                    
+                                    $allData[] = [
+                                        'systolic' => (int) round($systolic),
+                                        'diastolic' => (int) round($diastolic),
+                                        'timestamp' => $timestamp,
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                } catch (\Exception $e) {
+                    Log::warning("Failed to fetch blood pressure from source {$dataSourceId}: " . $e->getMessage());
+                }
+            }
+        }
+
+        return $allData;
+    }
+
+    /**
+     * Fetch temperature from direct data sources (raw data)
+     */
+    private function fetchTemperatureFromSources(string $accessToken): array
+    {
+        $dataSources = $this->getDataSources($accessToken);
+        $allData = [];
+
+        // Time range: last 7 days
+        $endTime = Carbon::now();
+        $startTime = Carbon::now()->subDays(7);
+
+        $startNanos = $startTime->timestamp * 1000000000;
+        $endNanos = $endTime->timestamp * 1000000000;
+
+        foreach ($dataSources as $source) {
+            $dataType = $source['dataType']['name'] ?? '';
+            
+            // Check for body temperature data type
+            if ($dataType === 'com.google.body.temperature' || $dataType === 'com.google.body_temperature') {
+                $dataSourceId = $source['dataStreamId'];
+                $datasetId = "{$startNanos}-{$endNanos}";
+                
+                try {
+                    $response = Http::withToken($accessToken)
+                        ->get("https://www.googleapis.com/fitness/v1/users/me/dataSources/{$dataSourceId}/datasets/{$datasetId}");
+
+                    if ($response->successful()) {
+                        $points = $response->json()['point'] ?? [];
+                        
+                        foreach ($points as $point) {
+                            $values = $point['value'] ?? [];
+                            $startTimeNanos = $point['startTimeNanos'] ?? 0;
+                            
+                            if (!empty($values)) {
+                                $temperature = $values[0]['fpVal'] ?? null;
+                                
+                                // Temperature in Celsius should be between 35 and 42
+                                if ($temperature && $temperature >= 35 && $temperature <= 42) {
+                                    $timestamp = Carbon::createFromTimestampMs((int)($startTimeNanos / 1000000));
+                                    
+                                    $allData[] = [
+                                        'value' => round($temperature, 1),
+                                        'timestamp' => $timestamp,
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                } catch (\Exception $e) {
+                    Log::warning("Failed to fetch temperature from source {$dataSourceId}: " . $e->getMessage());
+                }
+            }
+        }
+
+        return $allData;
+    }
+
+    /**
+     * Fetch heart rate from aggregated API (fallback)
+     */
+    private function fetchHeartRateAggregated(string $accessToken): ?int
     {
         $now = Carbon::now();
         $startOfDay = Carbon::today();
@@ -317,41 +528,80 @@ class GoogleFitController extends Controller
             $response = Http::withToken($accessToken)
                 ->post('https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate', [
                     'aggregateBy' => [
-                        [
-                            'dataTypeName' => 'com.google.step_count.delta',
-                        ]
+                        ['dataTypeName' => 'com.google.heart_rate.bpm']
                     ],
                     'bucketByTime' => [
-                        'durationMillis' => 86400000 // 24 hours
+                        'durationMillis' => 86400000
                     ],
                     'startTimeMillis' => $startOfDay->timestamp * 1000,
                     'endTimeMillis' => $now->timestamp * 1000,
                 ]);
 
-            if (!$response->successful()) {
-                return null;
-            }
+            if ($response->successful()) {
+                $data = $response->json();
 
-            $data = $response->json();
-
-            // Extract total steps from response
-            $totalSteps = 0;
-            foreach ($data['bucket'] ?? [] as $bucket) {
-                foreach ($bucket['dataset'] ?? [] as $dataset) {
-                    foreach ($dataset['point'] ?? [] as $point) {
-                        foreach ($point['value'] ?? [] as $value) {
-                            if (isset($value['intVal'])) {
-                                $totalSteps += $value['intVal'];
+                foreach ($data['bucket'] ?? [] as $bucket) {
+                    foreach ($bucket['dataset'] ?? [] as $dataset) {
+                        foreach ($dataset['point'] ?? [] as $point) {
+                            foreach ($point['value'] ?? [] as $value) {
+                                if (isset($value['fpVal'])) {
+                                    return (int) round($value['fpVal']);
+                                }
                             }
                         }
                     }
                 }
             }
-
-            return $totalSteps > 0 ? $totalSteps : null;
-
         } catch (\Exception $e) {
-            return null;
+            Log::warning('Aggregated heart rate fetch failed: ' . $e->getMessage());
         }
+
+        return null;
+    }
+
+    /**
+     * Fetch steps from aggregated API
+     */
+    private function fetchStepsAggregated(string $accessToken): ?int
+    {
+        $now = Carbon::now();
+        $startOfDay = Carbon::today();
+
+        try {
+            $response = Http::withToken($accessToken)
+                ->post('https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate', [
+                    'aggregateBy' => [
+                        ['dataTypeName' => 'com.google.step_count.delta']
+                    ],
+                    'bucketByTime' => [
+                        'durationMillis' => 86400000
+                    ],
+                    'startTimeMillis' => $startOfDay->timestamp * 1000,
+                    'endTimeMillis' => $now->timestamp * 1000,
+                ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $totalSteps = 0;
+
+                foreach ($data['bucket'] ?? [] as $bucket) {
+                    foreach ($bucket['dataset'] ?? [] as $dataset) {
+                        foreach ($dataset['point'] ?? [] as $point) {
+                            foreach ($point['value'] ?? [] as $value) {
+                                if (isset($value['intVal'])) {
+                                    $totalSteps += $value['intVal'];
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return $totalSteps > 0 ? $totalSteps : null;
+            }
+        } catch (\Exception $e) {
+            Log::warning('Aggregated steps fetch failed: ' . $e->getMessage());
+        }
+
+        return null;
     }
 }
