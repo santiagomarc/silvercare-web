@@ -1,6 +1,6 @@
 # SilverCare Web - Setup Progress 🚀
 
-**Last Updated:** Nov 26, 2025
+**Last Updated:** Nov 30, 2025
 
 ## ✅ Completed Steps
 
@@ -258,6 +258,64 @@ resources/views/elderly/
 
 ---
 
+### 13. Health Vitals Recording ✅ (NOV 30 2025) - NEW!
+
+**HealthMetricController:**
+- ✅ `store()` - Record vitals (BP, Sugar, Temp, Heart Rate)
+- ✅ `today()` - Get today's recorded vitals (JSON API)
+- ✅ `history()` - Get history of specific vital type
+- ✅ `destroy()` - Delete a health metric record
+- ✅ Validation for each vital type with ranges
+- ✅ Blood pressure format validation (e.g., 120/80)
+
+**Features:**
+- ✅ **Modal Recording UI** - Beautiful popup forms for each vital
+- ✅ **Real-time Display** - Shows recorded values on vital cards
+- ✅ **Progress Tracking** - Vitals contribute 20% to Daily Goals
+- ✅ **Status Badges** - Shows "✓ Recorded" when logged today
+- ✅ **Time Display** - Shows when vital was recorded
+
+**Vital Types Supported:**
+| Type | Unit | Range | Notes |
+|------|------|-------|-------|
+| Blood Pressure | mmHg | N/A | Text format (120/80) |
+| Sugar Level | mg/dL | 50-500 | Normal: 70-100 fasting |
+| Temperature | °C | 35-42 | Normal: 36.1-37.2 |
+| Heart Rate | bpm | 40-200 | Normal resting: 60-100 |
+
+---
+
+### 14. Google Fit Integration ✅ (NOV 30 2025) - NEW!
+
+**GoogleFitController:**
+- ✅ `connect()` - Redirect to Google OAuth
+- ✅ `callback()` - Handle OAuth callback, store tokens
+- ✅ `sync()` - Fetch heart rate & steps from Google Fit API
+- ✅ `disconnect()` - Remove Google Fit connection
+
+**Features:**
+- ✅ **OAuth 2.0 Flow** - Secure connection to Google Fit
+- ✅ **Token Storage** - Encrypted tokens in GoogleFitToken model
+- ✅ **Auto Token Refresh** - Refreshes expired access tokens
+- ✅ **Heart Rate Sync** - Fetches today's heart rate from Google Fit
+- ✅ **Steps Sync** - Fetches today's step count
+- ✅ **Source Tracking** - Shows "Google Fit" badge for synced data
+
+**Dashboard UI:**
+- ✅ "Connect Google Fit" button (if not connected)
+- ✅ "Sync Google Fit" button (if connected)
+- ✅ Google Fit badge on heart rate card when synced
+
+**Routes:**
+```php
+Route::get('/google-fit/connect', ...);   // Start OAuth
+Route::get('/google-fit/callback', ...);  // OAuth callback
+Route::post('/google-fit/sync', ...);     // Sync data
+Route::post('/google-fit/disconnect', ...); // Disconnect
+```
+
+---
+
 ## 🔄 Current Status: Core Features Complete
 
 ### Project Structure
@@ -275,6 +333,8 @@ silvercare_web/
 │   │   │   ├── CaregiverDashboardController.php
 │   │   │   ├── CaregiverProfileController.php
 │   │   │   ├── ElderlyDashboardController.php      # ✅ ENHANCED
+│   │   │   ├── HealthMetricController.php          # ✅ NEW
+│   │   │   ├── GoogleFitController.php             # ✅ NEW
 │   │   │   ├── MedicationController.php            # ✅ Full CRUD
 │   │   │   └── ChecklistController.php             # ✅ Full CRUD
 │   │   └── Middleware/
@@ -319,42 +379,32 @@ silvercare_web/
 │   │       ├── create.blade.php                     # ✅ No inner bg
 │   │       └── edit.blade.php                       # ✅ No inner bg
 │   └── elderly/
-│       ├── dashboard.blade.php                      # ✅ MAJOR UPDATE
+│       ├── dashboard.blade.php                      # ✅ MAJOR UPDATE + VITALS
 │       ├── medications.blade.php
 │       └── checklists.blade.php
 └── routes/
-    └── web.php                                      # ✅ Role-protected routes
+    └── web.php                                      # ✅ Vitals + Google Fit routes
 ```
 
 ---
 
 ## 🎯 Next Steps
 
-### Immediate Priority - Health Vitals
+### Immediate Priority - Remaining Features
 
 | Priority | Feature | Status | Notes |
 |----------|---------|--------|-------|
-| **HIGH** | Health Metrics CRUD | ⏳ TODO | Manual input for BP, Sugar, Temp, Heart Rate |
-| **HIGH** | Vitals Recording UI | ⏳ TODO | Modal/form for each vital card on dashboard |
-| **HIGH** | HealthMetricController | ⏳ TODO | Store/update vitals for elderly |
+| **HIGH** | Calendar/Events | ⏳ TODO | Appointment scheduling for elderly |
+| **MEDIUM** | Notifications Feed | ⏳ TODO | Activity log for caregivers |
+| **MEDIUM** | Analytics Dashboard | ⏳ TODO | Charts for health trends |
+| **LOW** | PDF Export | ⏳ TODO | Export health reports |
 
-### Google Fit Integration
+### Google Fit - Additional Data
 
 | Priority | Feature | Status | Notes |
 |----------|---------|--------|-------|
-| **MEDIUM** | Google Fit OAuth Flow | ⏳ TODO | Connect Google Fit account |
-| **MEDIUM** | Heart Rate Sync | ⏳ TODO | Auto-fetch heart rate from Google Fit |
-| **MEDIUM** | Steps Sync | ⏳ TODO | Auto-fetch step count |
 | **LOW** | Activity Sync | ⏳ TODO | Auto-fetch activity data |
-
-### Other Features
-
-| Priority | Feature | Status |
-|----------|---------|--------|
-| Medium | Calendar/Events | ⏳ TODO |
-| Medium | Notifications/Activity Feed | ⏳ TODO |
-| Medium | Analytics Dashboard (Charts) | ⏳ TODO |
-| Low | PDF Export | ⏳ TODO |
+| **LOW** | Sleep Sync | ⏳ TODO | Auto-fetch sleep data |
 
 ### Testing Checklist
 
@@ -365,8 +415,9 @@ silvercare_web/
 - [x] Test checklist CRUD with toggle
 - [x] Test medication dose tracking (take/undo)
 - [x] Test session security (back button after logout)
-- [ ] Test vitals recording
-- [ ] Test Google Fit OAuth
+- [ ] Test vitals recording (BP, Sugar, Temp, Heart Rate)
+- [ ] Test Google Fit OAuth connection
+- [ ] Test Google Fit sync (heart rate, steps)
 
 ---
 
@@ -405,6 +456,7 @@ php artisan route:clear && php artisan config:clear && php artisan cache:clear &
 - ✅ Signed URLs for caregiver invitations (7-day expiry)
 - ✅ **Session security** - Back button disabled after logout
 - ✅ **Cache-Control headers** on authenticated pages
+- ✅ **Google Fit tokens encrypted** in database
 
 ---
 
@@ -418,6 +470,8 @@ php artisan route:clear && php artisan config:clear && php artisan cache:clear &
 | Dashboard | Stats + quick actions | Full featured (mood, vitals, progress) |
 | Medications | Full CRUD | View + dose tracking (take/undo) |
 | Checklists | Full CRUD | View + toggle (with priority/notes) |
+| **Health Vitals** | - | ✅ Record BP, Sugar, Temp, Heart Rate |
+| **Google Fit** | - | ✅ Connect + Sync (heart rate, steps) |
 | Daily Goals | - | ✅ Combined progress (tasks + meds + vitals) |
 | Navigation | Role-aware links | Role-aware links |
 

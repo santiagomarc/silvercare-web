@@ -253,68 +253,136 @@
             <div class="lg:col-span-6">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="font-[800] text-xl text-gray-900">Health Vitals</h3>
-                    <span class="text-xs font-bold text-gray-400 bg-white px-3 py-1 rounded-full border border-gray-200">Updated: Today</span>
+                    <div class="flex items-center gap-3">
+                        @if($googleFitConnected)
+                            <button onclick="syncGoogleFit()" id="syncBtn" class="text-xs font-bold text-green-600 bg-green-50 px-3 py-1.5 rounded-full border border-green-200 hover:bg-green-100 transition-colors flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                Sync Google Fit
+                            </button>
+                        @else
+                            <a href="{{ route('elderly.googlefit.connect') }}" class="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-200 hover:bg-blue-100 transition-colors flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/></svg>
+                                Connect Google Fit
+                            </a>
+                        @endif
+                        <span class="text-xs font-bold text-gray-400 bg-white px-3 py-1 rounded-full border border-gray-200">
+                            {{ $completedVitals }}/{{ $totalRequiredVitals }} recorded
+                        </span>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     
-                    <!-- Vital Card: Blood Pressure (Placeholder - will connect to HealthMetric later) -->
-                    <div class="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 hover:border-red-200 transition-all hover:shadow-md h-48 flex flex-col justify-between group">
+                    <!-- Vital Card: Blood Pressure -->
+                    @php $bp = $vitalsData['blood_pressure'] ?? ['recorded' => false]; @endphp
+                    <div class="vital-card bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 hover:border-red-200 transition-all hover:shadow-md h-48 flex flex-col justify-between group" data-type="blood_pressure">
                         <div class="flex justify-between items-start">
                             <div class="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
                             </div>
+                            @if($bp['recorded'])
+                                <span class="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">✓ Recorded</span>
+                            @endif
                         </div>
                         <div>
                             <h4 class="font-[700] text-gray-500 text-sm uppercase tracking-wide mb-1">Blood Pressure</h4>
-                            <button class="w-full py-3 mt-1 rounded-xl border-2 border-dashed border-gray-300 text-gray-400 font-bold text-sm hover:border-[#000080] hover:text-[#000080] transition-colors flex items-center justify-center gap-2">
-                                <span>+</span> Measure
-                            </button>
+                            @if($bp['recorded'])
+                                <div class="flex items-baseline gap-2">
+                                    <span class="text-2xl font-[900] text-gray-900">{{ $bp['value_text'] }}</span>
+                                    <span class="text-sm text-gray-400">mmHg</span>
+                                </div>
+                                <p class="text-[10px] text-gray-400 mt-1">{{ $bp['measured_at']?->format('g:i A') }}</p>
+                            @else
+                                <button onclick="openVitalModal('blood_pressure')" class="w-full py-3 mt-1 rounded-xl border-2 border-dashed border-gray-300 text-gray-400 font-bold text-sm hover:border-red-400 hover:text-red-500 transition-colors flex items-center justify-center gap-2">
+                                    <span>+</span> Measure
+                                </button>
+                            @endif
                         </div>
                     </div>
 
                     <!-- Vital Card: Sugar Level -->
-                    <div class="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 hover:border-blue-200 transition-all hover:shadow-md h-48 flex flex-col justify-between group">
+                    @php $sugar = $vitalsData['sugar_level'] ?? ['recorded' => false]; @endphp
+                    <div class="vital-card bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 hover:border-blue-200 transition-all hover:shadow-md h-48 flex flex-col justify-between group" data-type="sugar_level">
                         <div class="flex justify-between items-start">
                             <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
                             </div>
+                            @if($sugar['recorded'])
+                                <span class="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">✓ Recorded</span>
+                            @endif
                         </div>
                         <div>
                             <h4 class="font-[700] text-gray-500 text-sm uppercase tracking-wide mb-1">Sugar Level</h4>
-                            <button class="w-full py-3 mt-1 rounded-xl border-2 border-dashed border-gray-300 text-gray-400 font-bold text-sm hover:border-[#000080] hover:text-[#000080] transition-colors flex items-center justify-center gap-2">
-                                <span>+</span> Measure
-                            </button>
+                            @if($sugar['recorded'])
+                                <div class="flex items-baseline gap-2">
+                                    <span class="text-2xl font-[900] text-gray-900">{{ intval($sugar['value']) }}</span>
+                                    <span class="text-sm text-gray-400">mg/dL</span>
+                                </div>
+                                <p class="text-[10px] text-gray-400 mt-1">{{ $sugar['measured_at']?->format('g:i A') }}</p>
+                            @else
+                                <button onclick="openVitalModal('sugar_level')" class="w-full py-3 mt-1 rounded-xl border-2 border-dashed border-gray-300 text-gray-400 font-bold text-sm hover:border-blue-400 hover:text-blue-500 transition-colors flex items-center justify-center gap-2">
+                                    <span>+</span> Measure
+                                </button>
+                            @endif
                         </div>
                     </div>
 
                     <!-- Vital Card: Temperature -->
-                    <div class="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 hover:border-orange-200 transition-all hover:shadow-md h-48 flex flex-col justify-between group">
+                    @php $temp = $vitalsData['temperature'] ?? ['recorded' => false]; @endphp
+                    <div class="vital-card bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 hover:border-orange-200 transition-all hover:shadow-md h-48 flex flex-col justify-between group" data-type="temperature">
                         <div class="flex justify-between items-start">
                             <div class="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-500 group-hover:scale-110 transition-transform">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                             </div>
+                            @if($temp['recorded'])
+                                <span class="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">✓ Recorded</span>
+                            @endif
                         </div>
                         <div>
                             <h4 class="font-[700] text-gray-500 text-sm uppercase tracking-wide mb-1">Temperature</h4>
-                            <button class="w-full py-3 mt-1 rounded-xl border-2 border-dashed border-gray-300 text-gray-400 font-bold text-sm hover:border-[#000080] hover:text-[#000080] transition-colors flex items-center justify-center gap-2">
-                                <span>+</span> Measure
-                            </button>
+                            @if($temp['recorded'])
+                                <div class="flex items-baseline gap-2">
+                                    <span class="text-2xl font-[900] text-gray-900">{{ number_format($temp['value'], 1) }}</span>
+                                    <span class="text-sm text-gray-400">°C</span>
+                                </div>
+                                <p class="text-[10px] text-gray-400 mt-1">{{ $temp['measured_at']?->format('g:i A') }}</p>
+                            @else
+                                <button onclick="openVitalModal('temperature')" class="w-full py-3 mt-1 rounded-xl border-2 border-dashed border-gray-300 text-gray-400 font-bold text-sm hover:border-orange-400 hover:text-orange-500 transition-colors flex items-center justify-center gap-2">
+                                    <span>+</span> Measure
+                                </button>
+                            @endif
                         </div>
                     </div>
 
                     <!-- Vital Card: Heart Rate -->
-                    <div class="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 hover:border-rose-200 transition-all hover:shadow-md h-48 flex flex-col justify-between group">
+                    @php $hr = $vitalsData['heart_rate'] ?? ['recorded' => false]; @endphp
+                    <div class="vital-card bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 hover:border-rose-200 transition-all hover:shadow-md h-48 flex flex-col justify-between group" data-type="heart_rate">
                         <div class="flex justify-between items-start">
                             <div class="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 group-hover:scale-110 transition-transform">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                             </div>
+                            <div class="flex items-center gap-1.5">
+                                @if($hr['recorded'])
+                                    @if($hr['source'] === 'google_fit')
+                                        <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">Google Fit</span>
+                                    @endif
+                                    <span class="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">✓ Recorded</span>
+                                @endif
+                            </div>
                         </div>
                         <div>
                             <h4 class="font-[700] text-gray-500 text-sm uppercase tracking-wide mb-1">Heart Rate</h4>
-                            <button class="w-full py-3 mt-1 rounded-xl border-2 border-dashed border-gray-300 text-gray-400 font-bold text-sm hover:border-[#000080] hover:text-[#000080] transition-colors flex items-center justify-center gap-2">
-                                <span>+</span> Measure
-                            </button>
+                            @if($hr['recorded'])
+                                <div class="flex items-baseline gap-2">
+                                    <span class="text-2xl font-[900] text-gray-900">{{ intval($hr['value']) }}</span>
+                                    <span class="text-sm text-gray-400">bpm</span>
+                                </div>
+                                <p class="text-[10px] text-gray-400 mt-1">{{ $hr['measured_at']?->format('g:i A') }}</p>
+                            @else
+                                <button onclick="openVitalModal('heart_rate')" class="w-full py-3 mt-1 rounded-xl border-2 border-dashed border-gray-300 text-gray-400 font-bold text-sm hover:border-rose-400 hover:text-rose-500 transition-colors flex items-center justify-center gap-2">
+                                    <span>+</span> Measure
+                                </button>
+                            @endif
                         </div>
                     </div>
 
@@ -923,11 +991,282 @@
         }
 
         // ==========================================
+        // VITALS RECORDING
+        // ==========================================
+        const vitalConfigs = {
+            blood_pressure: {
+                name: 'Blood Pressure',
+                icon: '❤️',
+                unit: 'mmHg',
+                color: 'red',
+                inputType: 'text',
+                placeholder: '120/80',
+                hint: 'Enter as systolic/diastolic (e.g., 120/80)'
+            },
+            sugar_level: {
+                name: 'Sugar Level',
+                icon: '🩸',
+                unit: 'mg/dL',
+                color: 'blue',
+                inputType: 'number',
+                placeholder: '100',
+                min: 50,
+                max: 500,
+                hint: 'Normal range: 70-100 mg/dL (fasting)'
+            },
+            temperature: {
+                name: 'Temperature',
+                icon: '🌡️',
+                unit: '°C',
+                color: 'orange',
+                inputType: 'number',
+                placeholder: '36.5',
+                min: 35,
+                max: 42,
+                step: 0.1,
+                hint: 'Normal range: 36.1-37.2°C'
+            },
+            heart_rate: {
+                name: 'Heart Rate',
+                icon: '💓',
+                unit: 'bpm',
+                color: 'rose',
+                inputType: 'number',
+                placeholder: '72',
+                min: 40,
+                max: 200,
+                hint: 'Normal resting: 60-100 bpm'
+            }
+        };
+
+        function openVitalModal(type) {
+            const config = vitalConfigs[type];
+            if (!config) return;
+
+            // Create modal
+            const modal = document.createElement('div');
+            modal.id = 'vitalModal';
+            modal.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 transform transition-all duration-300 scale-95 opacity-0" id="vitalModalContent">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-16 h-16 bg-${config.color}-50 rounded-2xl flex items-center justify-center text-3xl">
+                            ${config.icon}
+                        </div>
+                        <div>
+                            <h3 class="font-[800] text-xl text-gray-900">${config.name}</h3>
+                            <p class="text-sm text-gray-500">Record your measurement</p>
+                        </div>
+                    </div>
+
+                    <form id="vitalForm" onsubmit="submitVital(event, '${type}')">
+                        <div class="mb-6">
+                            <label class="block text-sm font-bold text-gray-700 mb-2">
+                                Value <span class="text-gray-400">(${config.unit})</span>
+                            </label>
+                            <div class="relative">
+                                <input 
+                                    type="${config.inputType}" 
+                                    id="vitalValue"
+                                    name="value"
+                                    placeholder="${config.placeholder}"
+                                    ${config.min ? `min="${config.min}"` : ''}
+                                    ${config.max ? `max="${config.max}"` : ''}
+                                    ${config.step ? `step="${config.step}"` : ''}
+                                    class="w-full px-4 py-4 text-2xl font-bold text-center border-2 border-gray-200 rounded-xl focus:border-${config.color}-400 focus:ring-4 focus:ring-${config.color}-100 transition-all outline-none"
+                                    required
+                                    autofocus
+                                >
+                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">${config.unit}</span>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-2">${config.hint}</p>
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Notes (optional)</label>
+                            <textarea 
+                                id="vitalNotes"
+                                name="notes"
+                                placeholder="Any additional notes..."
+                                rows="2"
+                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-${config.color}-400 focus:ring-4 focus:ring-${config.color}-100 transition-all outline-none resize-none text-sm"
+                            ></textarea>
+                        </div>
+
+                        <div class="flex gap-3">
+                            <button type="button" onclick="closeVitalModal()" class="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors">
+                                Cancel
+                            </button>
+                            <button type="submit" id="submitVitalBtn" class="flex-1 py-3 px-4 bg-${config.color}-500 text-white font-bold rounded-xl hover:bg-${config.color}-600 transition-colors flex items-center justify-center gap-2">
+                                <span>Save</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+            document.body.style.overflow = 'hidden';
+
+            // Animate in
+            setTimeout(() => {
+                const content = document.getElementById('vitalModalContent');
+                content.style.transform = 'scale(1)';
+                content.style.opacity = '1';
+            }, 10);
+
+            // Close on backdrop click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeVitalModal();
+            });
+
+            // Close on Escape key
+            document.addEventListener('keydown', handleModalEscape);
+        }
+
+        function handleModalEscape(e) {
+            if (e.key === 'Escape') closeVitalModal();
+        }
+
+        function closeVitalModal() {
+            const modal = document.getElementById('vitalModal');
+            if (!modal) return;
+
+            const content = document.getElementById('vitalModalContent');
+            content.style.transform = 'scale(0.95)';
+            content.style.opacity = '0';
+
+            setTimeout(() => {
+                modal.remove();
+                document.body.style.overflow = '';
+            }, 200);
+
+            document.removeEventListener('keydown', handleModalEscape);
+        }
+
+        async function submitVital(event, type) {
+            event.preventDefault();
+            
+            const config = vitalConfigs[type];
+            const valueInput = document.getElementById('vitalValue');
+            const notesInput = document.getElementById('vitalNotes');
+            const submitBtn = document.getElementById('submitVitalBtn');
+
+            const value = valueInput.value.trim();
+            const notes = notesInput.value.trim();
+
+            if (!value) {
+                showToast('Please enter a value', 'error');
+                return;
+            }
+
+            // Disable button
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="animate-spin">⏳</span> Saving...';
+
+            try {
+                const payload = {
+                    type: type,
+                    notes: notes || null
+                };
+
+                // Blood pressure uses value_text, others use value
+                if (type === 'blood_pressure') {
+                    payload.value_text = value;
+                } else {
+                    payload.value = parseFloat(value);
+                }
+
+                const response = await fetch('/my-vitals', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': CSRF_TOKEN,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to save');
+                }
+
+                closeVitalModal();
+                showToast(`✅ ${config.name} recorded!`, 'success');
+                
+                // Reload page to show updated vitals
+                setTimeout(() => window.location.reload(), 500);
+
+            } catch (error) {
+                console.error('Error:', error);
+                showToast(`❌ ${error.message}`, 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Save</span><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+            }
+        }
+
+        // ==========================================
+        // GOOGLE FIT SYNC
+        // ==========================================
+        async function syncGoogleFit() {
+            const syncBtn = document.getElementById('syncBtn');
+            if (!syncBtn) return;
+
+            const originalContent = syncBtn.innerHTML;
+            syncBtn.disabled = true;
+            syncBtn.innerHTML = '<span class="animate-spin">⏳</span> Syncing...';
+
+            try {
+                const response = await fetch('/google-fit/sync', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': CSRF_TOKEN,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Sync failed');
+                }
+
+                showToast('✅ Google Fit synced!', 'success');
+                
+                // Show what was synced
+                if (data.synced) {
+                    const syncedItems = Object.entries(data.synced)
+                        .map(([key, val]) => `${key}: ${val}`)
+                        .join(', ');
+                    if (syncedItems) {
+                        setTimeout(() => showToast(`📊 ${syncedItems}`, 'info'), 1000);
+                    }
+                }
+
+                // Reload to show new data
+                setTimeout(() => window.location.reload(), 1500);
+
+            } catch (error) {
+                console.error('Error:', error);
+                showToast(`❌ ${error.message}`, 'error');
+            } finally {
+                syncBtn.disabled = false;
+                syncBtn.innerHTML = originalContent;
+            }
+        }
+
+        // ==========================================
         // INITIALIZE ON PAGE LOAD
         // ==========================================
         document.addEventListener('DOMContentLoaded', function() {
             // Add entrance animations to cards
-            const cards = document.querySelectorAll('.checklist-item, .medication-card');
+            const cards = document.querySelectorAll('.checklist-item, .medication-card, .vital-card');
             cards.forEach((card, index) => {
                 card.style.opacity = '0';
                 card.style.transform = 'translateY(10px)';

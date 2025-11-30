@@ -9,6 +9,8 @@ use App\Http\Controllers\CaregiverAnalyticsController;
 use App\Http\Controllers\MedicationController;
 use App\Http\Controllers\ChecklistController;
 use App\Http\Controllers\ElderlyDashboardController;
+use App\Http\Controllers\HealthMetricController;
+use App\Http\Controllers\GoogleFitController;
 use Illuminate\Support\Facades\Route;
 
 // Welcome landing page - redirect logged-in users to their dashboard
@@ -33,6 +35,18 @@ Route::middleware(['auth', 'verified', 'elderly'])->group(function () {
     // Medication dose tracking
     Route::post('/my-medications/{medication}/take', [ElderlyDashboardController::class, 'takeMedication'])->name('elderly.medications.take');
     Route::post('/my-medications/{medication}/undo', [ElderlyDashboardController::class, 'undoMedication'])->name('elderly.medications.undo');
+
+    // Health Metrics (Vitals)
+    Route::post('/my-vitals', [HealthMetricController::class, 'store'])->name('elderly.vitals.store');
+    Route::get('/my-vitals/today', [HealthMetricController::class, 'today'])->name('elderly.vitals.today');
+    Route::get('/my-vitals/{type}/history', [HealthMetricController::class, 'history'])->name('elderly.vitals.history');
+    Route::delete('/my-vitals/{metric}', [HealthMetricController::class, 'destroy'])->name('elderly.vitals.destroy');
+
+    // Google Fit Integration
+    Route::get('/google-fit/connect', [GoogleFitController::class, 'connect'])->name('elderly.googlefit.connect');
+    Route::get('/google-fit/callback', [GoogleFitController::class, 'callback'])->name('elderly.googlefit.callback');
+    Route::post('/google-fit/sync', [GoogleFitController::class, 'sync'])->name('elderly.googlefit.sync');
+    Route::post('/google-fit/disconnect', [GoogleFitController::class, 'disconnect'])->name('elderly.googlefit.disconnect');
 });
 
 // Caregiver Routes - Protected by 'caregiver' middleware

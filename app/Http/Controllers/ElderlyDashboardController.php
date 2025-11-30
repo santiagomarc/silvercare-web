@@ -6,6 +6,7 @@ use App\Models\Medication;
 use App\Models\MedicationLog;
 use App\Models\Checklist;
 use App\Models\HealthMetric;
+use App\Models\GoogleFitToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -129,6 +130,23 @@ class ElderlyDashboardController extends Controller
 
         $dailyGoalsProgress = $totalWeight > 0 ? round($weightedProgress / $totalWeight) : 0;
 
+        // Check Google Fit connection status
+        $googleFitConnected = GoogleFitToken::where('user_id', $user->id)->exists();
+
+        // Organize vitals data for display - keyed by type with latest values
+        $vitalsData = [];
+        foreach (self::REQUIRED_VITALS as $vitalType) {
+            $latestMetric = $todayVitals->where('type', $vitalType)->sortByDesc('measured_at')->first();
+            $vitalsData[$vitalType] = [
+                'recorded' => $latestMetric !== null,
+                'value' => $latestMetric?->value,
+                'value_text' => $latestMetric?->value_text,
+                'unit' => $latestMetric?->unit,
+                'measured_at' => $latestMetric?->measured_at,
+                'source' => $latestMetric?->source,
+            ];
+        }
+
         return view('elderly.dashboard', compact(
             'medications',
             'todayMedications',
@@ -143,10 +161,12 @@ class ElderlyDashboardController extends Controller
             'completedVitals',
             'totalRequiredVitals',
             'vitalsProgress',
+            'vitalsData',
             'takenMedicationDoses',
             'totalMedicationDoses',
             'medicationProgress',
-            'dailyGoalsProgress'
+            'dailyGoalsProgress',
+            'googleFitConnected'
         ));
     }
 
