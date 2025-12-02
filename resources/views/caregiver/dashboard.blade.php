@@ -11,7 +11,7 @@
             <!-- Welcome Section -->
             <div class="mb-8">
                 <h1 class="text-3xl font-bold text-gray-900">Welcome back, {{ Auth::user()->name }}! 👋</h1>
-                <p class="text-gray-600 mt-2">Here's what's happening with <span class="font-semibold text-indigo-600">{{ $elderly ? $elderly->user->name : 'your loved one' }}</span> today.</p>
+                <p class="text-gray-600 mt-2">Here's what's happening with <span class="font-semibold text-indigo-600">{{ $elderly ? ($elderlyUser->name ?? $elderly->user->name) : 'your loved one' }}</span> today.</p>
             </div>
 
             @if(!$elderly)
@@ -31,6 +31,69 @@
                 </div>
             @else
 
+            <!-- Today's Overview Stats -->
+            @if(!empty($stats))
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <!-- Medication Adherence -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500">Medication Today</p>
+                            @if($stats['doses_total'] > 0)
+                                <p class="text-2xl font-bold text-gray-900">{{ $stats['doses_taken'] }}/{{ $stats['doses_total'] }}</p>
+                                <p class="text-xs text-gray-500">doses taken</p>
+                            @else
+                                <p class="text-lg font-medium text-gray-400">No doses scheduled</p>
+                            @endif
+                        </div>
+                        <div class="w-14 h-14 rounded-full flex items-center justify-center {{ $stats['medication_adherence'] === 100 ? 'bg-green-100' : ($stats['medication_adherence'] >= 50 ? 'bg-yellow-100' : 'bg-gray-100') }}">
+                            @if($stats['medication_adherence'] !== null)
+                                <span class="text-lg font-bold {{ $stats['medication_adherence'] === 100 ? 'text-green-600' : ($stats['medication_adherence'] >= 50 ? 'text-yellow-600' : 'text-gray-500') }}">{{ $stats['medication_adherence'] }}%</span>
+                            @else
+                                <span class="text-xl">💊</span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Task Completion -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500">Tasks Today</p>
+                            @if($stats['tasks_total'] > 0)
+                                <p class="text-2xl font-bold text-gray-900">{{ $stats['tasks_completed'] }}/{{ $stats['tasks_total'] }}</p>
+                                <p class="text-xs text-gray-500">completed</p>
+                            @else
+                                <p class="text-lg font-medium text-gray-400">No tasks due</p>
+                            @endif
+                        </div>
+                        <div class="w-14 h-14 rounded-full flex items-center justify-center {{ $stats['task_completion'] === 100 ? 'bg-green-100' : ($stats['task_completion'] >= 50 ? 'bg-yellow-100' : 'bg-gray-100') }}">
+                            @if($stats['task_completion'] !== null)
+                                <span class="text-lg font-bold {{ $stats['task_completion'] === 100 ? 'text-green-600' : ($stats['task_completion'] >= 50 ? 'text-yellow-600' : 'text-gray-500') }}">{{ $stats['task_completion'] }}%</span>
+                            @else
+                                <span class="text-xl">✅</span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vitals Recorded -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500">Vitals Recorded</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $stats['vitals_recorded'] }}/{{ $stats['vitals_total'] }}</p>
+                            <p class="text-xs text-gray-500">types today</p>
+                        </div>
+                        <div class="w-14 h-14 rounded-full flex items-center justify-center {{ $stats['vitals_recorded'] === $stats['vitals_total'] ? 'bg-green-100' : ($stats['vitals_recorded'] > 0 ? 'bg-blue-100' : 'bg-gray-100') }}">
+                            <span class="text-xl">📊</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
                 <!-- Left Column: Vitals & Mood -->
@@ -42,21 +105,38 @@
                             <div class="flex items-center justify-between mb-4">
                                 <h3 class="text-lg font-semibold text-gray-800 flex items-center">
                                     <span class="bg-purple-100 text-purple-600 p-2 rounded-lg mr-3">😊</span>
-                                    Current Mood
+                                    Today's Mood
                                 </h3>
-                                <span class="text-xs text-gray-500">{{ $mood ? $mood->measured_at->diffForHumans() : 'No data' }}</span>
+                                @if($mood)
+                                    <span class="text-xs text-gray-500">{{ $mood->measured_at->diffForHumans() }}</span>
+                                @endif
                             </div>
                             
                             @if($mood)
+                                @php
+                                    $moodEmojis = [0 => '😢', 1 => '😕', 2 => '😐', 3 => '🙂', 4 => '😊'];
+                                    $moodLabels = [0 => 'Poor', 1 => 'Fair', 2 => 'Okay', 3 => 'Good', 4 => 'Excellent'];
+                                    $moodColors = [0 => 'red', 1 => 'orange', 2 => 'yellow', 3 => 'green', 4 => 'green'];
+                                    $moodValue = (int)$mood->value;
+                                @endphp
                                 <div class="flex items-center">
-                                    <div class="text-4xl mr-4">{{ $mood->value_text }}</div> <!-- Assuming value_text holds emoji or text -->
+                                    <div class="text-5xl mr-4">{{ $moodEmojis[$moodValue] ?? '😐' }}</div>
                                     <div>
-                                        <p class="text-gray-900 font-medium text-lg">{{ ucfirst($mood->value) }}</p>
-                                        <p class="text-gray-500 text-sm">{{ $mood->notes ?? 'No notes added.' }}</p>
+                                        <p class="text-gray-900 font-semibold text-xl">{{ $moodLabels[$moodValue] ?? 'Unknown' }}</p>
+                                        <p class="text-gray-500 text-sm mt-1">{{ $mood->notes ?? 'No notes added.' }}</p>
                                     </div>
                                 </div>
+                                <!-- Mood Scale Indicator -->
+                                <div class="mt-4 flex items-center space-x-2">
+                                    @foreach($moodEmojis as $level => $emoji)
+                                        <div class="flex-1 h-2 rounded-full {{ $moodValue >= $level ? 'bg-purple-400' : 'bg-gray-200' }}"></div>
+                                    @endforeach
+                                </div>
                             @else
-                                <p class="text-gray-500 italic">No mood recorded yet.</p>
+                                <div class="text-center py-4">
+                                    <span class="text-4xl mb-2 block opacity-50">😶</span>
+                                    <p class="text-gray-400 italic">No mood recorded today</p>
+                                </div>
                             @endif
                         </div>
                     </div>
@@ -69,13 +149,29 @@
                                 <div class="bg-red-50 text-red-500 p-2 rounded-lg group-hover:bg-red-100 transition-colors">
                                     ❤️
                                 </div>
-                                <span class="text-xs text-gray-400">{{ $vitals['heart_rate'] ? $vitals['heart_rate']->measured_at->diffForHumans() : '--' }}</span>
+                                @if($vitals['heart_rate'])
+                                    <div class="flex items-center space-x-2">
+                                        @if($vitals['heart_rate']['metric']->source === 'google_fit')
+                                            <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">Google Fit</span>
+                                        @endif
+                                        <span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $vitals['heart_rate']['status']['bg'] }} {{ $vitals['heart_rate']['status']['text'] }}">
+                                            {{ $vitals['heart_rate']['status']['label'] }}
+                                        </span>
+                                    </div>
+                                @endif
                             </div>
                             <h4 class="text-gray-500 text-sm font-medium">Heart Rate</h4>
-                            <div class="mt-1 flex items-baseline">
-                                <span class="text-2xl font-bold text-gray-900">{{ $vitals['heart_rate'] ? $vitals['heart_rate']->value : '--' }}</span>
-                                <span class="ml-1 text-sm text-gray-500">bpm</span>
-                            </div>
+                            @if($vitals['heart_rate'])
+                                <div class="mt-1 flex items-baseline">
+                                    <span class="text-2xl font-bold text-gray-900">{{ intval($vitals['heart_rate']['metric']->value) }}</span>
+                                    <span class="ml-1 text-sm text-gray-500">bpm</span>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1">{{ $vitals['heart_rate']['metric']->measured_at->diffForHumans() }}</p>
+                            @else
+                                <div class="mt-1">
+                                    <span class="text-lg text-gray-300 font-medium">No record today</span>
+                                </div>
+                            @endif
                         </div>
 
                         <!-- Blood Pressure -->
@@ -84,13 +180,29 @@
                                 <div class="bg-blue-50 text-blue-500 p-2 rounded-lg group-hover:bg-blue-100 transition-colors">
                                     🩺
                                 </div>
-                                <span class="text-xs text-gray-400">{{ $vitals['blood_pressure'] ? $vitals['blood_pressure']->measured_at->diffForHumans() : '--' }}</span>
+                                @if($vitals['blood_pressure'])
+                                    <div class="flex items-center space-x-2">
+                                        @if($vitals['blood_pressure']['metric']->source === 'google_fit')
+                                            <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">Google Fit</span>
+                                        @endif
+                                        <span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $vitals['blood_pressure']['status']['bg'] }} {{ $vitals['blood_pressure']['status']['text'] }}">
+                                            {{ $vitals['blood_pressure']['status']['label'] }}
+                                        </span>
+                                    </div>
+                                @endif
                             </div>
                             <h4 class="text-gray-500 text-sm font-medium">Blood Pressure</h4>
-                            <div class="mt-1 flex items-baseline">
-                                <span class="text-2xl font-bold text-gray-900">{{ $vitals['blood_pressure'] ? $vitals['blood_pressure']->value_text : '--' }}</span> <!-- BP is usually text like 120/80 -->
-                                <span class="ml-1 text-sm text-gray-500">mmHg</span>
-                            </div>
+                            @if($vitals['blood_pressure'])
+                                <div class="mt-1 flex items-baseline">
+                                    <span class="text-2xl font-bold text-gray-900">{{ $vitals['blood_pressure']['metric']->value_text }}</span>
+                                    <span class="ml-1 text-sm text-gray-500">mmHg</span>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1">{{ $vitals['blood_pressure']['metric']->measured_at->diffForHumans() }}</p>
+                            @else
+                                <div class="mt-1">
+                                    <span class="text-lg text-gray-300 font-medium">No record today</span>
+                                </div>
+                            @endif
                         </div>
 
                         <!-- Sugar Level -->
@@ -99,13 +211,29 @@
                                 <div class="bg-pink-50 text-pink-500 p-2 rounded-lg group-hover:bg-pink-100 transition-colors">
                                     🍬
                                 </div>
-                                <span class="text-xs text-gray-400">{{ $vitals['sugar_level'] ? $vitals['sugar_level']->measured_at->diffForHumans() : '--' }}</span>
+                                @if($vitals['sugar_level'])
+                                    <div class="flex items-center space-x-2">
+                                        @if($vitals['sugar_level']['metric']->source === 'google_fit')
+                                            <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">Google Fit</span>
+                                        @endif
+                                        <span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $vitals['sugar_level']['status']['bg'] }} {{ $vitals['sugar_level']['status']['text'] }}">
+                                            {{ $vitals['sugar_level']['status']['label'] }}
+                                        </span>
+                                    </div>
+                                @endif
                             </div>
                             <h4 class="text-gray-500 text-sm font-medium">Sugar Level</h4>
-                            <div class="mt-1 flex items-baseline">
-                                <span class="text-2xl font-bold text-gray-900">{{ $vitals['sugar_level'] ? $vitals['sugar_level']->value : '--' }}</span>
-                                <span class="ml-1 text-sm text-gray-500">mg/dL</span>
-                            </div>
+                            @if($vitals['sugar_level'])
+                                <div class="mt-1 flex items-baseline">
+                                    <span class="text-2xl font-bold text-gray-900">{{ intval($vitals['sugar_level']['metric']->value) }}</span>
+                                    <span class="ml-1 text-sm text-gray-500">mg/dL</span>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1">{{ $vitals['sugar_level']['metric']->measured_at->diffForHumans() }}</p>
+                            @else
+                                <div class="mt-1">
+                                    <span class="text-lg text-gray-300 font-medium">No record today</span>
+                                </div>
+                            @endif
                         </div>
 
                         <!-- Temperature -->
@@ -114,17 +242,33 @@
                                 <div class="bg-orange-50 text-orange-500 p-2 rounded-lg group-hover:bg-orange-100 transition-colors">
                                     🌡️
                                 </div>
-                                <span class="text-xs text-gray-400">{{ $vitals['temperature'] ? $vitals['temperature']->measured_at->diffForHumans() : '--' }}</span>
+                                @if($vitals['temperature'])
+                                    <div class="flex items-center space-x-2">
+                                        @if($vitals['temperature']['metric']->source === 'google_fit')
+                                            <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">Google Fit</span>
+                                        @endif
+                                        <span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $vitals['temperature']['status']['bg'] }} {{ $vitals['temperature']['status']['text'] }}">
+                                            {{ $vitals['temperature']['status']['label'] }}
+                                        </span>
+                                    </div>
+                                @endif
                             </div>
                             <h4 class="text-gray-500 text-sm font-medium">Temperature</h4>
-                            <div class="mt-1 flex items-baseline">
-                                <span class="text-2xl font-bold text-gray-900">{{ $vitals['temperature'] ? $vitals['temperature']->value : '--' }}</span>
-                                <span class="ml-1 text-sm text-gray-500">°C</span>
-                            </div>
+                            @if($vitals['temperature'])
+                                <div class="mt-1 flex items-baseline">
+                                    <span class="text-2xl font-bold text-gray-900">{{ number_format($vitals['temperature']['metric']->value, 1) }}</span>
+                                    <span class="ml-1 text-sm text-gray-500">°C</span>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1">{{ $vitals['temperature']['metric']->measured_at->diffForHumans() }}</p>
+                            @else
+                                <div class="mt-1">
+                                    <span class="text-lg text-gray-300 font-medium">No record today</span>
+                                </div>
+                            @endif
                         </div>
                     </div>
 
-                    <!-- Analytics Placeholder -->
+                    <!-- Analytics Link -->
                     <a href="{{ route('caregiver.analytics') }}" class="block bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                         <div class="p-6 text-white">
                             <div class="flex items-center justify-between">
@@ -146,7 +290,7 @@
                 <!-- Right Column: Actions & Activity -->
                 <div class="space-y-6">
                     
-                    <!-- Core Management Features -->
+                    <!-- Care Management -->
                     <div class="space-y-4">
                         <h3 class="text-lg font-semibold text-gray-800">Care Management</h3>
                         
@@ -185,29 +329,62 @@
                         </a>
                     </div>
 
-                    <!-- Recent Activity (Placeholder) -->
+                    <!-- Recent Activity -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Recent Activity</h3>
-                        <ul class="space-y-4">
-                            <li class="flex items-start">
-                                <div class="bg-green-100 rounded-full p-1 mr-3 mt-1">
-                                    <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-gray-800 font-medium">Morning Medication Taken</p>
-                                    <p class="text-xs text-gray-500">2 hours ago</p>
-                                </div>
-                            </li>
-                            <li class="flex items-start">
-                                <div class="bg-blue-100 rounded-full p-1 mr-3 mt-1">
-                                    <svg class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-gray-800 font-medium">Vitals Updated</p>
-                                    <p class="text-xs text-gray-500">4 hours ago</p>
-                                </div>
-                            </li>
-                        </ul>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800">Recent Activity</h3>
+                            <span class="text-xs text-gray-400">Last 7 days</span>
+                        </div>
+                        
+                        @if($recentActivity->count() > 0)
+                            <ul class="space-y-3 max-h-80 overflow-y-auto">
+                                @foreach($recentActivity as $activity)
+                                    <li class="flex items-start py-2 border-b border-gray-50 last:border-0">
+                                        <div class="text-xl mr-3">{{ $activity['icon'] }}</div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm text-gray-800 font-medium truncate">{{ $activity['title'] }}</p>
+                                            <p class="text-xs text-gray-500">{{ $activity['subtitle'] }}</p>
+                                        </div>
+                                        <div class="text-xs text-gray-400 ml-2 whitespace-nowrap">
+                                            {{ \Carbon\Carbon::parse($activity['timestamp'])->diffForHumans(null, true, true) }}
+                                        </div>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <div class="text-center py-8">
+                                <div class="text-4xl mb-2 opacity-30">📭</div>
+                                <p class="text-gray-400 text-sm">No recent activity</p>
+                                <p class="text-gray-300 text-xs mt-1">Activity will appear here as it happens</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Quick Health Legend -->
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <h4 class="text-sm font-medium text-gray-700 mb-3">Health Status Legend</h4>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div class="flex items-center">
+                                <span class="w-3 h-3 rounded-full bg-green-500 mr-2"></span>
+                                <span class="text-gray-600">Normal</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="w-3 h-3 rounded-full bg-yellow-500 mr-2"></span>
+                                <span class="text-gray-600">Elevated</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="w-3 h-3 rounded-full bg-orange-500 mr-2"></span>
+                                <span class="text-gray-600">High/Fever</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="w-3 h-3 rounded-full bg-red-500 mr-2"></span>
+                                <span class="text-gray-600">Critical</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="w-3 h-3 rounded-full bg-blue-500 mr-2"></span>
+                                <span class="text-gray-600">Low</span>
+                            </div>
+                        </div>
                     </div>
 
                 </div>
