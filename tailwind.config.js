@@ -12,7 +12,8 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                // CHANGE THIS LINE: Figtree -> Montserrat
+                sans: ['Montserrat', ...defaultTheme.fontFamily.sans],
             },
         },
     },

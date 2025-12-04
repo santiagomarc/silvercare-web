@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\CaregiverSetPasswordController;
 use App\Http\Controllers\ProfileCompletionController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\CalendarController; // <--- Added this
 use App\Http\Controllers\CaregiverDashboardController;
 use App\Http\Controllers\CaregiverProfileController;
 use App\Http\Controllers\CaregiverAnalyticsController;
@@ -42,7 +43,7 @@ Route::middleware(['auth', 'verified', 'elderly'])->group(function () {
     Route::get('/my-vitals/{type}/history', [HealthMetricController::class, 'history'])->name('elderly.vitals.history');
     Route::delete('/my-vitals/{metric}', [HealthMetricController::class, 'destroy'])->name('elderly.vitals.destroy');
 
-    // Individual Vital Screens (like Flutter version)
+    // Individual Vital Screens
     Route::get('/my-vitals/blood-pressure', [HealthMetricController::class, 'bloodPressureScreen'])->name('elderly.vitals.blood_pressure');
     Route::get('/my-vitals/sugar-level', [HealthMetricController::class, 'sugarLevelScreen'])->name('elderly.vitals.sugar_level');
     Route::get('/my-vitals/temperature', [HealthMetricController::class, 'temperatureScreen'])->name('elderly.vitals.temperature');
@@ -69,7 +70,7 @@ Route::middleware(['auth', 'verified', 'caregiver'])->prefix('caregiver')->name(
     Route::post('checklists/{checklist}/toggle', [ChecklistController::class, 'toggleComplete'])->name('checklists.toggle');
 });
 
-// Profile Completion Routes (for elderly users who haven't completed profile)
+// Profile Completion Routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile/completion', [ProfileCompletionController::class, 'show'])
         ->name('profile.completion');
@@ -81,11 +82,16 @@ Route::middleware(['auth'])->group(function () {
         ->name('profile.completion.skip');
 });
 
-// User Profile Routes
 Route::middleware('auth')->group(function () {
+    // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Calendar
+    Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
+    Route::post('/calendar', [CalendarController::class, 'store'])->name('calendar.store');
+    Route::delete('/calendar/{event}', [CalendarController::class, 'destroy'])->name('calendar.destroy');
 });
 
 require __DIR__.'/auth.php';

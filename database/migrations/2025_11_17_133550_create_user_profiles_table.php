@@ -6,48 +6,47 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('user_profiles', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->enum('user_type', ['elderly', 'caregiver'])->index();
             
-            // Elderly-specific fields
+            // Role
+            $table->string('user_type')->default('elderly'); // 'elderly' or 'caregiver'
+            
+            // Basic Info
             $table->string('username')->nullable();
             $table->string('phone_number')->nullable();
-            $table->enum('sex', ['Male', 'Female', 'Other'])->nullable();
+            $table->string('sex')->nullable();
             $table->integer('age')->nullable();
-            $table->decimal('weight', 5, 2)->nullable();
             $table->decimal('height', 5, 2)->nullable();
+            $table->decimal('weight', 5, 2)->nullable();
+            $table->text('address')->nullable();
+
+            // JSON Lists
+            $table->json('medical_conditions')->nullable();
+            $table->json('medications')->nullable();
+            $table->json('allergies')->nullable();
+
+            // Emergency Contact (Stored as individual columns or JSON)
+            $table->string('emergency_name')->nullable();
+            $table->string('emergency_phone')->nullable();
+            $table->string('emergency_relationship')->nullable();
             
-            // Emergency Contact (JSON)
-            $table->json('emergency_contact')->nullable();
-            
-            // Medical Info (JSON)
+            // Legacy/App Specific Fields (Keeping to prevent errors)
+            $table->json('emergency_contact')->nullable(); 
             $table->json('medical_info')->nullable();
-            
-            // Caregiver-specific fields
-            $table->string('relationship')->nullable(); // For caregivers
-            
-            // 1:1 Relationship: Each elderly has ONE caregiver (nullable)
-            $table->foreignId('caregiver_id')->nullable()->constrained('user_profiles')->onDelete('set null');
-            
-            // Common fields
+            $table->string('relationship')->nullable();
+            $table->unsignedBigInteger('caregiver_id')->nullable();
             $table->boolean('profile_completed')->default(false);
             $table->boolean('is_active')->default(true);
             $table->timestamp('last_login_at')->nullable();
-            
+
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('user_profiles');

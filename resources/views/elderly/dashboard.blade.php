@@ -82,6 +82,22 @@
 </head>
 <body class="bg-[#EBEBEB] min-h-screen">
 
+    <!-- DATA FETCHING: Get Upcoming Events safely -->
+    @php
+        $upcomingEvents = [];
+        try {
+            if(class_exists('App\Models\CalendarEvent')) {
+                $upcomingEvents = \App\Models\CalendarEvent::where('user_id', Auth::id())
+                    ->where('start_time', '>=', now())
+                    ->orderBy('start_time', 'asc')
+                    ->take(3)
+                    ->get();
+            }
+        } catch (\Exception $e) {
+            // Prevent crash if table/model issues exist
+        }
+    @endphp
+
     <!-- NAV BAR -->
     <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div class="max-w-[1600px] mx-auto px-6 lg:px-12 h-20 flex justify-between items-center">
@@ -97,15 +113,24 @@
                     {{ now()->format('l, F j, Y') }}
                 </p>
                 <div class="h-8 w-[1px] bg-gray-200 hidden md:block"></div>
-                <div class="flex items-center gap-3 pl-2">
-                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-[#000080] font-[900] text-lg">
-                        {{ substr(Auth::user()->name, 0, 1) }}
+                
+                <!-- PROFILE LINK (Updated as requested) -->
+                <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 pl-2 group hover:bg-gray-50 rounded-2xl py-1 px-2 transition-all cursor-pointer" title="Manage Profile">
+                    <div class="relative">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-[#000080] font-[900] text-lg group-hover:bg-[#000080] group-hover:text-white transition-colors">
+                            {{ substr(Auth::user()->name, 0, 1) }}
+                        </div>
+                        <!-- Small edit indicator -->
+                        <div class="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 border border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm">
+                            <svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        </div>
                     </div>
                     <div class="hidden sm:block">
-                        <p class="text-sm font-bold text-gray-900 leading-tight">{{ Auth::user()->name }}</p>
+                        <p class="text-sm font-bold text-gray-900 leading-tight group-hover:text-[#000080] transition-colors">{{ Auth::user()->name }}</p>
                         <p class="text-xs text-gray-500 font-medium">Patient</p>
                     </div>
-                </div>
+                </a>
+
                 <!-- Logout Button -->
                 <form method="POST" action="{{ route('logout') }}" class="ml-2">
                     @csrf
@@ -140,6 +165,61 @@
         <div class="mb-8">
             <h2 class="text-3xl font-[800] text-gray-900">Dashboard Overview</h2>
             <p class="text-gray-500">Here's your daily health summary.</p>
+        </div>
+
+        <!-- NEW: Calendar Widget (Replaces the old 2-card row) -->
+        <div class="mb-8">
+            <a href="{{ route('calendar.index') }}" class="group bg-white rounded-[24px] p-8 shadow-sm border border-gray-100 hover:shadow-md hover:border-purple-200 transition-all block relative overflow-hidden">
+                <!-- Decorative BG -->
+                <div class="absolute top-0 right-0 w-64 h-64 bg-purple-50 rounded-full -mr-20 -mt-20 opacity-50 group-hover:scale-110 transition-transform"></div>
+                
+                <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+                    <!-- Left Side: Title & Description -->
+                    <div class="max-w-md">
+                        <div class="flex items-center gap-4 mb-3">
+                            <div class="w-12 h-12 bg-purple-100 rounded-2xl flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            </div>
+                            <h3 class="font-[800] text-2xl text-gray-900 group-hover:text-purple-700 transition-colors">My Schedule</h3>
+                        </div>
+                        <p class="text-gray-500 font-medium">
+                            View your appointments, medication reminders, and daily events. Click to manage your full calendar.
+                        </p>
+                    </div>
+
+                    <!-- Right Side: Upcoming Events Preview -->
+                    <div class="flex-grow w-full lg:w-auto">
+                        @if(count($upcomingEvents) > 0)
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                @foreach($upcomingEvents as $event)
+                                    <div class="bg-purple-50/50 rounded-2xl p-4 border border-purple-100 group-hover:bg-purple-50 transition-colors">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-[10px] font-[900] text-purple-600 uppercase bg-white px-2 py-0.5 rounded-full shadow-sm">
+                                                {{ \Carbon\Carbon::parse($event->start_time)->isToday() ? 'TODAY' : \Carbon\Carbon::parse($event->start_time)->format('M d') }}
+                                            </span>
+                                            <span class="text-xs font-bold text-gray-500">
+                                                {{ \Carbon\Carbon::parse($event->start_time)->format('g:i A') }}
+                                            </span>
+                                        </div>
+                                        <p class="font-[800] text-gray-900 text-sm truncate">{{ $event->title }}</p>
+                                        <p class="text-[10px] text-gray-500 truncate mt-0.5">{{ $event->type ?? 'Event' }}</p>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100 text-center w-full">
+                                <p class="text-sm font-bold text-gray-500 mb-1">No upcoming events.</p>
+                                <p class="text-xs text-gray-400">Tap here to schedule something new.</p>
+                            </div>
+                        @endif
+                    </div>
+                    
+                    <!-- Arrow Icon (Desktop only) -->
+                    <div class="hidden lg:flex bg-white border border-gray-200 w-12 h-12 rounded-full items-center justify-center text-gray-400 group-hover:bg-purple-600 group-hover:text-white group-hover:border-purple-600 transition-all flex-shrink-0 shadow-sm">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </div>
+                </div>
+            </a>
         </div>
 
         <!-- THE DASHBOARD GRID -->
