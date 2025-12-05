@@ -3,7 +3,7 @@
 use App\Http\Controllers\Auth\CaregiverSetPasswordController;
 use App\Http\Controllers\ProfileCompletionController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\CalendarController; // <--- Added this
+use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CaregiverDashboardController;
 use App\Http\Controllers\CaregiverProfileController;
 use App\Http\Controllers\CaregiverAnalyticsController;
@@ -12,6 +12,7 @@ use App\Http\Controllers\ChecklistController;
 use App\Http\Controllers\ElderlyDashboardController;
 use App\Http\Controllers\HealthMetricController;
 use App\Http\Controllers\GoogleFitController;
+use App\Http\Controllers\WellnessController; // <--- ADDED THIS
 use Illuminate\Support\Facades\Route;
 
 // Welcome landing page - redirect logged-in users to their dashboard
@@ -56,6 +57,15 @@ Route::middleware(['auth', 'verified', 'elderly'])->group(function () {
     Route::get('/google-fit/callback', [GoogleFitController::class, 'callback'])->name('elderly.googlefit.callback');
     Route::post('/google-fit/sync', [GoogleFitController::class, 'sync'])->name('elderly.googlefit.sync');
     Route::post('/google-fit/disconnect', [GoogleFitController::class, 'disconnect'])->name('elderly.googlefit.disconnect');
+
+    // ---------------------------------------------------------------------
+    // WELLNESS ROUTES (Added)
+    // ---------------------------------------------------------------------
+    Route::get('/wellness', [WellnessController::class, 'index'])->name('elderly.wellness.index');
+    Route::get('/wellness/breathing', [WellnessController::class, 'breathing'])->name('elderly.wellness.breathing');
+    Route::get('/wellness/memory-match', [WellnessController::class, 'memoryMatch'])->name('elderly.wellness.memory');
+    Route::get('/wellness/morning-stretch', [WellnessController::class, 'morningStretch'])->name('elderly.wellness.stretch');
+    Route::get('/wellness/word-of-day', [WellnessController::class, 'wordOfDay'])->name('elderly.wellness.word');
 });
 
 // Caregiver Routes - Protected by 'caregiver' middleware
