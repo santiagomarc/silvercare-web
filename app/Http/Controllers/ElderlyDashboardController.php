@@ -94,7 +94,7 @@ class ElderlyDashboardController extends Controller
         $totalMedicationDoses = 0;
         $takenMedicationDoses = 0;
         foreach ($todayMedications as $med) {
-            $times = $med->times ?? [];
+            $times = $med->times_of_day ?? [];
             $totalMedicationDoses += count($times);
             foreach ($times as $time) {
                 $logKey = $med->id . '_' . $time;
@@ -166,6 +166,18 @@ class ElderlyDashboardController extends Controller
             }
         }
 
+        // Get today's mood
+        $todayMood = 3; // Default to neutral
+        if ($elderlyId) {
+            $moodMetric = HealthMetric::where('elderly_id', $elderlyId)
+                ->where('type', 'mood')
+                ->whereDate('measured_at', Carbon::today())
+                ->first();
+            if ($moodMetric) {
+                $todayMood = (int) $moodMetric->value;
+            }
+        }
+
         return view('elderly.dashboard', compact(
             'medications',
             'todayMedications',
@@ -186,7 +198,8 @@ class ElderlyDashboardController extends Controller
             'totalMedicationDoses',
             'medicationProgress',
             'dailyGoalsProgress',
-            'googleFitConnected'
+            'googleFitConnected',
+            'todayMood'
         ));
     }
 

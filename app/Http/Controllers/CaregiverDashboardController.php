@@ -193,7 +193,7 @@ class CaregiverDashboardController extends Controller
         $today = Carbon::today();
 
         // Today's medication adherence
-        $todaysMeds = $elderly->medications()
+        $todaysMeds = $elderly->trackedMedications()
             ->where('is_active', true)
             ->get();
         

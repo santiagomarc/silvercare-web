@@ -280,6 +280,72 @@ class HealthMetricController extends Controller
     }
 
     /**
+     * Store mood value (auto-saved from dashboard slider)
+     */
+    public function storeMood(Request $request)
+    {
+        $user = Auth::user();
+        $elderlyId = $user->profile?->id;
+
+        if (!$elderlyId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Profile not found'
+            ], 404);
+        }
+
+        $request->validate([
+            'value' => 'required|integer|min:1|max:5',
+        ]);
+
+        // Update or create today's mood entry (only one mood per day)
+        $metric = HealthMetric::updateOrCreate(
+            [
+                'elderly_id' => $elderlyId,
+                'type' => 'mood',
+                'measured_at' => Carbon::today(),
+            ],
+            [
+                'value' => $request->input('value'),
+                'unit' => '',
+                'source' => 'manual',
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Mood saved!',
+            'value' => $metric->value,
+        ]);
+    }
+
+    /**
+     * Get today's mood (for loading dashboard)
+     */
+    public function getTodayMood()
+    {
+        $user = Auth::user();
+        $elderlyId = $user->profile?->id;
+
+        if (!$elderlyId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Profile not found'
+            ], 404);
+        }
+
+        $mood = HealthMetric::where('elderly_id', $elderlyId)
+            ->where('type', 'mood')
+            ->whereDate('measured_at', Carbon::today())
+            ->first();
+
+        return response()->json([
+            'success' => true,
+            'value' => $mood?->value ?? 3, // Default to neutral (3)
+        ]);
+    }
+
+    /**
      * Format display value based on metric type
      */
     private function formatDisplayValue(HealthMetric $metric): string

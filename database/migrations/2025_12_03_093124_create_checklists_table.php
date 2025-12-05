@@ -8,6 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Skip if table already exists (avoids duplicate table error)
+        if (Schema::hasTable('checklists')) {
+            return;
+        }
+
         Schema::create('checklists', function (Blueprint $table) {
             $table->id();
             

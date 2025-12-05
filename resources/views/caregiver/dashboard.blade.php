@@ -114,9 +114,9 @@
                             
                             @if($mood)
                                 @php
-                                    $moodEmojis = [0 => '😢', 1 => '😕', 2 => '😐', 3 => '🙂', 4 => '😊'];
-                                    $moodLabels = [0 => 'Poor', 1 => 'Fair', 2 => 'Okay', 3 => 'Good', 4 => 'Excellent'];
-                                    $moodColors = [0 => 'red', 1 => 'orange', 2 => 'yellow', 3 => 'green', 4 => 'green'];
+                                    $moodEmojis = [1 => '😢', 2 => '😕', 3 => '😐', 4 => '🙂', 5 => '😊'];
+                                    $moodLabels = [1 => 'Poor', 2 => 'Fair', 3 => 'Okay', 4 => 'Good', 5 => 'Excellent'];
+                                    $moodColors = [1 => 'red', 2 => 'orange', 3 => 'yellow', 4 => 'green', 5 => 'green'];
                                     $moodValue = (int)$mood->value;
                                 @endphp
                                 <div class="flex items-center">

@@ -124,6 +124,13 @@
                         </div>
 
                         <div>
+                            <label for="address" class="block text-sm font-bold text-gray-700 mb-2">Address</label>
+                            <input id="address" type="text" name="address" value="{{ old('address') }}"
+                                   class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#000080] focus:ring-2 focus:ring-[#000080]/20 transition-all duration-200 font-medium"
+                                   placeholder="123 Main St, City">
+                        </div>
+
+                        <div>
                             <label for="password_confirmation" class="block text-sm font-bold text-gray-700 mb-2">Confirm Password</label>
                             <input id="password_confirmation" type="password" name="password_confirmation" required
                                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#000080] focus:ring-2 focus:ring-[#000080]/20 transition-all duration-200 font-medium"

@@ -27,8 +27,25 @@
 
             <div x-data="{
                 currentStep: 1,
+                useCaregiverAsEmergency: false,
+                caregiverName: '{{ $caregiver['name'] ?? '' }}',
+                caregiverPhone: '{{ $caregiver['phone'] ?? '' }}',
+                caregiverRelationship: '{{ $caregiver['relationship'] ?? '' }}',
+                emergencyName: '',
+                emergencyPhone: '',
+                emergencyRelationship: '',
                 nextStep() { if (this.currentStep < 3) this.currentStep++; },
-                prevStep() { if (this.currentStep > 1) this.currentStep--; }
+                prevStep() { if (this.currentStep > 1) this.currentStep--; },
+                toggleCaregiverEmergency() {
+                    if (this.useCaregiverAsEmergency) {
+                        this.emergencyName = this.caregiverName;
+                        this.emergencyRelationship = this.caregiverRelationship;
+                    } else {
+                        this.emergencyName = '';
+                        this.emergencyPhone = '';
+                        this.emergencyRelationship = '';
+                    }
+                }
             }" class="bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] p-8">
                 
                 <!-- Progress Bar -->
@@ -82,18 +99,20 @@
                                    placeholder="65">
                         </div>
 
-                        <div>
-                            <label for="weight" class="block text-sm font-bold text-gray-700 mb-2">Weight (kg, Optional)</label>
-                            <input id="weight" type="number" step="0.1" name="weight" value="{{ old('weight') }}"
-                                   class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#000080] focus:ring-2 focus:ring-[#000080]/20 transition-all duration-200 font-medium"
-                                   placeholder="70.5">
-                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="weight" class="block text-sm font-bold text-gray-700 mb-2">Weight (kg)</label>
+                                <input id="weight" type="number" step="0.1" name="weight" value="{{ old('weight') }}"
+                                       class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#000080] focus:ring-2 focus:ring-[#000080]/20 transition-all duration-200 font-medium"
+                                       placeholder="70.5">
+                            </div>
 
-                        <div>
-                            <label for="height" class="block text-sm font-bold text-gray-700 mb-2">Height (cm, Optional)</label>
-                            <input id="height" type="number" step="0.1" name="height" value="{{ old('height') }}"
-                                   class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#000080] focus:ring-2 focus:ring-[#000080]/20 transition-all duration-200 font-medium"
-                                   placeholder="170.0">
+                            <div>
+                                <label for="height" class="block text-sm font-bold text-gray-700 mb-2">Height (cm)</label>
+                                <input id="height" type="number" step="0.1" name="height" value="{{ old('height') }}"
+                                       class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#000080] focus:ring-2 focus:ring-[#000080]/20 transition-all duration-200 font-medium"
+                                       placeholder="170.0">
+                            </div>
                         </div>
                     </div>
 
@@ -104,23 +123,52 @@
                          x-transition:enter-end="opacity-100 transform translate-x-0"
                          class="space-y-5">
                         
+                        @if($caregiver)
+                        <!-- Checkbox to use caregiver as emergency contact -->
+                        <div class="p-4 bg-blue-50 rounded-xl border-2 border-blue-100">
+                            <label class="flex items-start gap-3 cursor-pointer">
+                                <input type="checkbox" x-model="useCaregiverAsEmergency" @change="toggleCaregiverEmergency()"
+                                       class="w-5 h-5 mt-0.5 rounded border-gray-300 text-[#000080] focus:ring-[#000080]">
+                                <div>
+                                    <span class="text-sm font-bold text-gray-900">Use my caregiver as emergency contact</span>
+                                    <p class="text-xs text-gray-600 mt-1">
+                                        <span class="font-semibold">{{ $caregiver['name'] }}</span> 
+                                        <span class="text-gray-400">({{ $caregiver['relationship'] }})</span>
+                                    </p>
+                                    <p class="text-xs text-blue-600 mt-1">You'll only need to confirm their phone number below</p>
+                                </div>
+                            </label>
+                        </div>
+                        @endif
+
                         <div>
                             <label for="emergency_name" class="block text-sm font-bold text-gray-700 mb-2">Emergency Contact Name</label>
-                            <input id="emergency_name" type="text" name="emergency_name" value="{{ old('emergency_name') }}"
+                            <input id="emergency_name" type="text" name="emergency_name" 
+                                   x-model="emergencyName"
+                                   :class="useCaregiverAsEmergency ? 'bg-gray-100' : ''"
+                                   :readonly="useCaregiverAsEmergency"
                                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#000080] focus:ring-2 focus:ring-[#000080]/20 transition-all duration-200 font-medium"
                                    placeholder="John Doe">
                         </div>
 
                         <div>
-                            <label for="emergency_phone" class="block text-sm font-bold text-gray-700 mb-2">Emergency Contact Phone</label>
-                            <input id="emergency_phone" type="tel" name="emergency_phone" value="{{ old('emergency_phone') }}"
+                            <label for="emergency_phone" class="block text-sm font-bold text-gray-700 mb-2">
+                                Emergency Contact Phone
+                                <span x-show="useCaregiverAsEmergency" class="text-blue-600 font-normal">(Please enter your caregiver's phone)</span>
+                            </label>
+                            <input id="emergency_phone" type="tel" name="emergency_phone" 
+                                   x-model="emergencyPhone"
                                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#000080] focus:ring-2 focus:ring-[#000080]/20 transition-all duration-200 font-medium"
+                                   :class="useCaregiverAsEmergency ? 'ring-2 ring-blue-300 border-blue-300' : ''"
                                    placeholder="+1234567890">
                         </div>
 
                         <div>
                             <label for="emergency_relationship" class="block text-sm font-bold text-gray-700 mb-2">Relationship</label>
-                            <input id="emergency_relationship" type="text" name="emergency_relationship" value="{{ old('emergency_relationship') }}"
+                            <input id="emergency_relationship" type="text" name="emergency_relationship" 
+                                   x-model="emergencyRelationship"
+                                   :class="useCaregiverAsEmergency ? 'bg-gray-100' : ''"
+                                   :readonly="useCaregiverAsEmergency"
                                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#000080] focus:ring-2 focus:ring-[#000080]/20 transition-all duration-200 font-medium"
                                    placeholder="Spouse, Child, etc.">
                         </div>

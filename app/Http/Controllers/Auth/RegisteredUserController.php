@@ -52,6 +52,7 @@ class RegisteredUserController extends Controller
             'username' => ['required', 'string', 'max:255'],
             'phone_number' => ['required', 'string', 'max:20'],
             'sex' => ['required', 'in:Male,Female,male,female'],
+            'address' => ['nullable', 'string', 'max:500'],
             
             // Optional caregiver invitation
             'add_caregiver' => ['nullable', 'boolean'],
@@ -77,6 +78,7 @@ class RegisteredUserController extends Controller
                 'username' => $validated['username'],
                 'phone_number' => $validated['phone_number'],
                 'sex' => ucfirst(strtolower($validated['sex'])),
+                'address' => $validated['address'] ?? null,
                 'profile_completed' => false,
                 'is_active' => true,
             ]);

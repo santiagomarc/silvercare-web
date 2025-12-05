@@ -5,6 +5,9 @@
         $isCaregiver = $user->profile?->user_type === 'caregiver';
         $dashboardRoute = $isCaregiver ? 'caregiver.dashboard' : 'dashboard';
         $profileRoute = $isCaregiver ? 'caregiver.profile.edit' : 'profile.edit';
+        
+        // Check if we're currently on the dashboard
+        $isOnDashboard = request()->routeIs($dashboardRoute) || request()->routeIs('dashboard') || request()->routeIs('caregiver.dashboard');
     @endphp
 
     <!-- Primary Navigation Menu -->
@@ -26,13 +29,15 @@
             <!-- RIGHT: Actions -->
             <div class="hidden sm:flex sm:items-center sm:gap-6">
                 
-                <!-- 1. BACK TO DASHBOARD BUTTON -->
+                <!-- 1. BACK TO DASHBOARD BUTTON - Only show when NOT on dashboard -->
+                @if(!$isOnDashboard)
                 <a href="{{ route($dashboardRoute) }}" class="text-sm font-bold text-gray-500 hover:text-[#000080] hover:bg-blue-50 px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 group">
                     <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                     Back to Dashboard
                 </a>
 
                 <div class="h-8 w-[1px] bg-gray-200"></div>
+                @endif
 
                 <!-- 2. USER DROPDOWN -->
                 <div class="relative ms-3">
@@ -97,10 +102,12 @@
     <!-- Mobile Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden bg-white border-t border-gray-100">
         <div class="pt-2 pb-3 space-y-1">
-            <!-- Mobile Back Button -->
+            <!-- Mobile Back Button - Only show when NOT on dashboard -->
+            @if(!$isOnDashboard)
             <x-responsive-nav-link :href="route($dashboardRoute)" class="text-[#000080] font-bold">
                 ← {{ __('Back to Dashboard') }}
             </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Mobile Settings Options -->

@@ -39,6 +39,8 @@ Route::middleware(['auth', 'verified', 'elderly'])->group(function () {
 
     // Health Metrics (Vitals)
     Route::post('/my-vitals', [HealthMetricController::class, 'store'])->name('elderly.vitals.store');
+    Route::post('/my-mood', [HealthMetricController::class, 'storeMood'])->name('elderly.mood.store');
+    Route::get('/my-mood/today', [HealthMetricController::class, 'getTodayMood'])->name('elderly.mood.today');
     Route::get('/my-vitals/today', [HealthMetricController::class, 'today'])->name('elderly.vitals.today');
     Route::get('/my-vitals/{type}/history', [HealthMetricController::class, 'history'])->name('elderly.vitals.history');
     Route::delete('/my-vitals/{metric}', [HealthMetricController::class, 'destroy'])->name('elderly.vitals.destroy');

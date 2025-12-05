@@ -20,7 +20,7 @@ class MedicationController extends Controller
             return redirect()->route('caregiver.dashboard')->with('error', 'No elderly profile associated.');
         }
 
-        $medications = $elderly->medications()->orderBy('created_at', 'desc')->get();
+        $medications = $elderly->trackedMedications()->orderBy('created_at', 'desc')->get();
 
         return view('caregiver.medications.index', compact('medications'));
     }
@@ -69,7 +69,7 @@ class MedicationController extends Controller
             'start_date' => $request->start_date ?? now(),
             'is_active' => true,
             'track_inventory' => $request->has('track_inventory'),
-            'current_stock' => $request->current_stock,
+            'current_stock' => $request->current_stock ?? 0,
             'low_stock_threshold' => $request->low_stock_threshold ?? 5,
         ]);
 

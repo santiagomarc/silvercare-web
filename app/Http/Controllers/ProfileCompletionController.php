@@ -22,7 +22,20 @@ class ProfileCompletionController extends Controller
             return $this->redirectToDashboard($profile->user_type);
         }
 
-        return view('auth.profile-completion', compact('profile'));
+        // Get caregiver info if exists (for emergency contact auto-fill option)
+        $caregiver = null;
+        if ($profile && $profile->caregiver_id) {
+            $caregiverProfile = $profile->caregiver;
+            if ($caregiverProfile && $caregiverProfile->user) {
+                $caregiver = [
+                    'name' => $caregiverProfile->user->name,
+                    'phone' => $caregiverProfile->phone_number ?? '',
+                    'relationship' => $caregiverProfile->relationship ?? 'Caregiver',
+                ];
+            }
+        }
+
+        return view('auth.profile-completion', compact('profile', 'caregiver'));
     }
 
     /**

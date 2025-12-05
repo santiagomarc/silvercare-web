@@ -169,9 +169,9 @@
 
         <!-- NEW: Calendar Widget (Replaces the old 2-card row) -->
         <div class="mb-8">
-            <a href="{{ route('calendar.index') }}" class="group bg-white rounded-[24px] p-8 shadow-sm border border-gray-100 hover:shadow-md hover:border-purple-200 transition-all block relative overflow-hidden">
+            <a href="{{ route('calendar.index') }}" class="group bg-purple-50 rounded-[24px] p-8 shadow-sm border border-purple-200 hover:shadow-md hover:border-purple-300 transition-all block relative overflow-hidden">
                 <!-- Decorative BG -->
-                <div class="absolute top-0 right-0 w-64 h-64 bg-purple-50 rounded-full -mr-20 -mt-20 opacity-50 group-hover:scale-110 transition-transform"></div>
+                <div class="absolute top-0 right-0 w-64 h-64 bg-purple-100 rounded-full -mr-20 -mt-20 opacity-50 group-hover:scale-110 transition-transform"></div>
                 
                 <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
                     <!-- Left Side: Title & Description -->
@@ -192,7 +192,7 @@
                         @if(count($upcomingEvents) > 0)
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 @foreach($upcomingEvents as $event)
-                                    <div class="bg-purple-50/50 rounded-2xl p-4 border border-purple-100 group-hover:bg-purple-50 transition-colors">
+                                    <div class="bg-white rounded-2xl p-4 border-2 border-purple-300 shadow-sm group-hover:border-purple-400 group-hover:shadow-md transition-all">
                                         <div class="flex items-center justify-between mb-2">
                                             <span class="text-[10px] font-[900] text-purple-600 uppercase bg-white px-2 py-0.5 rounded-full shadow-sm">
                                                 {{ \Carbon\Carbon::parse($event->start_time)->isToday() ? 'TODAY' : \Carbon\Carbon::parse($event->start_time)->format('M d') }}
@@ -229,7 +229,7 @@
             <div class="lg:col-span-3 space-y-8">
                 
                 <!-- 1. MOOD TRACKER (First - Most Important) -->
-                <div class="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100">
+                <div class="bg-amber-50 rounded-[24px] p-6 shadow-sm border border-amber-200">
                     <h3 class="font-[800] text-lg text-gray-900 mb-1">Mood of the Day</h3>
                     <p class="text-xs text-gray-400 font-medium mb-6">How are you feeling right now?</p>
 
@@ -245,7 +245,7 @@
                                 id="moodSlider"
                                 min="1" 
                                 max="5" 
-                                value="3"
+                                value="{{ $todayMood ?? 3 }}"
                                 class="w-full"
                                 style="color: #6B7280;"
                             >
@@ -261,8 +261,8 @@
                 </div>
 
                 <!-- 2. DAILY PROGRESS CARD -->
-                <div class="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-[100px] -mr-8 -mt-8 z-0"></div>
+                <div class="bg-pink-50 rounded-[24px] p-6 shadow-sm border border-pink-200 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-pink-100 rounded-bl-[100px] -mr-8 -mt-8 z-0"></div>
                     <div class="relative z-10">
                         <h3 class="font-[800] text-lg text-gray-900 mb-4">Daily Goals</h3>
                         
@@ -636,114 +636,127 @@
             <div class="lg:col-span-3 space-y-8">
                 
                 <!-- MEDICATION LIST (GREEN) - With Dose Tracking -->
-                <a href="{{ route('elderly.medications') }}" class="block bg-gradient-to-br from-green-500 to-green-600 rounded-[24px] p-6 shadow-lg shadow-green-900/20 text-white flex flex-col hover:shadow-xl hover:scale-[1.01] transition-all duration-300 cursor-pointer" style="min-height: 380px;">
-                    <div class="flex justify-between items-center mb-4">
+                <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-[24px] p-6 shadow-lg shadow-green-900/20 text-white flex flex-col">
+                    <div class="flex justify-between items-center mb-2">
                         <div>
                             <h3 class="font-[800] text-lg">Today's Medications</h3>
                             <p class="text-white/70 text-xs font-medium">
                                 @php
                                     $totalDoses = 0;
+                                    $takenDoses = 0;
                                     foreach($todayMedications as $med) {
-                                        $totalDoses += count($med->times_of_day ?? []);
+                                        $times = $med->times_of_day ?? [];
+                                        $totalDoses += count($times);
+                                        foreach($times as $t) {
+                                            $lk = $med->id . '_' . $t;
+                                            if($medicationLogs->get($lk)?->is_taken) $takenDoses++;
+                                        }
                                     }
+                                    $medProgress = $totalDoses > 0 ? round(($takenDoses / $totalDoses) * 100) : 0;
                                 @endphp
-                                {{ $totalDoses }} doses scheduled
+                                {{ $takenDoses }}/{{ $totalDoses }} doses taken
                             </p>
                         </div>
-                        <span class="text-xs font-bold text-white/90 flex items-center gap-1">
+                        <a href="{{ route('elderly.medications') }}" class="text-xs font-bold text-white/90 flex items-center gap-1 hover:text-white bg-white/20 px-3 py-1.5 rounded-full transition-colors">
                             View All <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                        </span>
+                        </a>
+                    </div>
+
+                    <!-- Mini Progress Bar -->
+                    <div class="h-2 bg-white/20 rounded-full mb-4 overflow-hidden">
+                        <div id="medicationProgressBar" class="h-full bg-white rounded-full transition-all duration-500" 
+                             style="width: {{ $medProgress }}%"></div>
                     </div>
                     
-                    <div class="overflow-y-auto no-scrollbar space-y-3 flex-1" id="medicationContainer" onclick="event.stopPropagation();">
+                    <div class="overflow-y-auto no-scrollbar space-y-2" id="medicationContainer">
                         @forelse($todayMedications as $medication)
-                            <div class="medication-card bg-white rounded-xl p-4 shadow-sm" data-medication-id="{{ $medication->id }}">
-                                <div class="flex items-start gap-3 mb-3">
-                                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center text-xl flex-shrink-0">💊</div>
-                                    <div class="flex-grow min-w-0">
-                                        <h4 class="font-[800] text-gray-900 text-sm truncate">{{ $medication->name }}</h4>
-                                        <p class="text-gray-600 text-xs font-medium">{{ $medication->dosage }} {{ $medication->dosage_unit }}</p>
-                                        @if($medication->instructions)
-                                            <p class="text-gray-400 text-[10px] mt-1 truncate">📝 {{ Str::limit($medication->instructions, 40) }}</p>
-                                        @endif
+                            @php
+                                $medTimes = $medication->times_of_day ?? [];
+                            @endphp
+                            @foreach($medTimes as $time)
+                                @php
+                                    $logKey = $medication->id . '_' . $time;
+                                    $log = $medicationLogs->get($logKey);
+                                    $isTaken = $log?->is_taken ?? false;
+                                    $takenAt = $log?->taken_at;
+                                    
+                                    // Calculate time window status
+                                    $now = now();
+                                    $scheduledTime = \Carbon\Carbon::parse(today()->format('Y-m-d') . ' ' . $time);
+                                    $windowStart = $scheduledTime->copy()->subMinutes(60);
+                                    $windowEnd = $scheduledTime->copy()->addMinutes(60);
+                                    
+                                    $isWithinWindow = $now->between($windowStart, $windowEnd);
+                                    $isPastWindow = $now->gt($windowEnd);
+                                    $isBeforeWindow = $now->lt($windowStart);
+                                    $canTake = $isWithinWindow || $isPastWindow;
+                                    
+                                    // Determine entry style
+                                    if ($isTaken) {
+                                        $wasLate = $takenAt && $takenAt->gt($windowEnd);
+                                        $entryBg = $wasLate ? 'bg-orange-50 border-orange-300' : 'bg-green-50 border-green-300';
+                                        $iconBg = $wasLate ? 'bg-orange-200' : 'bg-green-200';
+                                        $statusIcon = '✓';
+                                        $statusText = $wasLate ? 'Taken Late' : 'Taken';
+                                    } elseif ($isPastWindow) {
+                                        $entryBg = 'bg-red-50 border-red-300';
+                                        $iconBg = 'bg-red-200';
+                                        $statusIcon = '!';
+                                        $statusText = 'Missed';
+                                    } elseif ($isWithinWindow) {
+                                        $entryBg = 'bg-amber-50 border-amber-300';
+                                        $iconBg = 'bg-amber-200';
+                                        $statusIcon = '●';
+                                        $statusText = 'Take Now';
+                                    } else {
+                                        $entryBg = 'bg-white border-gray-200';
+                                        $iconBg = 'bg-green-100';
+                                        $statusIcon = '○';
+                                        $statusText = 'Upcoming';
+                                    }
+                                @endphp
+                                <div class="medication-entry rounded-xl p-3 border-2 transition-all duration-300 cursor-pointer hover:shadow-md active:scale-[0.98] {{ $entryBg }} {{ $isTaken ? 'opacity-75' : '' }}" 
+                                     data-medication-id="{{ $medication->id }}"
+                                     data-time="{{ $time }}"
+                                     data-taken="{{ $isTaken ? 'true' : 'false' }}"
+                                     data-can-take="{{ $canTake ? 'true' : 'false' }}"
+                                     onclick="toggleMedicationEntry(this)">
+                                    <div class="flex items-center gap-3">
+                                        <!-- Status Icon -->
+                                        <div class="w-9 h-9 rounded-lg flex items-center justify-center text-lg flex-shrink-0 {{ $iconBg }} {{ $isWithinWindow && !$isTaken ? 'animate-pulse' : '' }}">
+                                            <span class="status-icon">{{ $statusIcon }}</span>
+                                        </div>
+                                        
+                                        <!-- Content -->
+                                        <div class="flex-grow min-w-0">
+                                            <div class="flex items-center justify-between">
+                                                <h4 class="font-[800] text-gray-900 text-sm truncate {{ $isTaken ? 'line-through' : '' }}">{{ $medication->name }}</h4>
+                                                <span class="text-[10px] font-bold text-gray-500 flex-shrink-0">{{ \Carbon\Carbon::parse($time)->format('g:i A') }}</span>
+                                            </div>
+                                            <div class="flex items-center justify-between mt-0.5">
+                                                <p class="text-gray-500 text-[11px] font-medium">{{ $medication->dosage }} {{ $medication->dosage_unit }}</p>
+                                                <span class="text-[9px] font-bold {{ $isTaken ? ($wasLate ?? false ? 'text-orange-600' : 'text-green-600') : ($isPastWindow ? 'text-red-600' : ($isWithinWindow ? 'text-amber-600' : 'text-gray-400')) }}">
+                                                    {{ $statusText }}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-
-                                <!-- Dose Time Buttons -->
-                                @if(!empty($medication->times_of_day))
-                                    <div class="flex flex-wrap gap-2">
-                                        @foreach($medication->times_of_day as $time)
-                                            @php
-                                                $logKey = $medication->id . '_' . $time;
-                                                $log = $medicationLogs->get($logKey);
-                                                $isTaken = $log?->is_taken ?? false;
-                                                $takenAt = $log?->taken_at;
-                                                
-                                                // Calculate time window status
-                                                $now = now();
-                                                $scheduledTime = \Carbon\Carbon::parse(today()->format('Y-m-d') . ' ' . $time);
-                                                $windowStart = $scheduledTime->copy()->subMinutes(60);
-                                                $windowEnd = $scheduledTime->copy()->addMinutes(60);
-                                                
-                                                $isWithinWindow = $now->between($windowStart, $windowEnd);
-                                                $isPastWindow = $now->gt($windowEnd);
-                                                $isBeforeWindow = $now->lt($windowStart);
-                                                
-                                                // Determine status class
-                                                $statusClass = 'upcoming';
-                                                $statusIcon = '○';
-                                                $statusText = 'Upcoming';
-                                                
-                                                if ($isTaken) {
-                                                    $wasLate = $takenAt && $takenAt->gt($windowEnd);
-                                                    $statusClass = $wasLate ? 'taken-late' : 'taken';
-                                                    $statusIcon = '✓';
-                                                    $statusText = $wasLate ? 'Late' : 'Taken';
-                                                } elseif ($isPastWindow) {
-                                                    $statusClass = 'missed';
-                                                    $statusIcon = '!';
-                                                    $statusText = 'Missed';
-                                                } elseif ($isWithinWindow) {
-                                                    $statusClass = 'active';
-                                                    $statusIcon = '●';
-                                                    $statusText = 'Take Now';
-                                                }
-                                                
-                                                $canTake = $isWithinWindow || $isPastWindow;
-                                            @endphp
-                                            <button 
-                                                class="dose-btn {{ $statusClass }} flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-[11px] font-bold hover:scale-105 active:scale-95 text-gray-700"
-                                                data-medication-id="{{ $medication->id }}"
-                                                data-time="{{ $time }}"
-                                                data-taken="{{ $isTaken ? 'true' : 'false' }}"
-                                                data-can-take="{{ $canTake ? 'true' : 'false' }}"
-                                                onclick="event.preventDefault(); event.stopPropagation(); toggleMedicationDose(this);"
-                                                {{ !$canTake && !$isTaken ? 'disabled' : '' }}
-                                            >
-                                                <span class="status-icon">{{ $statusIcon }}</span>
-                                                <span class="time-text">{{ \Carbon\Carbon::parse($time)->format('g:i A') }}</span>
-                                                @if($isTaken || $isPastWindow)
-                                                    <span class="status-label text-[9px] opacity-75">({{ $statusText }})</span>
-                                                @endif
-                                            </button>
-                                        @endforeach
-                                    </div>
-                                @endif
-                            </div>
+                            @endforeach
                         @empty
-                            <div class="text-center py-12 flex flex-col items-center bg-white/20 rounded-xl">
-                                <div class="text-5xl mb-3 opacity-50">🎉</div>
+                            <div class="text-center py-8 flex flex-col items-center bg-white/20 rounded-xl">
+                                <div class="text-4xl mb-2 opacity-50">🎉</div>
                                 <p class="text-white/90 text-sm font-bold">No medications today!</p>
                                 <p class="text-white/70 text-xs mt-1">Enjoy your day</p>
                             </div>
                         @endforelse
                     </div>
-                </a>
+                </div>
 
                 <!-- CHECKLIST WIDGET - Enhanced -->
-                <div class="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 relative overflow-hidden">
+                <div class="bg-blue-50 rounded-[24px] p-6 shadow-sm border border-blue-200 relative overflow-hidden">
                     <!-- Background decoration -->
-                    <div class="absolute -bottom-8 -right-8 w-32 h-32 bg-green-50 rounded-full opacity-50"></div>
+                    <div class="absolute -bottom-8 -right-8 w-32 h-32 bg-blue-100 rounded-full opacity-50"></div>
                     
                     <div class="relative z-10">
                         <div class="flex justify-between items-center mb-4">
@@ -760,8 +773,8 @@
                         </div>
 
                         <!-- Mini Progress Bar -->
-                        <div class="h-2 bg-gray-100 rounded-full mb-4 overflow-hidden">
-                            <div id="progressBar" class="h-full bg-gradient-to-r from-green-400 to-green-500 rounded-full transition-all duration-500" 
+                        <div class="h-2 bg-blue-100 rounded-full mb-4 overflow-hidden">
+                            <div id="progressBar" class="h-full bg-gradient-to-r from-blue-400 to-blue-500 rounded-full transition-all duration-500" 
                                  style="width: {{ $checklistProgress }}%"></div>
                         </div>
 
@@ -913,14 +926,41 @@
             moodSaved.style.opacity = '1';
             moodSaved.style.transform = 'translateY(0)';
             
+            // Actually save to backend
+            fetch('/my-mood', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ value: value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Mood saved:', value);
+                }
+            })
+            .catch(error => {
+                console.error('Error saving mood:', error);
+            });
+            
             setTimeout(() => {
                 moodSaved.style.opacity = '0';
                 moodSaved.style.transform = 'translateY(-10px)';
             }, 2000);
-
-            // TODO: Send to backend when HealthMetric routes are ready
-            console.log('Mood saved:', value);
         }
+
+        // Initialize mood display on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const initialMood = parseInt(moodSlider.value);
+            const mood = moods[initialMood - 1];
+            moodEmoji.textContent = mood.emoji;
+            moodLabel.textContent = mood.label;
+            moodLabel.style.color = mood.color;
+        });
 
         // ==========================================
         // CHECKLIST TOGGLE - FIXED WITH PROPER HEADERS
@@ -994,7 +1034,154 @@
         }
 
         // ==========================================
-        // MEDICATION DOSE TOGGLE
+        // MEDICATION ENTRY TOGGLE (NEW SIMPLIFIED VERSION)
+        // ==========================================
+        async function toggleMedicationEntry(entry) {
+            const medicationId = entry.dataset.medicationId;
+            const time = entry.dataset.time;
+            const isTaken = entry.dataset.taken === 'true';
+            const canTake = entry.dataset.canTake === 'true';
+
+            if (!canTake && !isTaken) {
+                showToast('⏰ Too early! Wait until the scheduled time window (1 hour before).', 'info');
+                return;
+            }
+
+            entry.style.transform = 'scale(0.98)';
+            entry.style.opacity = '0.7';
+
+            const endpoint = isTaken ? `/my-medications/${medicationId}/undo` : `/my-medications/${medicationId}/take`;
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': CSRF_TOKEN,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ time: time })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to update');
+                }
+
+                const data = await response.json();
+
+                if (data.is_taken) {
+                    // Mark as taken
+                    entry.dataset.taken = 'true';
+                    const isLate = data.taken_late;
+                    
+                    // Update entry appearance
+                    entry.className = 'medication-entry rounded-xl p-3 border-2 transition-all duration-300 cursor-pointer hover:shadow-md active:scale-[0.98] opacity-75 ' + 
+                        (isLate ? 'bg-orange-50 border-orange-300' : 'bg-green-50 border-green-300');
+                    
+                    const iconDiv = entry.querySelector('.w-9.h-9');
+                    if (iconDiv) {
+                        iconDiv.className = 'w-9 h-9 rounded-lg flex items-center justify-center text-lg flex-shrink-0 ' + 
+                            (isLate ? 'bg-orange-200' : 'bg-green-200');
+                        iconDiv.querySelector('.status-icon').textContent = '✓';
+                    }
+                    
+                    const title = entry.querySelector('h4');
+                    if (title) title.classList.add('line-through');
+                    
+                    const statusSpan = entry.querySelector('.text-\\[9px\\].font-bold');
+                    if (statusSpan) {
+                        statusSpan.className = 'text-[9px] font-bold ' + (isLate ? 'text-orange-600' : 'text-green-600');
+                        statusSpan.textContent = isLate ? 'Taken Late' : 'Taken';
+                    }
+                    
+                    // Update medication progress
+                    updateMedicationProgress(1);
+                    updateOverallMedicationProgress();
+                    
+                    createConfetti(entry);
+                    showToast(data.message, 'success');
+                } else {
+                    // Mark as not taken (undo)
+                    entry.dataset.taken = 'false';
+                    
+                    // Re-evaluate current status
+                    const now = new Date();
+                    const [hours, minutes] = time.split(':').map(Number);
+                    const scheduledTime = new Date();
+                    scheduledTime.setHours(hours, minutes, 0, 0);
+                    const windowStart = new Date(scheduledTime.getTime() - 60 * 60 * 1000);
+                    const windowEnd = new Date(scheduledTime.getTime() + 60 * 60 * 1000);
+                    
+                    const isPastWindow = now > windowEnd;
+                    const isWithinWindow = now >= windowStart && now <= windowEnd;
+                    
+                    let entryClass, iconClass, statusText, statusColor;
+                    
+                    if (isPastWindow) {
+                        entryClass = 'bg-red-50 border-red-300';
+                        iconClass = 'bg-red-200';
+                        statusText = 'Missed';
+                        statusColor = 'text-red-600';
+                    } else if (isWithinWindow) {
+                        entryClass = 'bg-amber-50 border-amber-300';
+                        iconClass = 'bg-amber-200 animate-pulse';
+                        statusText = 'Take Now';
+                        statusColor = 'text-amber-600';
+                    } else {
+                        entryClass = 'bg-white border-gray-200';
+                        iconClass = 'bg-green-100';
+                        statusText = 'Upcoming';
+                        statusColor = 'text-gray-400';
+                    }
+                    
+                    entry.className = 'medication-entry rounded-xl p-3 border-2 transition-all duration-300 cursor-pointer hover:shadow-md active:scale-[0.98] ' + entryClass;
+                    entry.classList.remove('opacity-75');
+                    
+                    const iconDiv = entry.querySelector('.w-9.h-9');
+                    if (iconDiv) {
+                        iconDiv.className = 'w-9 h-9 rounded-lg flex items-center justify-center text-lg flex-shrink-0 ' + iconClass;
+                        iconDiv.querySelector('.status-icon').textContent = isPastWindow ? '!' : (isWithinWindow ? '●' : '○');
+                    }
+                    
+                    const title = entry.querySelector('h4');
+                    if (title) title.classList.remove('line-through');
+                    
+                    const statusSpan = entry.querySelector('.text-\\[9px\\].font-bold');
+                    if (statusSpan) {
+                        statusSpan.className = 'text-[9px] font-bold ' + statusColor;
+                        statusSpan.textContent = statusText;
+                    }
+                    
+                    // Update medication progress
+                    updateMedicationProgress(-1);
+                    updateOverallMedicationProgress();
+                    
+                    showToast(data.message, 'info');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast(`❌ ${error.message}`, 'error');
+            } finally {
+                entry.style.transform = '';
+                entry.style.opacity = '';
+            }
+        }
+
+        function updateOverallMedicationProgress() {
+            const allEntries = document.querySelectorAll('#medicationContainer .medication-entry');
+            const total = allEntries.length;
+            let taken = 0;
+            allEntries.forEach(e => { if (e.dataset.taken === 'true') taken++; });
+            const progress = total > 0 ? Math.round((taken / total) * 100) : 0;
+            
+            const bar = document.getElementById('medicationProgressBar');
+            if (bar) bar.style.width = progress + '%';
+        }
+
+        // ==========================================
+        // MEDICATION DOSE TOGGLE (LEGACY - keeping for compatibility)
         // ==========================================
         async function toggleMedicationDose(button) {
             const medicationId = button.dataset.medicationId;
@@ -1034,55 +1221,16 @@
                 button.style.transform = 'scale(1)';
 
                 if (data.is_taken) {
-                    // Mark as taken
                     button.dataset.taken = 'true';
-                    button.classList.remove('upcoming', 'missed', 'active');
-                    button.classList.add(data.taken_late ? 'taken-late' : 'taken');
-                    button.querySelector('.status-icon').textContent = '✓';
-                    
-                    // Update or add status label
-                    let statusLabel = button.querySelector('.status-label');
-                    if (!statusLabel) {
-                        statusLabel = document.createElement('span');
-                        statusLabel.className = 'status-label text-[9px] opacity-75';
-                        button.appendChild(statusLabel);
-                    }
-                    statusLabel.textContent = `(${data.taken_late ? 'Late' : 'Taken'})`;
-                    
-                    // Update medication progress in Daily Goals
                     updateMedicationProgress(1);
-                    
                     createConfetti(button);
                     showToast(data.message, 'success');
                 } else {
-                    // Mark as not taken (undo)
                     button.dataset.taken = 'false';
-                    button.classList.remove('taken', 'taken-late');
-                    
-                    // Re-evaluate current status
-                    const now = new Date();
-                    const [hours, minutes] = time.split(':').map(Number);
-                    const scheduledTime = new Date();
-                    scheduledTime.setHours(hours, minutes, 0, 0);
-                    const windowEnd = new Date(scheduledTime.getTime() + 60 * 60 * 1000);
-                    
-                    if (now > windowEnd) {
-                        button.classList.add('missed');
-                        button.querySelector('.status-icon').textContent = '!';
-                        let statusLabel = button.querySelector('.status-label');
-                        if (statusLabel) statusLabel.textContent = '(Missed)';
-                    } else {
-                        button.classList.add('active');
-                        button.querySelector('.status-icon').textContent = '●';
-                        let statusLabel = button.querySelector('.status-label');
-                        if (statusLabel) statusLabel.remove();
-                    }
-                    
-                    // Update medication progress in Daily Goals
                     updateMedicationProgress(-1);
-                    
                     showToast(data.message, 'info');
                 }
+
             } catch (error) {
                 console.error('Error:', error);
                 showToast(`❌ ${error.message}`, 'error');
@@ -1090,6 +1238,129 @@
                 button.disabled = false;
                 button.style.transform = 'scale(1)';
             }
+        }
+
+        // Update medication card appearance based on dose statuses
+        function updateMedicationCardAppearance(card) {
+            const chips = card.querySelectorAll('.dose-chip');
+            const total = chips.length;
+            let taken = 0;
+            let hasMissed = false;
+            let hasActive = false;
+            
+            const now = new Date();
+            
+            chips.forEach(chip => {
+                const isTaken = chip.dataset.taken === 'true';
+                if (isTaken) {
+                    taken++;
+                } else {
+                    const time = chip.dataset.time;
+                    const [hours, minutes] = time.split(':').map(Number);
+                    const scheduledTime = new Date();
+                    scheduledTime.setHours(hours, minutes, 0, 0);
+                    const windowStart = new Date(scheduledTime.getTime() - 60 * 60 * 1000);
+                    const windowEnd = new Date(scheduledTime.getTime() + 60 * 60 * 1000);
+                    
+                    if (now > windowEnd) hasMissed = true;
+                    else if (now >= windowStart && now <= windowEnd) hasActive = true;
+                }
+            });
+            
+            const allTaken = taken === total && total > 0;
+            const progress = total > 0 ? Math.round((taken / total) * 100) : 0;
+            
+            // Update card classes
+            card.classList.remove('bg-white', 'bg-green-50', 'bg-red-50', 'bg-amber-50', 'border-gray-200', 'border-green-300', 'border-red-200', 'border-amber-300');
+            
+            if (allTaken) {
+                card.classList.add('bg-green-50', 'border-green-300');
+                card.dataset.status = 'completed';
+            } else if (hasMissed) {
+                card.classList.add('bg-red-50', 'border-red-200');
+                card.dataset.status = 'missed';
+            } else if (hasActive) {
+                card.classList.add('bg-amber-50', 'border-amber-300');
+                card.dataset.status = 'active';
+            } else {
+                card.classList.add('bg-white', 'border-gray-200');
+                card.dataset.status = 'upcoming';
+            }
+            
+            // Update icon
+            const iconDiv = card.querySelector('.w-10.h-10');
+            if (iconDiv) {
+                iconDiv.classList.remove('bg-green-100', 'bg-green-200', 'bg-red-100', 'bg-amber-200');
+                if (allTaken) {
+                    iconDiv.classList.add('bg-green-200');
+                    iconDiv.textContent = '✅';
+                } else if (hasMissed) {
+                    iconDiv.classList.add('bg-red-100');
+                    iconDiv.textContent = '⚠️';
+                } else if (hasActive) {
+                    iconDiv.classList.add('bg-amber-200');
+                    iconDiv.textContent = '⏰';
+                } else {
+                    iconDiv.classList.add('bg-green-100');
+                    iconDiv.textContent = '💊';
+                }
+            }
+            
+            // Update count badge
+            const badge = card.querySelector('.text-\\[10px\\].font-bold.px-2.py-0\\.5.rounded-full');
+            if (badge) {
+                badge.classList.remove('bg-green-100', 'text-green-700', 'bg-red-100', 'text-red-700', 'bg-amber-100', 'text-amber-700', 'bg-gray-100', 'text-gray-500');
+                badge.textContent = `${taken}/${total}`;
+                if (allTaken) {
+                    badge.classList.add('bg-green-100', 'text-green-700');
+                } else if (hasMissed) {
+                    badge.classList.add('bg-red-100', 'text-red-700');
+                } else if (hasActive) {
+                    badge.classList.add('bg-amber-100', 'text-amber-700');
+                } else {
+                    badge.classList.add('bg-gray-100', 'text-gray-500');
+                }
+            }
+            
+            // Update progress bar
+            const progressBar = card.querySelector('.h-1\\.5.bg-gray-200 > div');
+            if (progressBar) {
+                progressBar.style.width = progress + '%';
+                progressBar.classList.remove('bg-green-500', 'bg-green-400', 'bg-red-400', 'bg-amber-400');
+                if (allTaken) {
+                    progressBar.classList.add('bg-green-500');
+                } else if (hasMissed) {
+                    progressBar.classList.add('bg-red-400');
+                } else if (hasActive) {
+                    progressBar.classList.add('bg-amber-400');
+                } else {
+                    progressBar.classList.add('bg-green-400');
+                }
+            }
+            
+            // Update title strikethrough
+            const title = card.querySelector('h4');
+            if (title) {
+                if (allTaken) {
+                    title.classList.add('line-through', 'opacity-75');
+                } else {
+                    title.classList.remove('line-through', 'opacity-75');
+                }
+            }
+            
+            // Update overall medication progress bar
+            updateOverallMedicationProgress();
+        }
+
+        function updateOverallMedicationProgress() {
+            const allChips = document.querySelectorAll('#medicationContainer .dose-chip');
+            const total = allChips.length;
+            let taken = 0;
+            allChips.forEach(c => { if (c.dataset.taken === 'true') taken++; });
+            const progress = total > 0 ? Math.round((taken / total) * 100) : 0;
+            
+            const bar = document.getElementById('medicationProgressBar');
+            if (bar) bar.style.width = progress + '%';
         }
 
         // ==========================================
