@@ -94,112 +94,170 @@
         @if(session('error'))
             <div class="fade-in bg-red-50 border-l-8 border-red-500 text-red-800 px-6 py-4 rounded-xl shadow-sm flex items-center gap-4">
                 <div class="bg-red-100 p-2 rounded-full"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg></div>
-                <span class="font-bold text-lg">{{ session('error') }}</span>
+                <span class="font-[800] text-lg">{{ session('error') }}</span>
             </div>
-        @endif
-
-        @if($supportsGoogleFit)
-        <div class="bg-white rounded-3xl shadow-md border border-gray-200 p-6 lg:p-8 fade-in stagger-1">
-            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
-                <div class="flex items-center gap-5 w-full md:w-auto">
-                    <div class="w-16 h-16 bg-white border-2 border-gray-100 rounded-2xl shadow-sm flex items-center justify-center shrink-0">
-                        <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none">
-                            <path d="M22.5 12.06c0-.82-.07-1.6-.2-2.36H12v4.49h5.88a5.03 5.03 0 0 1-2.18 3.3v2.74h3.53c2.06-1.9 3.25-4.7 3.25-7.17z" fill="#4285F4"/>
-                            <path d="M12 22.5c2.95 0 5.43-.98 7.24-2.66l-3.53-2.74c-.98.66-2.23 1.05-3.71 1.05-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.08 7.7 22.5 12 22.5z" fill="#34A853"/>
-                            <path d="M5.84 13.62a6.52 6.52 0 0 1-.43-2.62c0-.91.16-1.78.43-2.62V5.54H2.18A10.49 10.49 0 0 0 0 12c0 1.68.4 3.29 1.18 4.76l3.66-2.84V13.62z" fill="#FBBC05"/>
-                            <path d="M12 5.03c1.61 0 3.05.55 4.19 1.64l3.15-3.15C17.43 1.63 14.95.5 12 .5 7.7.5 3.99 2.92 2.18 6.54l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="font-[800] text-xl text-gray-900 mb-1">Google Fit Sync</h3>
-                        <p class="text-base font-medium text-gray-500">
-                            @if($googleFitConnected)
-                                <span class="text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded-lg border border-green-100">● Connected</span> 
-                                <span class="block sm:inline mt-1 sm:mt-0"> - Automatic syncing is active.</span>
-                            @else
-                                Connect to automatically pull your {{ strtolower($config['name']) }} data.
-                            @endif
-                        </p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-3 w-full md:w-auto">
-                    @if($googleFitConnected)
-                        <button onclick="syncGoogleFit()" id="syncBtn" class="flex-1 md:flex-none justify-center px-6 py-3 bg-blue-50 text-blue-700 font-[800] rounded-xl hover:bg-blue-100 hover:shadow-md transition-all flex items-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                            Sync Now
-                        </button>
-                        <form action="{{ route('elderly.googlefit.disconnect') }}" method="POST" class="inline">
-                            @csrf
-                            <button type="submit" class="px-4 py-3 text-gray-400 hover:text-red-500 font-bold hover:bg-red-50 rounded-xl transition-all">
-                                Unlink
-                            </button>
-                        </form>
-                    @else
-                        <a href="{{ route('elderly.googlefit.connect') }}" class="w-full md:w-auto justify-center px-6 py-3 bg-blue-600 text-white font-[800] text-base rounded-xl hover:bg-blue-700 hover:shadow-lg transition-all flex items-center gap-2">
-                            Connect Google Fit
-                        </a>
-                    @endif
-                </div>
-            </div>
-            
-            @if($googleFitConnected)
-            <div id="autoSyncStatus" class="mt-5 pt-4 border-t border-gray-100 text-sm font-semibold text-gray-500 flex items-center gap-2">
-                <div class="w-2.5 h-2.5 bg-gray-300 rounded-full"></div>
-                <span>Status: Idle</span>
-            </div>
-            @endif
-        </div>
         @endif
 
         @if($stats['count'] > 0)
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 fade-in stagger-2">
-            <div class="bg-white rounded-2xl p-5 shadow-md border-b-4 {{ $colors['accent'] }} flex flex-col items-center justify-center text-center hover:shadow-lg transition-shadow">
-                <p class="text-xs text-gray-400 uppercase tracking-widest font-[800] mb-2">LATEST READING</p>
-                <p class="text-3xl lg:text-4xl font-[900] text-gray-900 mb-1">
-                    @if($type === 'blood_pressure')
-                        {{ $stats['latest']->value_text ?? '-' }}
-                    @else
-                        {{ $type === 'temperature' ? number_format($stats['latest']->value, 1) : intval($stats['latest']->value) }}
-                    @endif
-                </p>
-                <p class="text-sm font-bold text-gray-400">{{ $config['unit'] }}</p>
+        <!-- Integrated Stats Hero Card -->
+        <div class="bg-gradient-to-r {{ $colors['gradient'] }} rounded-3xl p-6 lg:p-8 shadow-xl fade-in stagger-1 relative overflow-hidden">
+            <!-- Background decoration -->
+            <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full"></div>
+            <div class="absolute -bottom-16 -left-16 w-48 h-48 bg-white/5 rounded-full"></div>
+            
+            <div class="relative flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                <!-- Left: Latest Reading -->
+                <div class="text-white">
+                    <p class="text-sm uppercase tracking-widest font-[800] text-white/70 mb-2">LATEST READING</p>
+                    <div class="flex items-baseline gap-3">
+                        <span class="text-6xl lg:text-7xl font-[900] tracking-tight">
+                            @if($type === 'blood_pressure')
+                                {{ $stats['latest']->value_text ?? '-' }}
+                            @else
+                                {{ $type === 'temperature' ? number_format($stats['latest']->value, 1) : intval($stats['latest']->value) }}
+                            @endif
+                        </span>
+                        <span class="text-2xl font-[800] text-white/80">{{ $config['unit'] }}</span>
+                    </div>
+                    <p class="text-base font-[700] text-white/70 mt-2">
+                        Measured {{ $stats['latest']->measured_at->diffForHumans() }}
+                    </p>
+                </div>
+                
+                <!-- Right: Stats Grid -->
+                @if($type !== 'blood_pressure')
+                <div class="flex gap-3">
+                    <!-- Average -->
+                    <div class="bg-white/20 backdrop-blur-sm rounded-2xl px-6 py-5 text-center min-w-[100px] border border-white/20">
+                        <p class="text-xs uppercase tracking-wider font-[800] text-white/70 mb-1">AVG</p>
+                        <p class="text-3xl font-[900] text-white">{{ $stats['avg'] ?? '-' }}</p>
+                    </div>
+                    <!-- Min/Max Stacked -->
+                    <div class="flex flex-col gap-2">
+                        <div class="bg-white/20 backdrop-blur-sm rounded-xl px-5 py-3 flex items-center gap-4 border border-white/20">
+                            <span class="text-xs uppercase tracking-wider font-[800] text-white/70">MIN</span>
+                            <span class="text-xl font-[900] text-white">{{ number_format($stats['min'], $type === 'temperature' ? 2 : 0) }}</span>
+                        </div>
+                        <div class="bg-white/20 backdrop-blur-sm rounded-xl px-5 py-3 flex items-center gap-4 border border-white/20">
+                            <span class="text-xs uppercase tracking-wider font-[800] text-white/70">MAX</span>
+                            <span class="text-xl font-[900] text-white">{{ number_format($stats['max'], $type === 'temperature' ? 2 : 0) }}</span>
+                        </div>
+                    </div>
+                </div>
+                @else
+                <!-- Blood Pressure: Show total entries instead -->
+                <div class="bg-white/20 backdrop-blur-sm rounded-2xl px-8 py-5 text-center border border-white/20">
+                    <p class="text-xs uppercase tracking-wider font-[800] text-white/70 mb-1">TOTAL ENTRIES</p>
+                    <p class="text-4xl font-[900] text-white">{{ $stats['count'] }}</p>
+                    <p class="text-sm font-[700] text-white/60 mt-1">Last 30 Days</p>
+                </div>
+                @endif
             </div>
-
-            @if($type !== 'blood_pressure')
-                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center">
-                    <p class="text-xs text-gray-400 uppercase tracking-widest font-[800] mb-2">AVERAGE</p>
-                    <p class="text-2xl font-[800] text-gray-700">{{ $stats['avg'] ?? '-' }}</p>
-                    <p class="text-xs font-bold text-gray-300">{{ $config['unit'] }}</p>
-                </div>
-                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center">
-                    <p class="text-xs text-gray-400 uppercase tracking-widest font-[800] mb-2">LOWEST</p>
-                    <p class="text-2xl font-[800] text-green-600">{{ $stats['min'] ?? '-' }}</p>
-                    <p class="text-xs font-bold text-gray-300">{{ $config['unit'] }}</p>
-                </div>
-                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center">
-                    <p class="text-xs text-gray-400 uppercase tracking-widest font-[800] mb-2">HIGHEST</p>
-                    <p class="text-2xl font-[800] text-red-600">{{ $stats['max'] ?? '-' }}</p>
-                    <p class="text-xs font-bold text-gray-300">{{ $config['unit'] }}</p>
-                </div>
-            @else
-                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 col-span-2 flex flex-col items-center justify-center text-center">
-                    <p class="text-xs text-gray-400 uppercase tracking-widest font-[800] mb-2">TOTAL ENTRIES</p>
-                    <p class="text-3xl font-[900] text-gray-800">{{ $stats['count'] }}</p>
-                    <p class="text-xs font-bold text-gray-400">Last 30 Days</p>
-                </div>
-            @endif
         </div>
         @endif
 
-        <button onclick="openRecordModal()" class="w-full bg-gradient-to-r {{ $colors['gradient'] }} text-white font-[800] text-lg py-5 rounded-2xl shadow-lg {{ $colors['btn'] }} hover:shadow-xl hover:-translate-y-1 transition-all flex items-center justify-center gap-3 fade-in stagger-3">
-            <div class="bg-white/20 rounded-full p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg></div>
-            RECORD NEW READING
-        </button>
+        <!-- UNIFIED ACTION CARD: Manual Record + Google Fit -->
+        <div class="bg-white rounded-3xl shadow-lg border border-gray-200 overflow-hidden fade-in stagger-2">
+            <div class="flex flex-col md:flex-row">
+                <!-- LEFT: Manual Record Button -->
+                <button onclick="openRecordModal()" class="flex-1 p-6 lg:p-8 bg-gradient-to-br {{ $colors['gradient'] }} text-white hover:opacity-95 transition-all group relative overflow-hidden">
+                    <!-- Background decoration -->
+                    <div class="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full"></div>
+                    <div class="absolute -bottom-12 -left-12 w-40 h-40 bg-white/5 rounded-full"></div>
+                    
+                    <div class="relative flex items-center gap-5">
+                        <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                        </div>
+                        <div class="text-left">
+                            <h3 class="font-[900] text-xl lg:text-2xl mb-1">Record Manually</h3>
+                            <p class="text-white/80 font-[600] text-sm lg:text-base">Enter your {{ strtolower($config['name']) }} reading</p>
+                        </div>
+                    </div>
+                </button>
 
-        <div class="bg-white rounded-3xl shadow-md border border-gray-200 overflow-hidden fade-in stagger-4">
+                <!-- CURVED SEPARATOR -->
+                <div class="hidden md:block relative w-0">
+                    <svg class="absolute top-0 -left-6 h-full w-12 text-white z-10" viewBox="0 0 48 100" preserveAspectRatio="none">
+                        <path d="M0,0 Q24,50 0,100 L48,100 L48,0 Z" fill="currentColor"/>
+                    </svg>
+                </div>
+                <!-- Mobile separator -->
+                <div class="md:hidden h-0.5 bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+
+                <!-- RIGHT: Google Fit Section -->
+                <div class="flex-1 p-6 lg:p-8 bg-white">
+                    @if($supportsGoogleFit)
+                        <div class="flex items-center gap-5 h-full">
+                            <div class="w-16 h-16 bg-gray-50 border-2 border-gray-100 rounded-2xl shadow-sm flex items-center justify-center shrink-0">
+                                <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none">
+                                    <path d="M22.5 12.06c0-.82-.07-1.6-.2-2.36H12v4.49h5.88a5.03 5.03 0 0 1-2.18 3.3v2.74h3.53c2.06-1.9 3.25-4.7 3.25-7.17z" fill="#4285F4"/>
+                                    <path d="M12 22.5c2.95 0 5.43-.98 7.24-2.66l-3.53-2.74c-.98.66-2.23 1.05-3.71 1.05-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.08 7.7 22.5 12 22.5z" fill="#34A853"/>
+                                    <path d="M5.84 13.62a6.52 6.52 0 0 1-.43-2.62c0-.91.16-1.78.43-2.62V5.54H2.18A10.49 10.49 0 0 0 0 12c0 1.68.4 3.29 1.18 4.76l3.66-2.84V13.62z" fill="#FBBC05"/>
+                                    <path d="M12 5.03c1.61 0 3.05.55 4.19 1.64l3.15-3.15C17.43 1.63 14.95.5 12 .5 7.7.5 3.99 2.92 2.18 6.54l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                                </svg>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-[900] text-xl text-gray-900 mb-1">Google Fit</h3>
+                                @if($googleFitConnected)
+                                    <p class="text-sm font-[600] text-green-600 flex items-center gap-1.5">
+                                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                                        Connected & syncing
+                                    </p>
+                                @else
+                                    <p class="text-sm font-[600] text-gray-500">Auto-sync your data</p>
+                                @endif
+                            </div>
+                            <div class="flex flex-col items-end gap-2">
+                                @if($googleFitConnected)
+                                    <button onclick="syncGoogleFit()" id="syncBtn" class="px-5 py-3 bg-blue-50 text-blue-700 font-[800] rounded-xl hover:bg-blue-100 hover:shadow-md transition-all flex items-center gap-2">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                        Sync
+                                    </button>
+                                    <form action="{{ route('elderly.googlefit.disconnect') }}" method="POST" class="inline">
+                                        @csrf
+                                        <button type="submit" class="text-sm font-[700] text-gray-400 hover:text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-all">
+                                            Unlink
+                                        </button>
+                                    </form>
+                                @else
+                                    <a href="{{ route('elderly.googlefit.connect') }}" class="px-5 py-3 bg-gray-900 text-white font-[800] rounded-xl hover:bg-gray-800 hover:shadow-lg transition-all flex items-center gap-2">
+                                        Connect
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                        
+                        @if($googleFitConnected)
+                        <div id="autoSyncStatus" class="mt-4 pt-4 border-t border-gray-100 text-sm font-[700] text-gray-500 flex items-center gap-2">
+                            <div class="w-2.5 h-2.5 bg-gray-300 rounded-full"></div>
+                            <span>Status: Idle</span>
+                        </div>
+                        @endif
+                    @else
+                        <!-- Non-Google Fit supported vital -->
+                        <div class="flex items-center gap-5 h-full">
+                            <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center">
+                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-[900] text-xl text-gray-900 mb-1">Manual Entry Only</h3>
+                                <p class="text-sm font-[600] text-gray-500">This vital requires manual recording</p>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-md border border-gray-200 overflow-hidden fade-in stagger-3">
             <div class="p-6 border-b border-gray-100 bg-gray-50/50">
-                <h2 class="font-[900] text-xl text-gray-900">Recent History</h2>
-                <p class="text-sm font-medium text-gray-500 mt-1">Your logs for the past 30 days</p>
+                <h2 class="font-[900] text-2xl text-gray-900">Recent History</h2>
+                <p class="text-base font-[600] text-gray-500 mt-1">Your logs for the past 30 days</p>
             </div>
             
             <div class="divide-y divide-gray-100 max-h-[600px] overflow-y-auto custom-scrollbar">
@@ -236,15 +294,15 @@
                         }
                     @endphp
 
-                    <div class="group p-5 hover:bg-gray-50 transition-colors flex items-center justify-between">
+                    <div class="group p-5 lg:p-6 hover:bg-gray-50 transition-colors flex items-center justify-between">
                         <div class="flex items-center gap-5">
-                            <div class="w-14 h-14 {{ $colors['bg'] }} rounded-2xl flex items-center justify-center text-3xl shadow-sm border {{ $colors['border'] }}">
+                            <div class="w-16 h-16 {{ $colors['bg'] }} rounded-2xl flex items-center justify-center text-3xl shadow-sm border {{ $colors['border'] }}">
                                 {{ $config['icon'] }}
                             </div>
                             
                             <div>
-                                <div class="flex items-baseline gap-3">
-                                    <span class="text-2xl font-[900] text-gray-900 tracking-tight">
+                                <div class="flex items-baseline gap-3 flex-wrap">
+                                    <span class="text-3xl lg:text-4xl font-[900] text-gray-900 tracking-tight">
                                         @if($type === 'blood_pressure')
                                             {{ $metric->value_text }}
                                         @elseif($type === 'temperature')
@@ -253,15 +311,15 @@
                                             {{ intval($metric->value) }}
                                         @endif
                                     </span>
-                                    <span class="text-sm font-bold text-gray-400">{{ $config['unit'] }}</span>
+                                    <span class="text-base font-[700] text-gray-400">{{ $config['unit'] }}</span>
                                     
                                     @if($recordStatus)
-                                        <span class="ml-2 px-2.5 py-0.5 rounded-full text-[11px] font-[800] uppercase tracking-wide {{ $recordStatus['bg'] }} {{ $recordStatus['text'] }}">
+                                        <span class="px-3 py-1 rounded-full text-xs font-[800] uppercase tracking-wide {{ $recordStatus['bg'] }} {{ $recordStatus['text'] }}">
                                             {{ $recordStatus['label'] }}
                                         </span>
                                     @endif
                                 </div>
-                                <p class="text-sm font-semibold text-gray-500 mt-0.5">
+                                <p class="text-base font-[700] text-gray-500 mt-1">
                                     {{ $metric->measured_at->format('M j, Y') }} 
                                     <span class="text-gray-300 mx-1">•</span> 
                                     {{ $metric->measured_at->format('g:i A') }}
@@ -271,14 +329,19 @@
 
                         <div class="flex items-center gap-4">
                             @if($metric->source === 'google_fit')
-                                <div class="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg flex items-center gap-1.5 shadow-sm border border-blue-200" title="Synced from Google Fit">
-                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/></svg>
-                                    <span class="text-xs font-[800]">FIT</span>
+                                <div class="px-3 py-2 bg-gray-50 rounded-xl flex items-center gap-2 shadow-sm border border-gray-200" title="Synced from Google Fit">
+                                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                                        <path d="M22.5 12.06c0-.82-.07-1.6-.2-2.36H12v4.49h5.88a5.03 5.03 0 0 1-2.18 3.3v2.74h3.53c2.06-1.9 3.25-4.7 3.25-7.17z" fill="#4285F4"/>
+                                        <path d="M12 22.5c2.95 0 5.43-.98 7.24-2.66l-3.53-2.74c-.98.66-2.23 1.05-3.71 1.05-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.08 7.7 22.5 12 22.5z" fill="#34A853"/>
+                                        <path d="M5.84 13.62a6.52 6.52 0 0 1-.43-2.62c0-.91.16-1.78.43-2.62V5.54H2.18A10.49 10.49 0 0 0 0 12c0 1.68.4 3.29 1.18 4.76l3.66-2.84V13.62z" fill="#FBBC05"/>
+                                        <path d="M12 5.03c1.61 0 3.05.55 4.19 1.64l3.15-3.15C17.43 1.63 14.95.5 12 .5 7.7.5 3.99 2.92 2.18 6.54l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                                    </svg>
+                                    <span class="text-sm font-[800] text-gray-700">Google Fit</span>
                                 </div>
                             @else
-                                <div class="px-3 py-1.5 bg-gray-200 text-gray-600 rounded-lg flex items-center gap-1.5 shadow-sm border border-gray-300" title="Manually Entered">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                    <span class="text-xs font-[800]">MANUAL</span>
+                                <div class="px-3 py-2 bg-gray-200 text-gray-600 rounded-xl flex items-center gap-2 shadow-sm border border-gray-300" title="Manually Entered">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                    <span class="text-sm font-[800]">MANUAL</span>
                                 </div>
                             @endif
 

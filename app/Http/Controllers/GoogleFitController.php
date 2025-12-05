@@ -357,7 +357,8 @@ class GoogleFitController extends Controller
                                 $heartRate = $values[0]['fpVal'] ?? $values[0]['intVal'] ?? null;
                                 
                                 if ($heartRate && $heartRate > 0 && $heartRate < 300) {
-                                    $timestamp = Carbon::createFromTimestampMs((int)($startTimeNanos / 1000000));
+                                    $timestamp = Carbon::createFromTimestampMs((int)($startTimeNanos / 1000000))
+                                        ->setTimezone(config('app.timezone'));
                                     
                                     $allData[] = [
                                         'value' => (int) round($heartRate),
@@ -438,7 +439,8 @@ class GoogleFitController extends Controller
                                 $diastolic = $values[1]['fpVal'] ?? null;
                                 
                                 if ($systolic && $diastolic && $systolic > 0 && $diastolic > 0) {
-                                    $timestamp = Carbon::createFromTimestampMs((int)($startTimeNanos / 1000000));
+                                    $timestamp = Carbon::createFromTimestampMs((int)($startTimeNanos / 1000000))
+                                        ->setTimezone(config('app.timezone'));
                                     
                                     $allData[] = [
                                         'systolic' => (int) round($systolic),
@@ -497,7 +499,8 @@ class GoogleFitController extends Controller
                                 
                                 // Temperature in Celsius should be between 35 and 42
                                 if ($temperature && $temperature >= 35 && $temperature <= 42) {
-                                    $timestamp = Carbon::createFromTimestampMs((int)($startTimeNanos / 1000000));
+                                    $timestamp = Carbon::createFromTimestampMs((int)($startTimeNanos / 1000000))
+                                        ->setTimezone(config('app.timezone'));
                                     
                                     $allData[] = [
                                         'value' => round($temperature, 1),

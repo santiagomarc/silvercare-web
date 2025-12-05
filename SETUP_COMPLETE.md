@@ -1,6 +1,6 @@
 # SilverCare Web - Setup Progress 🚀
 
-**Last Updated:** Nov 30, 2025 (Evening Session)
+**Last Updated:** Dec 5, 2025
 
 ## ✅ Completed Steps
 
@@ -536,6 +536,93 @@ php artisan route:clear && php artisan config:clear && php artisan cache:clear &
 
 ---
 
+## 📝 Session Notes (Dec 4, 2025)
+
+### What Was Done This Session:
+
+1. **Timezone Configuration Fix**
+   - Changed default timezone from `UTC` to `Asia/Singapore` (GMT+8)
+   - Updated in `config/app.php`
+   - All times now display correctly in Philippine time
+
+2. **Caregiver Dashboard Mood Display Fix**
+   - Fixed mood emoji array indices from 0-4 to 1-5
+   - Mood values stored as 1-5 scale, not 0-4
+   - Now correctly displays: 😢 (1) → 😕 (2) → 😐 (3) → 🙂 (4) → 😊 (5)
+
+3. **Medication Progress Calculation Fix**
+   - Fixed `$med->times` → `$med->times_of_day` in ElderlyDashboardController
+   - Medication daily goals percentage now calculates correctly
+
+4. **Medication Entry Redesign (Elderly Dashboard)**
+   - Complete overhaul of medication entries
+   - Each dose is now its own clickable entry (not separate time chips)
+   - Time integrated directly into entry (e.g., "8:00 AM")
+   - Clicking anywhere on entry triggers mark/unmark
+   - Status icon on left, status text on right
+   - More compact and user-friendly design
+
+5. **Dashboard Card Colorization**
+   - **Checklist card**: Light blue (`bg-blue-50 border-blue-200`)
+   - **MOTD card**: Light yellow (`bg-yellow-50 border-yellow-200`)
+   - **Daily Progress card**: Light pink (`bg-pink-50 border-pink-200`)
+   - **Calendar card**: Light purple (`bg-purple-50 border-purple-200`)
+
+6. **Mini Calendar Preview Cards**
+   - Added purple border outline to event preview cards
+   - `border-2 border-purple-200` styling
+
+7. **Medication Card Height Fix**
+   - Removed hardcoded `min-height: 380px`
+   - Card now fits content dynamically
+   - No more unnecessary whitespace
+
+### Files Modified:
+- `config/app.php` - Timezone change
+- `app/Http/Controllers/ElderlyDashboardController.php` - Medication progress fix
+- `resources/views/caregiver/dashboard.blade.php` - Mood array indices fix
+- `resources/views/elderly/dashboard.blade.php` - Complete medication redesign, card colors, calendar borders
+
+---
+
+## 📝 Session Notes (Dec 5, 2025)
+
+### What Was Done This Session:
+
+1. **Vitals Page - Integrated Stats Hero Card**
+   - Restored the unified gradient hero card design
+   - Shows latest reading with "Measured X minutes/hours ago"
+   - AVG, MIN, MAX displayed in compact frosted glass cards on right
+   - Dynamic gradient color based on vital type
+   - Decorative background circles for visual appeal
+
+2. **Vitals Page - Unified Action Card (Manual + Google Fit)**
+   - Combined "Record Manually" and "Google Fit Sync" into one card
+   - Left side: Gradient button for manual recording
+   - Right side: Google Fit connection/sync controls
+   - Curved SVG separator between the two sections
+   - Reduced cognitive load with unified design
+
+3. **Google Fit Timezone Fix**
+   - Fixed 8-hour time offset on synced vitals
+   - Timestamps from Google Fit now converted to Asia/Singapore timezone
+   - Added timezone config to PostgreSQL database settings
+   - Affected: Heart Rate, Blood Pressure, Temperature
+
+4. **Stronger Fonts for Elderly Users**
+   - Vitals page: Larger readings (text-3xl → text-4xl), bolder dates/times
+   - Dashboard vital cards: Values increased to text-3xl, times now text-sm font-[700]
+   - History entries: Bigger icons (w-16 h-16), larger source badges
+   - All improvements for better readability
+
+### Files Modified:
+- `resources/views/elderly/vitals/show.blade.php` - Unified action card, stronger fonts
+- `resources/views/elderly/dashboard.blade.php` - Stronger fonts on vital cards
+- `app/Http/Controllers/GoogleFitController.php` - Timezone fix for synced data
+- `config/database.php` - Added timezone to PostgreSQL config
+
+---
+
 ## 📝 Session Notes (Nov 30, 2025 - Evening)
 
 ### What Was Done This Session:
@@ -574,5 +661,45 @@ php artisan route:clear && php artisan config:clear && php artisan cache:clear &
 - `resources/views/elderly/dashboard.blade.php` - Health badges, Google Fit badges
 - `resources/views/elderly/vitals/show.blade.php` - Health badges, auto-sync fix, design revert
 - `app/Http/Controllers/GoogleFitController.php` - BP, Temp scopes and parsing
+
+---
+
+## 📝 Session Notes (Dec 5, 2025 - Final Polish)
+
+### What Was Done This Session:
+
+1. **Stats Hero Card Redesign**
+   - Integrated stats card with gradient background
+   - Shows latest reading with "time ago" format
+   - Displays AVG, MIN, MAX in compact cards
+   - Blood pressure shows total entries instead of stats
+
+2. **Unified Action Card**
+   - Combined "Record Manually" and "Google Fit Sync" into one rectangular card
+   - Left side: Gradient button for manual recording
+   - Right side: Google Fit connection/sync controls
+   - Curved SVG separator between the two sections
+
+3. **Google Fit Timezone Fix**
+   - Fixed 8-hour time offset on synced vitals (UTC → Asia/Singapore)
+   - Added `->setTimezone(config('app.timezone'))` to all fetch methods
+   - Added `'timezone' => 'Asia/Singapore'` to PostgreSQL database config
+
+4. **Stronger Fonts for Elderly Users**
+   - Vitals page: Larger readings (text-6xl/7xl), bolder dates/times
+   - Dashboard vital cards: Values increased to text-3xl
+   - All improvements for better readability for elderly users
+
+5. **Final Polish Items**
+   - **Swapped card order**: Stats hero card now appears FIRST, action card below
+   - **Google Fit section redesign**: Sync button on top, "Unlink" text button below (was X icon)
+   - **Measure Now hover**: Dashboard vital cards show "Measure Now" on hover when data exists
+   - **Colored Google logo**: History badges use multi-color Google logo (blue, green, yellow, red)
+
+### Files Modified:
+- `resources/views/elderly/vitals/show.blade.php` - Card order, stats hero, Google Fit section
+- `resources/views/elderly/dashboard.blade.php` - Measure Now hover, stronger fonts
+- `app/Http/Controllers/GoogleFitController.php` - Timezone conversion
+- `config/database.php` - PostgreSQL timezone config
 
 **Repository:** github.com/santiagomarc/silvercare-web

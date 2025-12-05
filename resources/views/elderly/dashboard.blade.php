@@ -402,13 +402,16 @@
                             </div>
                         </div>
                         <div>
-                            <h4 class="font-[700] text-gray-500 text-sm uppercase tracking-wide mb-1">Blood Pressure</h4>
+                            <h4 class="font-[800] text-gray-500 text-sm uppercase tracking-wide mb-1">Blood Pressure</h4>
                             @if($bp['recorded'])
                                 <div class="flex items-baseline gap-2">
-                                    <span class="text-2xl font-[900] text-gray-900">{{ $bp['value_text'] }}</span>
-                                    <span class="text-sm text-gray-400">mmHg</span>
+                                    <span class="text-3xl font-[900] text-gray-900 group-hover:hidden">{{ $bp['value_text'] }}</span>
+                                    <span class="text-base font-[700] text-gray-400 group-hover:hidden">mmHg</span>
                                 </div>
-                                <p class="text-[10px] text-gray-400 mt-1">{{ $bp['measured_at']?->format('g:i A') }}</p>
+                                <p class="text-sm font-[700] text-gray-400 mt-1 group-hover:hidden">{{ $bp['measured_at']?->format('g:i A') }}</p>
+                                <div class="hidden group-hover:flex w-full py-3 mt-1 rounded-xl border-2 border-dashed border-red-400 text-red-500 font-bold text-sm items-center justify-center gap-2 transition-colors">
+                                    <span>+</span> Measure Now
+                                </div>
                             @else
                                 <div class="w-full py-3 mt-1 rounded-xl border-2 border-dashed border-gray-300 text-gray-400 font-bold text-sm group-hover:border-red-400 group-hover:text-red-500 transition-colors flex items-center justify-center gap-2">
                                     <span>+</span> Measure
@@ -451,13 +454,16 @@
                             </div>
                         </div>
                         <div>
-                            <h4 class="font-[700] text-gray-500 text-sm uppercase tracking-wide mb-1">Sugar Level</h4>
+                            <h4 class="font-[800] text-gray-500 text-sm uppercase tracking-wide mb-1">Sugar Level</h4>
                             @if($sugar['recorded'])
                                 <div class="flex items-baseline gap-2">
-                                    <span class="text-2xl font-[900] text-gray-900">{{ intval($sugar['value']) }}</span>
-                                    <span class="text-sm text-gray-400">mg/dL</span>
+                                    <span class="text-3xl font-[900] text-gray-900 group-hover:hidden">{{ intval($sugar['value']) }}</span>
+                                    <span class="text-base font-[700] text-gray-400 group-hover:hidden">mg/dL</span>
                                 </div>
-                                <p class="text-[10px] text-gray-400 mt-1">{{ $sugar['measured_at']?->format('g:i A') }}</p>
+                                <p class="text-sm font-[700] text-gray-400 mt-1 group-hover:hidden">{{ $sugar['measured_at']?->format('g:i A') }}</p>
+                                <div class="hidden group-hover:flex w-full py-3 mt-1 rounded-xl border-2 border-dashed border-blue-400 text-blue-500 font-bold text-sm items-center justify-center gap-2 transition-colors">
+                                    <span>+</span> Measure Now
+                                </div>
                             @else
                                 <div class="w-full py-3 mt-1 rounded-xl border-2 border-dashed border-gray-300 text-gray-400 font-bold text-sm group-hover:border-blue-400 group-hover:text-blue-500 transition-colors flex items-center justify-center gap-2">
                                     <span>+</span> Measure
@@ -503,13 +509,16 @@
                             </div>
                         </div>
                         <div>
-                            <h4 class="font-[700] text-gray-500 text-sm uppercase tracking-wide mb-1">Temperature</h4>
+                            <h4 class="font-[800] text-gray-500 text-sm uppercase tracking-wide mb-1">Temperature</h4>
                             @if($temp['recorded'])
                                 <div class="flex items-baseline gap-2">
-                                    <span class="text-2xl font-[900] text-gray-900">{{ number_format($temp['value'], 1) }}</span>
-                                    <span class="text-sm text-gray-400">°C</span>
+                                    <span class="text-3xl font-[900] text-gray-900 group-hover:hidden">{{ number_format($temp['value'], 1) }}</span>
+                                    <span class="text-base font-[700] text-gray-400 group-hover:hidden">°C</span>
                                 </div>
-                                <p class="text-[10px] text-gray-400 mt-1">{{ $temp['measured_at']?->format('g:i A') }}</p>
+                                <p class="text-sm font-[700] text-gray-400 mt-1 group-hover:hidden">{{ $temp['measured_at']?->format('g:i A') }}</p>
+                                <div class="hidden group-hover:flex w-full py-3 mt-1 rounded-xl border-2 border-dashed border-orange-400 text-orange-500 font-bold text-sm items-center justify-center gap-2 transition-colors">
+                                    <span>+</span> Measure Now
+                                </div>
                             @else
                                 <div class="w-full py-3 mt-1 rounded-xl border-2 border-dashed border-gray-300 text-gray-400 font-bold text-sm group-hover:border-orange-400 group-hover:text-orange-500 transition-colors flex items-center justify-center gap-2">
                                     <span>+</span> Measure
@@ -555,13 +564,16 @@
                             </div>
                         </div>
                         <div>
-                            <h4 class="font-[700] text-gray-500 text-sm uppercase tracking-wide mb-1">Heart Rate</h4>
+                            <h4 class="font-[800] text-gray-500 text-sm uppercase tracking-wide mb-1">Heart Rate</h4>
                             @if($hr['recorded'])
                                 <div class="flex items-baseline gap-2">
-                                    <span class="text-2xl font-[900] text-gray-900">{{ intval($hr['value']) }}</span>
-                                    <span class="text-sm text-gray-400">bpm</span>
+                                    <span class="text-3xl font-[900] text-gray-900 group-hover:hidden">{{ intval($hr['value']) }}</span>
+                                    <span class="text-base font-[700] text-gray-400 group-hover:hidden">bpm</span>
                                 </div>
-                                <p class="text-[10px] text-gray-400 mt-1">{{ $hr['measured_at']?->format('g:i A') }}</p>
+                                <p class="text-sm font-[700] text-gray-400 mt-1 group-hover:hidden">{{ $hr['measured_at']?->format('g:i A') }}</p>
+                                <div class="hidden group-hover:flex w-full py-3 mt-1 rounded-xl border-2 border-dashed border-rose-400 text-rose-500 font-bold text-sm items-center justify-center gap-2 transition-colors">
+                                    <span>+</span> Measure Now
+                                </div>
                             @else
                                 <div class="w-full py-3 mt-1 rounded-xl border-2 border-dashed border-gray-300 text-gray-400 font-bold text-sm group-hover:border-rose-400 group-hover:text-rose-500 transition-colors flex items-center justify-center gap-2">
                                     <span>+</span> Measure
