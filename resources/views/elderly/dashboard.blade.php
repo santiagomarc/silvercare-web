@@ -114,7 +114,7 @@
                 </p>
                 <div class="h-8 w-[1px] bg-gray-200 hidden md:block"></div>
                 
-                <!-- PROFILE LINK (Updated as requested) -->
+                <!-- PROFILE LINK -->
                 <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 pl-2 group hover:bg-gray-50 rounded-2xl py-1 px-2 transition-all cursor-pointer" title="Manage Profile">
                     <div class="relative">
                         <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-[#000080] font-[900] text-lg group-hover:bg-[#000080] group-hover:text-white transition-colors">
@@ -167,59 +167,54 @@
             <p class="text-gray-500">Here's your daily health summary.</p>
         </div>
 
-        <!-- NEW: Calendar Widget (Replaces the old 2-card row) -->
-        <div class="mb-8">
-            <a href="{{ route('calendar.index') }}" class="group bg-purple-50 rounded-[24px] p-8 shadow-sm border border-purple-200 hover:shadow-md hover:border-purple-300 transition-all block relative overflow-hidden">
-                <!-- Decorative BG -->
-                <div class="absolute top-0 right-0 w-64 h-64 bg-purple-100 rounded-full -mr-20 -mt-20 opacity-50 group-hover:scale-110 transition-transform"></div>
+        <!-- NEW: Main Navigation Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            
+            <!-- 1. WELLNESS CARD (UPDATED: Red/Pink Theme) -->
+            <a href="{{ route('elderly.wellness.index') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-500 to-pink-600 shadow-xl shadow-pink-200 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-1">
+                <!-- Background Decoration -->
+                <div class="absolute top-0 right-0 -mt-8 -mr-8 w-32 h-32 rounded-full bg-white/20 blur-2xl group-hover:bg-white/30 transition"></div>
+                <div class="absolute bottom-0 left-0 -mb-8 -ml-8 w-24 h-24 rounded-full bg-black/10 blur-xl"></div>
+                <!-- Pulse Animation Circle -->
+                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-white/5 rounded-full animate-pulse"></div>
                 
-                <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-                    <!-- Left Side: Title & Description -->
-                    <div class="max-w-md">
-                        <div class="flex items-center gap-4 mb-3">
-                            <div class="w-12 h-12 bg-purple-100 rounded-2xl flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <div class="relative p-6 flex items-center justify-between h-full z-10">
+                    <div class="flex flex-col justify-center">
+                        <div class="flex items-center space-x-3 mb-2">
+                            <div class="p-2.5 bg-white/20 rounded-xl backdrop-blur-sm border border-white/20 shadow-inner">
+                                <!-- Heart Icon -->
+                                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
                             </div>
-                            <h3 class="font-[800] text-2xl text-gray-900 group-hover:text-purple-700 transition-colors">My Schedule</h3>
+                            <h3 class="text-2xl font-extrabold text-white font-montserrat tracking-wide drop-shadow-sm">Wellness Center</h3>
                         </div>
-                        <p class="text-gray-500 font-medium">
-                            View your appointments, medication reminders, and daily events. Click to manage your full calendar.
-                        </p>
-                    </div>
-
-                    <!-- Right Side: Upcoming Events Preview -->
-                    <div class="flex-grow w-full lg:w-auto">
-                        @if(count($upcomingEvents) > 0)
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                @foreach($upcomingEvents as $event)
-                                    <div class="bg-white rounded-2xl p-4 border-2 border-purple-300 shadow-sm group-hover:border-purple-400 group-hover:shadow-md transition-all">
-                                        <div class="flex items-center justify-between mb-2">
-                                            <span class="text-[10px] font-[900] text-purple-600 uppercase bg-white px-2 py-0.5 rounded-full shadow-sm">
-                                                {{ \Carbon\Carbon::parse($event->start_time)->isToday() ? 'TODAY' : \Carbon\Carbon::parse($event->start_time)->format('M d') }}
-                                            </span>
-                                            <span class="text-xs font-bold text-gray-500">
-                                                {{ \Carbon\Carbon::parse($event->start_time)->format('g:i A') }}
-                                            </span>
-                                        </div>
-                                        <p class="font-[800] text-gray-900 text-sm truncate">{{ $event->title }}</p>
-                                        <p class="text-[10px] text-gray-500 truncate mt-0.5">{{ $event->type ?? 'Event' }}</p>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @else
-                            <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100 text-center w-full">
-                                <p class="text-sm font-bold text-gray-500 mb-1">No upcoming events.</p>
-                                <p class="text-xs text-gray-400">Tap here to schedule something new.</p>
-                            </div>
-                        @endif
+                        <p class="text-pink-50 font-medium text-sm pl-1 tracking-wide">Relax, stretch, and play games.</p>
                     </div>
                     
-                    <!-- Arrow Icon (Desktop only) -->
-                    <div class="hidden lg:flex bg-white border border-gray-200 w-12 h-12 rounded-full items-center justify-center text-gray-400 group-hover:bg-purple-600 group-hover:text-white group-hover:border-purple-600 transition-all flex-shrink-0 shadow-sm">
+                    <div class="h-12 w-12 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white group-hover:text-rose-600 transition-all duration-300 shadow-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                    </div>
+                </div>
+            </a>
+
+            <!-- 2. MY SCHEDULE / CALENDAR -->
+            <a href="{{ route('calendar.index') }}" class="group bg-white rounded-3xl p-6 shadow-sm border border-purple-200 hover:shadow-md hover:border-purple-300 transition-all relative overflow-hidden">
+                <div class="relative z-10 flex items-center justify-between h-full">
+                    <div class="flex flex-col justify-center">
+                        <div class="flex items-center space-x-3 mb-2">
+                            <div class="p-2.5 bg-purple-100 text-purple-600 rounded-xl">
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-900 font-montserrat">My Schedule</h3>
+                        </div>
+                        <p class="text-gray-500 font-medium text-sm pl-1">Appointments & reminders</p>
+                    </div>
+                    
+                    <div class="h-12 w-12 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                     </div>
                 </div>
             </a>
+
         </div>
 
         <!-- THE DASHBOARD GRID -->
@@ -362,6 +357,7 @@
 
             <!-- CENTER COLUMN (6/12): Vitals Grid -->
             <div class="lg:col-span-6">
+                <!-- Existing code for Vitals remains unchanged -->
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="font-[800] text-xl text-gray-900">Health Vitals</h3>
                     <div class="flex items-center gap-3">
@@ -383,8 +379,8 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    
-                    <!-- Vital Card: Blood Pressure -->
+                    <!-- Vital cards logic remains identical to previous version, just ensuring grid layout is preserved -->
+                     <!-- Vital Card: Blood Pressure -->
                     @php 
                         $bp = $vitalsData['blood_pressure'] ?? ['recorded' => false];
                         $bpStatus = null;
@@ -606,9 +602,9 @@
                     </a>
 
                 </div>
-
-                <!-- Steps Progress Card -->
-                <div class="mt-6 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-[24px] p-6 shadow-lg shadow-emerald-900/20 text-white relative overflow-hidden">
+                
+                <!-- Steps Progress Card - Unchanged -->
+                 <div class="mt-6 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-[24px] p-6 shadow-lg shadow-emerald-900/20 text-white relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20"></div>
                     <div class="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12"></div>
                     
@@ -665,12 +661,13 @@
                         </div>
                     </div>
                 </div>
+
             </div>
 
             <!-- RIGHT COLUMN (3/12): Tasks & Meds -->
             <div class="lg:col-span-3 space-y-8">
-                
-                <!-- MEDICATION LIST (GREEN) - With Dose Tracking -->
+                <!-- Code for right column remains identical -->
+                 <!-- MEDICATION LIST (GREEN) - With Dose Tracking -->
                 <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-[24px] p-6 shadow-lg shadow-green-900/20 text-white flex flex-col">
                     <div class="flex justify-between items-center mb-2">
                         <div>
@@ -935,7 +932,7 @@
         </div>
     </main>
 
-    <!-- JAVASCRIPT LOGIC -->
+    <!-- JAVASCRIPT LOGIC (Unchanged) -->
     <script>
         // ==========================================
         // CONFIGURATION
@@ -1942,7 +1939,7 @@
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': CSRF_TOKEN,
                         'X-Requested-With': 'XMLHttpRequest'
-                    }
+                    },
                 });
 
                 const data = await response.json();
