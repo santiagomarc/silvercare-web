@@ -728,6 +728,7 @@
                                     $isPastWindow = $now->gt($windowEnd);
                                     $isBeforeWindow = $now->lt($windowStart);
                                     $canTake = $isWithinWindow || $isPastWindow;
+                                    $canUndo = !$isPastWindow; // Can only undo within the grace period
                                     
                                     // Determine entry style
                                     if ($isTaken) {
@@ -757,7 +758,8 @@
                                      data-medication-id="{{ $medication->id }}"
                                      data-time="{{ $time }}"
                                      data-taken="{{ $isTaken ? 'true' : 'false' }}"
-                                     data-can-take="{{ $canTake ? 'true' : 'false' }}">
+                                     data-can-take="{{ $canTake ? 'true' : 'false' }}"
+                                     data-can-undo="{{ $canUndo ? 'true' : 'false' }}">
                                      
                                     <div class="flex items-center gap-3" onclick="toggleMedicationEntry(this.closest('.medication-entry'))">
                                         <!-- Status Icon -->
@@ -1104,9 +1106,16 @@
             const time = entry.dataset.time;
             const isTaken = entry.dataset.taken === 'true';
             const canTake = entry.dataset.canTake === 'true';
+            const canUndo = entry.dataset.canUndo === 'true';
 
             if (!canTake && !isTaken) {
                 showToast('⏰ Too early! Wait until the scheduled time window (1 hour before).', 'info');
+                return;
+            }
+
+            // Prevent unmarking if past grace period
+            if (isTaken && !canUndo) {
+                showToast('🔒 Cannot unmark - grace period has ended.', 'info');
                 return;
             }
 
@@ -1138,6 +1147,11 @@
                     // Mark as taken
                     entry.dataset.taken = 'true';
                     const isLate = data.taken_late;
+                    
+                    // If taken late, can no longer undo (past grace period)
+                    if (isLate) {
+                        entry.dataset.canUndo = 'false';
+                    }
                     
                     // Update entry appearance
                     entry.className = 'medication-entry rounded-xl p-3 border-2 transition-all duration-300 cursor-pointer hover:shadow-md active:scale-[0.98] opacity-75 ' + 

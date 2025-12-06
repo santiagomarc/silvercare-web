@@ -1,6 +1,6 @@
 # SilverCare Web - Setup Progress 🚀
 
-**Last Updated:** Dec 6, 2025
+**Last Updated:** Dec 5, 2025
 
 ## ✅ Completed Steps
 
@@ -662,6 +662,8 @@ php artisan route:clear && php artisan config:clear && php artisan cache:clear &
 - `resources/views/elderly/vitals/show.blade.php` - Health badges, auto-sync fix, design revert
 - `app/Http/Controllers/GoogleFitController.php` - BP, Temp scopes and parsing
 
+**Repository:** github.com/santiagomarc/silvercare-web
+
 ---
 
 ## 📝 Session Notes (Dec 5, 2025 - Final Polish)
@@ -763,3 +765,61 @@ php artisan route:clear && php artisan config:clear && php artisan cache:clear &
     - Removed old "Daily Progress" card
     - Consolidated metrics into Garden card
 
+---
+
+## 📝 Session Notes (Dec 6, 2025 - Late Night) - Health Analytics
+
+### What Was Done This Session:
+
+1.  **Vitals Analytics Dashboard**
+    - Created comprehensive analytics view (`/my-vitals/analytics`)
+    - Displays statistical data for all 4 vital types (BP, Sugar, Temp, Heart Rate)
+    - Time-range filtering: 7 days, 30 days, 90 days
+
+2.  **Advanced Data Processing**
+    - **Blood Pressure**: Parses "systolic/diastolic" strings to calculate separate averages, min/max for both values
+    - **Numeric Vitals**: Automatic calculation of Average, Minimum, Maximum
+    - **Trend Detection**: Algorithms to determine if stats are Increasing, Decreasing, or Stable
+
+3.  **Visualization Integration**
+    - Implemented Chart.js integration for visual trend analysis
+    - Interactive data points with date/value tooltips
+    - Responsive chart sizing
+
+4.  **Route & Controller Updates**
+    - Added `analytics()` method to `HealthMetricController`
+    - Added protected route `/my-vitals/analytics`
+    - Optimized queries to fetch data in efficient batches
+
+### Files Modified:
+- `app/Http/Controllers/HealthMetricController.php` - Added analytics logic & trend calculation
+- `resources/views/elderly/vitals/analytics.blade.php` - New analytics dashboard view
+- `resources/views/elderly/dashboard.blade.php` - Links to analytics
+- `routes/web.php` - Registered analytics route
+
+---
+
+## 📝 Session Notes (Dec 7, 2025) - Medication Undo Safety Fix
+
+### What Was Done This Session:
+
+1.  **Medication Undo Prevention (Safety Fix)**
+    - **Problem:** User could accidentally unmark a medication dose that was already taken late (past the 1-hour grace period). This could cause confusion and incorrect medication tracking.
+    - **Solution:** Added time validation to prevent unmarking doses after the grace period ends.
+    
+    **Implementation Details:**
+    - Backend: `undoMedication()` now checks if current time is past `scheduledTime + 60 minutes`
+    - Returns 400 error with message "Cannot unmark - grace period has ended"
+    - Frontend: Added `data-can-undo` attribute to medication entries
+    - JavaScript checks `canUndo` before making API call
+    - Shows friendly toast message: "🔒 Cannot unmark - grace period has ended."
+    - When a dose is taken late, `canUndo` is immediately set to `false`
+
+    **User Experience:**
+    - Within grace window: Can freely mark/unmark doses
+    - Past grace window (taken late): Dose is locked, cannot be unmarked
+    - Prevents accidental data corruption
+
+### Files Modified:
+- `app/Http/Controllers/ElderlyDashboardController.php` - Added time validation to `undoMedication()`
+- `resources/views/elderly/dashboard.blade.php` - Added `data-can-undo` attribute and JS check

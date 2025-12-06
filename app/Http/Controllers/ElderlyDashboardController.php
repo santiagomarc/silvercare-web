@@ -396,14 +396,33 @@ class ElderlyDashboardController extends Controller
         ]);
 
         $scheduledTime = $request->input('time');
+        $now = Carbon::now();
         $today = Carbon::today();
         $scheduledDateTime = Carbon::parse($today->format('Y-m-d') . ' ' . $scheduledTime);
 
-        // Find and delete the log
-        MedicationLog::where('elderly_id', $elderlyId)
+        // Check if we're still within the grace period window
+        $windowEnd = $scheduledDateTime->copy()->addMinutes(self::MEDICATION_GRACE_MINUTES);
+        $isPastWindow = $now->gt($windowEnd);
+
+        // Find the existing log
+        $log = MedicationLog::where('elderly_id', $elderlyId)
             ->where('medication_id', $medication->id)
             ->where('scheduled_time', $scheduledDateTime)
-            ->delete();
+            ->first();
+
+        // If past grace period, don't allow unmarking
+        if ($isPastWindow) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot unmark - grace period has ended',
+                'can_undo' => false,
+            ], 400);
+        }
+
+        // Delete the log if it exists
+        if ($log) {
+            $log->delete();
+        }
 
         return response()->json([
             'success' => true,
