@@ -1,6 +1,6 @@
 # SilverCare Web - Setup Progress 🚀
 
-**Last Updated:** Dec 5, 2025
+**Last Updated:** Dec 6, 2025
 
 ## ✅ Completed Steps
 
@@ -703,3 +703,63 @@ php artisan route:clear && php artisan config:clear && php artisan cache:clear &
 - `config/database.php` - PostgreSQL timezone config
 
 **Repository:** github.com/santiagomarc/silvercare-web
+
+---
+
+## 📝 Session Notes (Dec 6, 2025) - UX Audit & Garden of Wellness
+
+### What Was Done This Session:
+
+1.  **Medication & Checklist UX Audit**
+    - Deep-dive architectural and UX review of Medications and Checklists modules.
+    - Verified feature parity between Caregiver (Admin) and Elderly (End-User) roles.
+    - Created `audit_report.md` documenting findings.
+
+2.  **Critical Fix: Visible Medication Instructions (Safety)**
+    - **Problem:** Caregiver could set instructions (e.g., "Take with food"), but Elderly dashboard did NOT display them.
+    - **Solution:** Added an Alpine.js `x-data` toggle ("Show Instructions") to each medication entry.
+    - Clicking reveals the full instructions in a slide-down panel.
+    - Uses `@click.stop` to prevent accidentally marking dose as taken.
+
+3.  **Critical Fix: Expandable Checklist Descriptions (Usability)**
+    - **Problem:** Task descriptions were truncated at 60 characters with no way to read more.
+    - **Solution:** Replaced hard truncation with "Read more" / "Show less" Alpine.js toggle.
+    - Elderly users can now see full task details without leaving the dashboard.
+
+4.  **Garden of Wellness - v1 Implementation (Emotional Design)**
+    - Added a gamified "Digital Plant" card to the Elderly dashboard (Top-Left column).
+    - Plant grows based on `$dailyGoalsProgress` variable.
+    - Initial 3 states: Wilted (<50%), Growing (50-99%), Blooming (100%).
+
+5.  **Garden of Wellness - v2 Refinement (Dynamic & Progressive)**
+    - **Problem:** Plant didn't update in real-time when tasks were completed (required page refresh). "Jumping" animation was annoying.
+    - **Solution:** Refactored to use Client-Side JavaScript (`updateGardenState()`) for instant updates.
+    - Expanded to 5 distinct growth stages (based on user feedback):
+        - **0-24%:** Seed/Thirsty (Grey, wilted)
+        - **25-49%:** Sprout (Small green seedling)
+        - **50-74%:** Growing (Taller stem with leaves)
+        - **75-99%:** Budding (Pink bud appears)
+        - **100%:** Blooming (Full flower with celebration message)
+    - Removed `animate-bounce` class for smoother, less distracting animations (scale/fade on stage change).
+
+6.  **Consolidated Dashboard Progress**
+    - Integrated the metrics from the old "Daily Goals" circular progress card (Tasks, Meds, Vitals counts) directly into the Garden of Wellness card.
+    - Removed the redundant "Daily Progress" card to reduce clutter.
+    - User can now see progress + what to do next in one unified view.
+
+### UI Changes Summary:
+| Change | Before | After |
+|--------|--------|-------|
+| Medication Instructions | Hidden | Expandable "Show Instructions" toggle |
+| Checklist Description | Truncated to 60 chars | "Read more" / "Show less" toggle |
+| Garden Progress | Server-side Blade (3 stages) | Client-side JS (5 stages, real-time) |
+| Daily Goals Card | Separate Card | Merged into Garden Card |
+
+### Files Modified:
+- `resources/views/elderly/dashboard.blade.php`
+    - Garden of Wellness HTML/JS (5 stages, `updateGardenState()`)
+    - Medication entry Alpine.js toggle for instructions
+    - Checklist item Alpine.js toggle for description
+    - Removed old "Daily Progress" card
+    - Consolidated metrics into Garden card
+

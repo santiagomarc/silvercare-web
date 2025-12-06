@@ -228,6 +228,102 @@
             <!-- LEFT COLUMN (3/12): Mood & Progress -->
             <div class="lg:col-span-3 space-y-8">
                 
+                <!-- 0. GARDEN OF WELLNESS (NEW - Dynamic) -->
+                <div class="bg-gradient-to-br from-green-50 to-emerald-100 rounded-[24px] p-6 shadow-sm border border-emerald-200 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-yellow-300 rounded-full blur-[40px] opacity-20 animate-pulse"></div>
+                    
+                    <h3 class="font-[800] text-lg text-emerald-900 mb-1 relative z-10">Your Garden</h3>
+                    
+                    <div class="flex flex-col items-center justify-center py-4 relative z-10 min-h-[160px]">
+                        <!-- STAGE 0: SEED/WILTED (< 25%) -->
+                        <div id="plant-stage-0" class="plant-stage hidden w-32 h-32 relative">
+                            <svg viewBox="0 0 100 100" class="w-full h-full opacity-80">
+                                <path d="M30 80 L35 100 L65 100 L70 80 Z" fill="#9CA3AF" stroke="#6B7280" stroke-width="2"/>
+                                <path d="M50 80 Q60 60 55 50" stroke="#9CA3AF" stroke-width="3" fill="none"/>
+                                <path d="M55 50 Q40 55 45 65" stroke="#9CA3AF" stroke-width="2" fill="none"/>
+                                <!-- Wilted Leaf -->
+                                <path d="M55 50 Q65 55 60 65" stroke="#9CA3AF" stroke-width="2" fill="none"/>
+                            </svg>
+                            <div class="absolute top-0 right-0 bg-blue-100 px-2 py-1 rounded-full text-xs font-bold text-blue-600 shadow-sm">Thirsty!</div>
+                        </div>
+
+                        <!-- STAGE 1: SEEDLING (25-49%) -->
+                        <div id="plant-stage-1" class="plant-stage hidden w-32 h-32 relative">
+                             <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
+                                <path d="M30 80 L35 100 L65 100 L70 80 Z" fill="#D97706" stroke="#92400E" stroke-width="2"/>
+                                <path d="M50 80 Q50 70 50 65" stroke="#10B981" stroke-width="4" fill="none"/>
+                                <!-- Small leaves -->
+                                <path d="M50 65 Q40 60 40 50 M50 65 Q60 60 60 50" stroke="#10B981" stroke-width="3" fill="none" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+
+                        <!-- STAGE 2: GROWING (50-74%) -->
+                        <div id="plant-stage-2" class="plant-stage hidden w-32 h-32 relative">
+                            <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
+                                <path d="M30 80 L35 100 L65 100 L70 80 Z" fill="#D97706" stroke="#92400E" stroke-width="2"/>
+                                <path d="M50 80 Q55 60 50 45" stroke="#10B981" stroke-width="4" fill="none"/>
+                                <path d="M50 65 Q30 55 40 45 M50 65 Q70 55 60 45" stroke="#10B981" stroke-width="3" fill="none"/>
+                            </svg>
+                        </div>
+
+                        <!-- STAGE 3: BUDDING (75-99%) -->
+                        <div id="plant-stage-3" class="plant-stage hidden w-32 h-32 relative">
+                            <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
+                                <path d="M30 80 L35 100 L65 100 L70 80 Z" fill="#D97706" stroke="#92400E" stroke-width="2"/>
+                                <path d="M50 80 Q55 60 50 45" stroke="#10B981" stroke-width="4" fill="none"/>
+                                <path d="M50 65 Q30 55 40 45 M50 65 Q70 55 60 45" stroke="#10B981" stroke-width="3" fill="none"/>
+                                <!-- Bud -->
+                                <circle cx="50" cy="40" r="8" fill="#FBCFE8" stroke="#DB2777" stroke-width="2"/>
+                            </svg>
+                        </div>
+
+                        <!-- STAGE 4: BLOOMING (100%) -->
+                        <div id="plant-stage-4" class="plant-stage hidden w-32 h-32 relative">
+                            <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-lg transition-transform duration-700 hover:scale-110">
+                                <!-- Pot -->
+                                <path d="M25 80 L30 100 L70 100 L75 80 Z" fill="#D97706" stroke="#92400E" stroke-width="2"/>
+                                <!-- Stem -->
+                                <path d="M50 80 Q50 60 50 40" stroke="#10B981" stroke-width="4" fill="none"/>
+                                <!-- Leaves -->
+                                <path d="M50 60 Q30 50 40 40 M50 60 Q70 50 60 40" stroke="#10B981" stroke-width="3" fill="none"/>
+                                <!-- Flower -->
+                                <circle cx="50" cy="30" r="15" fill="#F472B6" stroke="#DB2777" stroke-width="2"/>
+                                <path d="M50 30 L50 10 M50 30 L70 30 M50 30 L50 50 M50 30 L30 30" stroke="#DB2777" stroke-width="2"/>
+                                <circle cx="50" cy="30" r="5" fill="#FCD34D"/>
+                            </svg>
+                            <div class="absolute -top-4 -right-4 bg-white px-2 py-1 rounded-full text-xs font-bold text-emerald-600 shadow-sm animate-pulse">Blooming!</div>
+                        </div>
+
+                        <p id="garden-message" class="text-center font-bold text-gray-700 mt-2 text-sm leading-tight transition-all duration-300">
+                            Loading garden...
+                        </p>
+                    </div>
+                    
+                    <!-- Water Level Bar -->
+                    <div class="mt-4 w-full bg-white/50 rounded-full h-2 overflow-hidden border border-emerald-100">
+                        <div id="garden-water-bar" class="h-full bg-blue-400 transition-all duration-1000" style="width: 0%"></div>
+                    </div>
+
+                     <!-- METRICS GRID (Consolidated from Old Progress Card) -->
+                     <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-emerald-100/50">
+                        <div class="text-center">
+                            <div class="text-lg">📋</div>
+                            <div class="text-[10px] text-gray-500 font-bold uppercase">Tasks</div>
+                            <div class="font-[900] text-emerald-800"><span id="metric-tasks">{{ $completedChecklists }}</span>/{{ $totalChecklists }}</div>
+                        </div>
+                        <div class="text-center border-l border-emerald-100/50 border-r">
+                            <div class="text-lg">💊</div>
+                            <div class="text-[10px] text-gray-500 font-bold uppercase">Meds</div>
+                            <div class="font-[900] text-emerald-800"><span id="metric-meds">{{ $takenMedicationDoses }}</span>/{{ $totalMedicationDoses }}</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-lg">❤️</div>
+                            <div class="text-[10px] text-gray-500 font-bold uppercase">Vitals</div>
+                            <div class="font-[900] text-emerald-800"><span id="metric-vitals">{{ $completedVitals }}</span>/{{ $totalRequiredVitals }}</div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 1. MOOD TRACKER (First - Most Important) -->
                 <div class="bg-amber-50 rounded-[24px] p-6 shadow-sm border border-amber-200">
                     <h3 class="font-[800] text-lg text-gray-900 mb-1">Mood of the Day</h3>
@@ -260,80 +356,7 @@
                     </div>
                 </div>
 
-                <!-- 2. DAILY PROGRESS CARD -->
-                <div class="bg-pink-50 rounded-[24px] p-6 shadow-sm border border-pink-200 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-pink-100 rounded-bl-[100px] -mr-8 -mt-8 z-0"></div>
-                    <div class="relative z-10">
-                        <h3 class="font-[800] text-lg text-gray-900 mb-4">Daily Goals</h3>
-                        
-                        <div class="flex flex-col items-center py-4">
-                            <!-- Circular Progress -->
-                            <div class="relative w-32 h-32">
-                                <svg class="transform -rotate-90 w-full h-full">
-                                    <circle cx="64" cy="64" r="56" stroke="#F3F4F6" stroke-width="10" fill="none" />
-                                    <circle 
-                                        id="dailyProgressCircle"
-                                        cx="64" cy="64" r="56" 
-                                        stroke="#10B981" 
-                                        stroke-width="10" 
-                                        fill="none" 
-                                        stroke-dasharray="352" 
-                                        stroke-dashoffset="{{ 352 - (352 * $dailyGoalsProgress / 100) }}"
-                                        stroke-linecap="round"
-                                        class="transition-all duration-500"
-                                    />
-                                </svg>
-                                <div class="absolute inset-0 flex items-center justify-center">
-                                    <span id="dailyProgressPercent" class="text-2xl font-[900] text-gray-900">{{ $dailyGoalsProgress }}%</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mt-4 space-y-3">
-                            <!-- Tasks Progress -->
-                            <div class="flex justify-between items-center">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-sm">📋</span>
-                                    <span class="text-sm text-gray-600">Tasks</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <div class="w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                        <div class="h-full bg-green-500 rounded-full" style="width: {{ $checklistProgress }}%"></div>
-                                    </div>
-                                    <span class="font-[800] text-xs text-gray-900">{{ $completedChecklists }}/{{ $totalChecklists }}</span>
-                                </div>
-                            </div>
-                            
-                            <!-- Medications Progress -->
-                            <div class="flex justify-between items-center">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-sm">💊</span>
-                                    <span class="text-sm text-gray-600">Medications</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <div class="w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                        <div class="h-full bg-blue-500 rounded-full" style="width: {{ $medicationProgress }}%"></div>
-                                    </div>
-                                    <span class="font-[800] text-xs text-gray-900">{{ $takenMedicationDoses }}/{{ $totalMedicationDoses }}</span>
-                                </div>
-                            </div>
-                            
-                            <!-- Vitals Progress -->
-                            <div class="flex justify-between items-center">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-sm">❤️</span>
-                                    <span class="text-sm text-gray-600">Vitals</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <div class="w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                        <div class="h-full bg-rose-500 rounded-full" style="width: {{ $vitalsProgress }}%"></div>
-                                    </div>
-                                    <span class="font-[800] text-xs text-gray-900">{{ $completedVitals }}/{{ $totalRequiredVitals }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <!-- REMOVED OLD PROGRESS CARD -->
 
             </div>
 
@@ -727,13 +750,13 @@
                                         $statusText = 'Upcoming';
                                     }
                                 @endphp
-                                <div class="medication-entry rounded-xl p-3 border-2 transition-all duration-300 cursor-pointer hover:shadow-md active:scale-[0.98] {{ $entryBg }} {{ $isTaken ? 'opacity-75' : '' }}" 
+                                <div x-data="{ expanded: false }" class="medication-entry rounded-xl p-3 border-2 transition-all duration-300 cursor-pointer hover:shadow-md active:scale-[0.98] {{ $entryBg }} {{ $isTaken ? 'opacity-75' : '' }}" 
                                      data-medication-id="{{ $medication->id }}"
                                      data-time="{{ $time }}"
                                      data-taken="{{ $isTaken ? 'true' : 'false' }}"
-                                     data-can-take="{{ $canTake ? 'true' : 'false' }}"
-                                     onclick="toggleMedicationEntry(this)">
-                                    <div class="flex items-center gap-3">
+                                     data-can-take="{{ $canTake ? 'true' : 'false' }}">
+                                     
+                                    <div class="flex items-center gap-3" onclick="toggleMedicationEntry(this.closest('.medication-entry'))">
                                         <!-- Status Icon -->
                                         <div class="w-9 h-9 rounded-lg flex items-center justify-center text-lg flex-shrink-0 {{ $iconBg }} {{ $isWithinWindow && !$isTaken ? 'animate-pulse' : '' }}">
                                             <span class="status-icon">{{ $statusIcon }}</span>
@@ -753,6 +776,20 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    <!-- INSTRUCTIONS TOGGLE (NEW) -->
+                                    @if($medication->instructions)
+                                        <div class="mt-2 border-t border-dashed border-gray-200 pt-1" @click.stop="expanded = !expanded">
+                                            <button class="text-[10px] font-bold text-blue-500 flex items-center gap-1 hover:text-blue-700 transition-colors w-full focus:outline-none">
+                                                <svg x-show="!expanded" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                <svg x-show="expanded" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                                                <span x-text="expanded ? 'Hide Info' : 'Show Instructions'"></span>
+                                            </button>
+                                            <div x-show="expanded" x-collapse class="mt-1 text-xs text-gray-600 bg-blue-50 p-2 rounded-lg leading-relaxed shadow-inner">
+                                                <span class="font-bold">Note:</span> {{ $medication->instructions }}
+                                            </div>
+                                        </div>
+                                    @endif
                                 </div>
                             @endforeach
                         @empty
@@ -807,7 +844,7 @@
                                 ];
                             @endphp
                             @forelse($todayChecklists->take(5) as $checklist)
-                                <div class="checklist-item flex items-start gap-3 p-3 rounded-xl border transition-all duration-300 {{ $checklist->is_completed ? 'bg-green-50/50 border-green-200 opacity-75' : 'bg-white border-gray-100 hover:border-green-200 hover:bg-green-50/30' }}" 
+                                <div x-data="{ expanded: false }" class="checklist-item flex items-start gap-3 p-3 rounded-xl border transition-all duration-300 {{ $checklist->is_completed ? 'bg-green-50/50 border-green-200 opacity-75' : 'bg-white border-gray-100 hover:border-green-200 hover:bg-green-50/30' }}" 
                                      data-id="{{ $checklist->id }}"
                                      data-completed="{{ $checklist->is_completed ? 'true' : 'false' }}">
                                     
@@ -863,7 +900,18 @@
                                         
                                         <!-- Description preview -->
                                         @if($checklist->description)
-                                            <p class="text-[10px] text-gray-500 mt-1 truncate">📝 {{ Str::limit($checklist->description, 60) }}</p>
+                                            <div class="mt-1">
+                                                <div x-show="!expanded" class="text-[10px] text-gray-500 cursor-pointer hover:text-gray-700" @click="expanded = true">
+                                                    📝 {{ Str::limit($checklist->description, 60) }}
+                                                    @if(strlen($checklist->description) > 60)
+                                                        <span class="text-blue-500 font-bold ml-1 hover:underline">Read more</span>
+                                                    @endif
+                                                </div>
+                                                <div x-show="expanded" class="text-[10px] text-gray-700 bg-gray-50 p-2 rounded border border-gray-100 mt-1" x-cloak>
+                                                    {{ $checklist->description }}
+                                                    <button @click="expanded = false" class="block mt-1 text-blue-500 font-bold hover:underline">Show less</button>
+                                                </div>
+                                            </div>
                                         @endif
                                         <!-- Notes preview -->
                                         @if($checklist->notes && !$checklist->description)
@@ -1416,23 +1464,75 @@
             
             const dailyGoalsProgress = totalWeight > 0 ? Math.round(weightedProgress / totalWeight) : 0;
             
+            // Update METRICS in Garden Card (Consolidated)
+            const metricTasks = document.getElementById('metric-tasks');
+            const metricMeds = document.getElementById('metric-meds');
+            const metricVitals = document.getElementById('metric-vitals');
+            
+            if (metricTasks) metricTasks.textContent = completedCount;
+            if (metricMeds) metricMeds.textContent = takenMedicationDoses;
+            if (metricVitals) metricVitals.textContent = completedVitals;
+
+            // Updated GARDEN STATE (Client-side Logic)
+            updateGardenState(dailyGoalsProgress);
+
             // Update mini progress bar in checklist widget
             if (progressBar) progressBar.style.width = `${checklistProgress}%`;
             if (completedCountEl) completedCountEl.textContent = completedCount;
+        }
 
-            // Update the circular progress in Daily Goals
-            const circleProgress = document.getElementById('dailyProgressCircle');
-            if (circleProgress) {
-                const dashOffset = 352 - (352 * dailyGoalsProgress / 100);
-                circleProgress.style.strokeDashoffset = dashOffset;
+        function updateGardenState(progress) {
+            // Hide all stages first
+            document.querySelectorAll('.plant-stage').forEach(el => el.classList.add('hidden'));
+            
+            const waterBar = document.getElementById('garden-water-bar');
+            const messageEl = document.getElementById('garden-message');
+            
+            if (waterBar) waterBar.style.width = `${progress}%`;
+
+            let stageId = 'plant-stage-0';
+            let message = "Your plant is thirsty. Let's do some tasks! 💧";
+            let colorClass = "text-gray-500";
+
+            if (progress >= 100) {
+                stageId = 'plant-stage-4';
+                message = "Amazing! Your garden is in full bloom! 🌸";
+                colorClass = "text-emerald-800";
+            } else if (progress >= 75) {
+                stageId = 'plant-stage-3';
+                message = "Almost there! It's about to bloom! 🌷";
+                colorClass = "text-emerald-700";
+            } else if (progress >= 50) {
+                stageId = 'plant-stage-2';
+                message = "Look at it grow! Keep it up! 🌱";
+                colorClass = "text-emerald-600";
+            } else if (progress >= 25) {
+                stageId = 'plant-stage-1';
+                message = "It's sprouting! Good start! 🌿";
+                colorClass = "text-emerald-600";
             }
 
-            // Update percentage text
-            const percentageText = document.getElementById('dailyProgressPercent');
-            if (percentageText) {
-                percentageText.textContent = `${dailyGoalsProgress}%`;
+            // Show current stage
+            const currentStage = document.getElementById(stageId);
+            if (currentStage) {
+                currentStage.classList.remove('hidden');
+                // Simple fade in
+                currentStage.animate([
+                    { opacity: 0, transform: 'scale(0.95)' },
+                    { opacity: 1, transform: 'scale(1)' }
+                ], { duration: 500, fill: 'forwards' });
+            }
+
+            if (messageEl) {
+                messageEl.textContent = message;
+                messageEl.className = `text-center font-bold mt-2 text-sm leading-tight transition-all duration-300 ${colorClass}`;
             }
         }
+        
+        // Initialize Garden on Load
+        document.addEventListener('DOMContentLoaded', () => {
+             updateProgress(); // This triggers updateGardenState
+        });
 
         function updateMedicationProgress(delta) {
             takenMedicationDoses += delta;
