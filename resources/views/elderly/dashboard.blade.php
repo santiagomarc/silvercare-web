@@ -98,43 +98,41 @@
         }
     @endphp
 
-    <!-- NAV BAR -->
+    <!-- NAV BAR (Enhanced with Dashboard Title) -->
     <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div class="max-w-[1600px] mx-auto px-6 lg:px-12 h-20 flex justify-between items-center">
-            <div class="flex items-center gap-4">
-                <div class="w-10 h-10 bg-[#000080] rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/20">
-                    <span class="text-white font-[900] text-lg">SC</span>
+        <div class="max-w-[1600px] mx-auto px-6 lg:px-12 h-16 flex justify-between items-center">
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 bg-[#000080] rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/20">
+                        <span class="text-white font-[900] text-sm">SC</span>
+                    </div>
+                    <h1 class="text-xl font-[900] tracking-tight text-gray-900 hidden sm:block">SILVER<span class="text-[#000080]">CARE</span></h1>
                 </div>
-                <h1 class="text-2xl font-[900] tracking-tight text-gray-900">SILVER<span class="text-[#000080]">CARE</span></h1>
+                <div class="h-6 w-[1px] bg-gray-200 hidden md:block"></div>
+                <div class="hidden md:block">
+                    <h2 class="text-lg font-[800] text-gray-900">Dashboard Overview</h2>
+                    <p class="text-xs text-gray-500 font-medium -mt-0.5">{{ now()->format('l, F j, Y') }}</p>
+                </div>
             </div>
             
-            <div class="flex items-center gap-6">
-                <p class="hidden md:block text-sm font-bold text-gray-500 uppercase tracking-wider">
-                    {{ now()->format('l, F j, Y') }}
-                </p>
-                <div class="h-8 w-[1px] bg-gray-200 hidden md:block"></div>
-                
+            <div class="flex items-center gap-4">
                 <!-- PROFILE LINK -->
-                <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 pl-2 group hover:bg-gray-50 rounded-2xl py-1 px-2 transition-all cursor-pointer" title="Manage Profile">
+                <a href="{{ route('profile.edit') }}" class="flex items-center gap-2 group hover:bg-gray-50 rounded-xl py-1.5 px-2 transition-all cursor-pointer" title="Manage Profile">
                     <div class="relative">
-                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-[#000080] font-[900] text-lg group-hover:bg-[#000080] group-hover:text-white transition-colors">
+                        <div class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-[#000080] font-[900] text-base group-hover:bg-[#000080] group-hover:text-white transition-colors">
                             {{ substr(Auth::user()->name, 0, 1) }}
-                        </div>
-                        <!-- Small edit indicator -->
-                        <div class="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 border border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm">
-                            <svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                         </div>
                     </div>
                     <div class="hidden sm:block">
                         <p class="text-sm font-bold text-gray-900 leading-tight group-hover:text-[#000080] transition-colors">{{ Auth::user()->name }}</p>
-                        <p class="text-xs text-gray-500 font-medium">Patient</p>
+                        <p class="text-[10px] text-gray-500 font-medium">Patient</p>
                     </div>
                 </a>
 
                 <!-- Logout Button -->
-                <form method="POST" action="{{ route('logout') }}" class="ml-2">
+                <form method="POST" action="{{ route('logout') }}" class="ml-1">
                     @csrf
-                    <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl font-bold text-sm transition-colors">
+                    <button type="submit" class="flex items-center gap-1.5 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl font-bold text-sm transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                         </svg>
@@ -146,227 +144,129 @@
     </nav>
 
     <!-- DASHBOARD CONTENT -->
-    <main class="max-w-[1600px] mx-auto px-6 lg:px-12 py-10">
+    <main class="max-w-[1600px] mx-auto px-6 lg:px-12 py-5">
         
         @if(session('success'))
-            <div class="mb-6 bg-green-50 border-l-4 border-green-500 text-green-700 px-4 py-3 rounded-lg shadow-sm flex items-center gap-2">
+            <div class="mb-4 bg-green-50 border-l-4 border-green-500 text-green-700 px-4 py-3 rounded-lg shadow-sm flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                 {{ session('success') }}
             </div>
         @endif
 
         @if(session('error'))
-            <div class="mb-6 bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg shadow-sm flex items-center gap-2">
+            <div class="mb-4 bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg shadow-sm flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 {{ session('error') }}
             </div>
         @endif
 
-        <div class="mb-8">
-            <h2 class="text-3xl font-[800] text-gray-900">Dashboard Overview</h2>
-            <p class="text-gray-500">Here's your daily health summary.</p>
-        </div>
-
-        <!-- NEW: Main Navigation Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <!-- ============================================ -->
+        <!-- TOP ROW: 3 Action Buttons -->
+        <!-- ============================================ -->
+        <div class="grid grid-cols-3 gap-4 mb-6">
             
-            <!-- 1. WELLNESS CARD (UPDATED: Red/Pink Theme) -->
-            <a href="{{ route('elderly.wellness.index') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-500 to-pink-600 shadow-xl shadow-pink-200 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-1">
-                <!-- Background Decoration -->
-                <div class="absolute top-0 right-0 -mt-8 -mr-8 w-32 h-32 rounded-full bg-white/20 blur-2xl group-hover:bg-white/30 transition"></div>
-                <div class="absolute bottom-0 left-0 -mb-8 -ml-8 w-24 h-24 rounded-full bg-black/10 blur-xl"></div>
-                <!-- Pulse Animation Circle -->
-                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-white/5 rounded-full animate-pulse"></div>
+            <!-- 1. WELLNESS CENTER (Pink/Rose) -->
+            <a href="{{ route('elderly.wellness.index') }}" class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 shadow-lg shadow-pink-200/50 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:-translate-y-1 min-h-[120px]">
+                <div class="absolute top-0 right-0 -mt-6 -mr-6 w-24 h-24 rounded-full bg-white/20 blur-xl"></div>
+                <div class="absolute bottom-0 left-0 -mb-4 -ml-4 w-16 h-16 rounded-full bg-black/10 blur-lg"></div>
                 
-                <div class="relative p-6 flex items-center justify-between h-full z-10">
-                    <div class="flex flex-col justify-center">
-                        <div class="flex items-center space-x-3 mb-2">
-                            <div class="p-2.5 bg-white/20 rounded-xl backdrop-blur-sm border border-white/20 shadow-inner">
-                                <!-- Heart Icon -->
-                                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-                            </div>
-                            <h3 class="text-2xl font-extrabold text-white font-montserrat tracking-wide drop-shadow-sm">Wellness Center</h3>
-                        </div>
-                        <p class="text-pink-50 font-medium text-sm pl-1 tracking-wide">Relax, stretch, and play games.</p>
+                <div class="relative p-5 flex flex-col justify-between h-full z-10">
+                    <div class="p-2 bg-white/20 rounded-xl backdrop-blur-sm w-fit">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
                     </div>
-                    
-                    <div class="h-12 w-12 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white group-hover:text-rose-600 transition-all duration-300 shadow-lg">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                    <div>
+                        <h3 class="text-lg font-[900] text-white leading-tight">Wellness Center</h3>
+                        <p class="text-pink-100 text-xs font-medium mt-0.5">Relax, stretch, play</p>
+                    </div>
+                    <div class="absolute bottom-4 right-4 h-8 w-8 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white group-hover:text-rose-600 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
                     </div>
                 </div>
             </a>
 
-            <!-- 2. MY SCHEDULE / CALENDAR -->
-            <a href="{{ route('calendar.index') }}" class="group bg-white rounded-3xl p-6 shadow-sm border border-purple-200 hover:shadow-md hover:border-purple-300 transition-all relative overflow-hidden">
-                <div class="relative z-10 flex items-center justify-between h-full">
-                    <div class="flex flex-col justify-center">
-                        <div class="flex items-center space-x-3 mb-2">
-                            <div class="p-2.5 bg-purple-100 text-purple-600 rounded-xl">
-                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            </div>
-                            <h3 class="text-xl font-bold text-gray-900 font-montserrat">My Schedule</h3>
-                        </div>
-                        <p class="text-gray-500 font-medium text-sm pl-1">Appointments & reminders</p>
+            <!-- 2. MY SCHEDULE (Orange Gradient) -->
+            <a href="{{ route('calendar.index') }}" class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 shadow-lg shadow-orange-200/50 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:-translate-y-1 min-h-[120px]">
+                <div class="absolute top-0 right-0 -mt-6 -mr-6 w-24 h-24 rounded-full bg-white/20 blur-xl"></div>
+                
+                <div class="relative p-5 flex flex-col justify-between h-full z-10">
+                    <div class="p-2 bg-white/20 rounded-xl backdrop-blur-sm w-fit">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     </div>
-                    
-                    <div class="h-12 w-12 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    <div>
+                        <h3 class="text-lg font-[900] text-white leading-tight">My Schedule</h3>
+                        <p class="text-orange-100 text-xs font-medium mt-0.5">Appointments & reminders</p>
+                    </div>
+                    <div class="absolute bottom-4 right-4 h-8 w-8 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white group-hover:text-orange-600 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </div>
+                </div>
+            </a>
+
+            <!-- 3. ANALYTICS (Purple Gradient) -->
+            <a href="{{ route('elderly.vitals.analytics') }}" class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-purple-200/50 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:-translate-y-1 min-h-[120px]">
+                <div class="absolute top-0 right-0 -mt-6 -mr-6 w-24 h-24 rounded-full bg-white/20 blur-xl"></div>
+                
+                <div class="relative p-5 flex flex-col justify-between h-full z-10">
+                    <div class="p-2 bg-white/20 rounded-xl backdrop-blur-sm w-fit">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-[900] text-white leading-tight">Health Analytics</h3>
+                        <p class="text-purple-100 text-xs font-medium mt-0.5">View insights & trends</p>
+                    </div>
+                    <div class="absolute bottom-4 right-4 h-8 w-8 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white group-hover:text-purple-600 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
                     </div>
                 </div>
             </a>
 
         </div>
 
-        <!-- THE DASHBOARD GRID -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- ============================================ -->
+        <!-- MAIN CONTENT: 2-Column Layout -->
+        <!-- ============================================ -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-            <!-- LEFT COLUMN (3/12): Mood & Progress -->
-            <div class="lg:col-span-3 space-y-8">
+            <!-- LEFT/MAIN COLUMN (8/12): Mood + Vitals -->
+            <div class="lg:col-span-8 space-y-6">
                 
-                <!-- 0. GARDEN OF WELLNESS (NEW - Dynamic) -->
-                <div class="bg-gradient-to-br from-green-50 to-emerald-100 rounded-[24px] p-6 shadow-sm border border-emerald-200 relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-yellow-300 rounded-full blur-[40px] opacity-20 animate-pulse"></div>
-                    
-                    <h3 class="font-[800] text-lg text-emerald-900 mb-1 relative z-10">Your Garden</h3>
-                    
-                    <div class="flex flex-col items-center justify-center py-4 relative z-10 min-h-[160px]">
-                        <!-- STAGE 0: SEED/WILTED (< 25%) -->
-                        <div id="plant-stage-0" class="plant-stage hidden w-32 h-32 relative">
-                            <svg viewBox="0 0 100 100" class="w-full h-full opacity-80">
-                                <path d="M30 80 L35 100 L65 100 L70 80 Z" fill="#9CA3AF" stroke="#6B7280" stroke-width="2"/>
-                                <path d="M50 80 Q60 60 55 50" stroke="#9CA3AF" stroke-width="3" fill="none"/>
-                                <path d="M55 50 Q40 55 45 65" stroke="#9CA3AF" stroke-width="2" fill="none"/>
-                                <!-- Wilted Leaf -->
-                                <path d="M55 50 Q65 55 60 65" stroke="#9CA3AF" stroke-width="2" fill="none"/>
-                            </svg>
-                            <div class="absolute top-0 right-0 bg-blue-100 px-2 py-1 rounded-full text-xs font-bold text-blue-600 shadow-sm">Thirsty!</div>
+                <!-- MOOD TRACKER (Full Width, Thick & Bold) -->
+                <div class="bg-gradient-to-br from-amber-50 to-orange-100 rounded-2xl p-6 md:p-8 shadow-lg border border-amber-200">
+                    <div class="flex flex-col md:flex-row items-center gap-6">
+                        <!-- Left: Fixed width Emoji + Mood Label -->
+                        <div class="flex flex-col items-center justify-center w-32 md:w-40 flex-shrink-0">
+                            <div id="moodEmoji" class="text-6xl md:text-7xl transition-transform duration-300 mb-2">😐</div>
+                            <p id="moodLabel" class="font-[900] text-xl md:text-2xl text-amber-700 transition-colors duration-300 text-center w-full truncate">Neutral</p>
                         </div>
-
-                        <!-- STAGE 1: SEEDLING (25-49%) -->
-                        <div id="plant-stage-1" class="plant-stage hidden w-32 h-32 relative">
-                             <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
-                                <path d="M30 80 L35 100 L65 100 L70 80 Z" fill="#D97706" stroke="#92400E" stroke-width="2"/>
-                                <path d="M50 80 Q50 70 50 65" stroke="#10B981" stroke-width="4" fill="none"/>
-                                <!-- Small leaves -->
-                                <path d="M50 65 Q40 60 40 50 M50 65 Q60 60 60 50" stroke="#10B981" stroke-width="3" fill="none" stroke-linecap="round"/>
-                            </svg>
-                        </div>
-
-                        <!-- STAGE 2: GROWING (50-74%) -->
-                        <div id="plant-stage-2" class="plant-stage hidden w-32 h-32 relative">
-                            <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
-                                <path d="M30 80 L35 100 L65 100 L70 80 Z" fill="#D97706" stroke="#92400E" stroke-width="2"/>
-                                <path d="M50 80 Q55 60 50 45" stroke="#10B981" stroke-width="4" fill="none"/>
-                                <path d="M50 65 Q30 55 40 45 M50 65 Q70 55 60 45" stroke="#10B981" stroke-width="3" fill="none"/>
-                            </svg>
-                        </div>
-
-                        <!-- STAGE 3: BUDDING (75-99%) -->
-                        <div id="plant-stage-3" class="plant-stage hidden w-32 h-32 relative">
-                            <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
-                                <path d="M30 80 L35 100 L65 100 L70 80 Z" fill="#D97706" stroke="#92400E" stroke-width="2"/>
-                                <path d="M50 80 Q55 60 50 45" stroke="#10B981" stroke-width="4" fill="none"/>
-                                <path d="M50 65 Q30 55 40 45 M50 65 Q70 55 60 45" stroke="#10B981" stroke-width="3" fill="none"/>
-                                <!-- Bud -->
-                                <circle cx="50" cy="40" r="8" fill="#FBCFE8" stroke="#DB2777" stroke-width="2"/>
-                            </svg>
-                        </div>
-
-                        <!-- STAGE 4: BLOOMING (100%) -->
-                        <div id="plant-stage-4" class="plant-stage hidden w-32 h-32 relative">
-                            <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-lg transition-transform duration-700 hover:scale-110">
-                                <!-- Pot -->
-                                <path d="M25 80 L30 100 L70 100 L75 80 Z" fill="#D97706" stroke="#92400E" stroke-width="2"/>
-                                <!-- Stem -->
-                                <path d="M50 80 Q50 60 50 40" stroke="#10B981" stroke-width="4" fill="none"/>
-                                <!-- Leaves -->
-                                <path d="M50 60 Q30 50 40 40 M50 60 Q70 50 60 40" stroke="#10B981" stroke-width="3" fill="none"/>
-                                <!-- Flower -->
-                                <circle cx="50" cy="30" r="15" fill="#F472B6" stroke="#DB2777" stroke-width="2"/>
-                                <path d="M50 30 L50 10 M50 30 L70 30 M50 30 L50 50 M50 30 L30 30" stroke="#DB2777" stroke-width="2"/>
-                                <circle cx="50" cy="30" r="5" fill="#FCD34D"/>
-                            </svg>
-                            <div class="absolute -top-4 -right-4 bg-white px-2 py-1 rounded-full text-xs font-bold text-emerald-600 shadow-sm animate-pulse">Blooming!</div>
-                        </div>
-
-                        <p id="garden-message" class="text-center font-bold text-gray-700 mt-2 text-sm leading-tight transition-all duration-300">
-                            Loading garden...
-                        </p>
-                    </div>
-                    
-                    <!-- Water Level Bar -->
-                    <div class="mt-4 w-full bg-white/50 rounded-full h-2 overflow-hidden border border-emerald-100">
-                        <div id="garden-water-bar" class="h-full bg-blue-400 transition-all duration-1000" style="width: 0%"></div>
-                    </div>
-
-                     <!-- METRICS GRID (Consolidated from Old Progress Card) -->
-                     <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-emerald-100/50">
-                        <div class="text-center">
-                            <div class="text-lg">📋</div>
-                            <div class="text-[10px] text-gray-500 font-bold uppercase">Tasks</div>
-                            <div class="font-[900] text-emerald-800"><span id="metric-tasks">{{ $completedChecklists }}</span>/{{ $totalChecklists }}</div>
-                        </div>
-                        <div class="text-center border-l border-emerald-100/50 border-r">
-                            <div class="text-lg">💊</div>
-                            <div class="text-[10px] text-gray-500 font-bold uppercase">Meds</div>
-                            <div class="font-[900] text-emerald-800"><span id="metric-meds">{{ $takenMedicationDoses }}</span>/{{ $totalMedicationDoses }}</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-lg">❤️</div>
-                            <div class="text-[10px] text-gray-500 font-bold uppercase">Vitals</div>
-                            <div class="font-[900] text-emerald-800"><span id="metric-vitals">{{ $completedVitals }}</span>/{{ $totalRequiredVitals }}</div>
+                        
+                        <!-- Right: Question + Slider (fixed layout) -->
+                        <div class="flex-1 flex flex-col items-center md:items-end gap-2">
+                            <h3 class="font-[800] text-lg md:text-xl text-gray-800 text-center md:text-right whitespace-nowrap">How are you feeling today?</h3>
+                            <div class="flex items-center gap-4">
+                                <input 
+                                    type="range" 
+                                    id="moodSlider"
+                                    min="1" 
+                                    max="5" 
+                                    value="{{ $todayMood ?? 3 }}"
+                                    class="w-48 md:w-64 lg:w-80 h-3"
+                                    style="color: #6B7280;"
+                                >
+                                <span id="moodSaved" class="text-xs font-bold text-green-600 opacity-0 transition-opacity whitespace-nowrap">✓ Saved</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 1. MOOD TRACKER (First - Most Important) -->
-                <div class="bg-amber-50 rounded-[24px] p-6 shadow-sm border border-amber-200">
-                    <h3 class="font-[800] text-lg text-gray-900 mb-1">Mood of the Day</h3>
-                    <p class="text-xs text-gray-400 font-medium mb-6">How are you feeling right now?</p>
-
-                    <div class="flex flex-col items-center">
-                        <!-- Dynamic Emoji -->
-                        <div id="moodEmoji" class="text-6xl mb-2 transition-transform duration-300">😐</div>
-                        <p id="moodLabel" class="font-[800] text-lg mb-6 transition-colors duration-300 text-gray-600">Neutral</p>
-
-                        <!-- Slider -->
-                        <div class="w-full relative h-10 flex items-center">
-                            <input 
-                                type="range" 
-                                id="moodSlider"
-                                min="1" 
-                                max="5" 
-                                value="{{ $todayMood ?? 3 }}"
-                                class="w-full"
-                                style="color: #6B7280;"
-                            >
-                        </div>
-
-                        <!-- Auto-Save Indicator -->
-                        <div class="h-6 mt-2 flex items-center justify-center">
-                            <span id="moodSaved" class="text-xs font-bold text-green-600 opacity-0 transition-opacity duration-300">
-                                ✓ Auto-saved
-                            </span>
-                        </div>
+                <!-- Health Vitals Section -->
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 class="font-[800] text-xl text-gray-900">Health Vitals</h3>
+                        <p class="text-xs text-gray-500 font-medium">Record and track your daily vitals</p>
                     </div>
-                </div>
-
-                <!-- REMOVED OLD PROGRESS CARD -->
-
-            </div>
-
-            <!-- CENTER COLUMN (6/12): Vitals Grid -->
-            <div class="lg:col-span-6">
-                <!-- Existing code for Vitals remains unchanged -->
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-[800] text-xl text-gray-900">Health Vitals</h3>
-                    <div class="flex items-center gap-3">
-                        <a href="{{ route('elderly.vitals.analytics') }}" class="text-xs font-bold text-purple-600 bg-purple-50 px-3 py-1.5 rounded-full border border-purple-200 hover:bg-purple-100 transition-colors flex items-center gap-1.5">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                            </svg>
-                            Analytics
-                        </a>
+                    <div class="flex items-center gap-2">
                         @if($googleFitConnected)
                             <button onclick="syncGoogleFit()" id="syncBtn" class="text-xs font-bold text-green-600 bg-green-50 px-3 py-1.5 rounded-full border border-green-200 hover:bg-green-100 transition-colors flex items-center gap-1.5">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
@@ -378,15 +278,14 @@
                                 Connect Google Fit
                             </a>
                         @endif
-                        <span class="text-xs font-bold text-gray-400 bg-white px-3 py-1 rounded-full border border-gray-200">
+                        <span class="text-xs font-bold text-gray-400 bg-white px-3 py-1.5 rounded-full border border-gray-200">
                             {{ $completedVitals }}/{{ $totalRequiredVitals }} recorded
                         </span>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Vital cards logic remains identical to previous version, just ensuring grid layout is preserved -->
-                     <!-- Vital Card: Blood Pressure -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Vital Card: Blood Pressure -->
                     @php 
                         $bp = $vitalsData['blood_pressure'] ?? ['recorded' => false];
                         $bpStatus = null;
@@ -409,7 +308,7 @@
                             }
                         }
                     @endphp
-                    <a href="{{ route('elderly.vitals.blood_pressure') }}" class="vital-card bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 hover:border-red-200 transition-all hover:shadow-md h-48 flex flex-col justify-between group cursor-pointer" data-type="blood_pressure">
+                    <a href="{{ route('elderly.vitals.blood_pressure') }}" class="vital-card bg-white rounded-[24px] p-6 shadow-md border border-gray-100 hover:shadow-lg transition-all h-48 flex flex-col justify-between group cursor-pointer" data-type="blood_pressure">
                         <div class="flex justify-between items-start">
                             <div class="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
@@ -464,7 +363,7 @@
                             }
                         }
                     @endphp
-                    <a href="{{ route('elderly.vitals.sugar_level') }}" class="vital-card bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 hover:border-blue-200 transition-all hover:shadow-md h-48 flex flex-col justify-between group cursor-pointer" data-type="sugar_level">
+                    <a href="{{ route('elderly.vitals.sugar_level') }}" class="vital-card bg-white rounded-[24px] p-6 shadow-md border border-gray-100 hover:shadow-lg transition-all h-48 flex flex-col justify-between group cursor-pointer" data-type="sugar_level">
                         <div class="flex justify-between items-start">
                             <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
@@ -516,7 +415,7 @@
                             }
                         }
                     @endphp
-                    <a href="{{ route('elderly.vitals.temperature') }}" class="vital-card bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 hover:border-orange-200 transition-all hover:shadow-md h-48 flex flex-col justify-between group cursor-pointer" data-type="temperature">
+                    <a href="{{ route('elderly.vitals.temperature') }}" class="vital-card bg-white rounded-[24px] p-6 shadow-md border border-gray-100 hover:shadow-lg transition-all h-48 flex flex-col justify-between group cursor-pointer" data-type="temperature">
                         <div class="flex justify-between items-start">
                             <div class="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-500 group-hover:scale-110 transition-transform">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
@@ -571,7 +470,7 @@
                             }
                         }
                     @endphp
-                    <a href="{{ route('elderly.vitals.heart_rate') }}" class="vital-card bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 hover:border-rose-200 transition-all hover:shadow-md h-48 flex flex-col justify-between group cursor-pointer" data-type="heart_rate">
+                    <a href="{{ route('elderly.vitals.heart_rate') }}" class="vital-card bg-white rounded-[24px] p-6 shadow-md border border-gray-100 hover:shadow-lg transition-all h-48 flex flex-col justify-between group cursor-pointer" data-type="heart_rate">
                         <div class="flex justify-between items-start">
                             <div class="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 group-hover:scale-110 transition-transform">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
@@ -670,10 +569,96 @@
 
             </div>
 
-            <!-- RIGHT COLUMN (3/12): Tasks & Meds -->
-            <div class="lg:col-span-3 space-y-8">
-                <!-- Code for right column remains identical -->
-                 <!-- MEDICATION LIST (GREEN) - With Dose Tracking -->
+            <!-- RIGHT COLUMN (4/12): Garden, Medications, Tasks -->
+            <div class="lg:col-span-4 space-y-4">
+                
+                <!-- GARDEN OF WELLNESS -->
+                <div class="bg-gradient-to-br from-green-50 to-emerald-100 rounded-2xl p-5 shadow-lg border border-emerald-200 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-yellow-300 rounded-full blur-[20px] opacity-20 animate-pulse"></div>
+                    
+                    <div class="flex items-center justify-between mb-3 relative z-10">
+                        <h3 class="font-[800] text-base text-emerald-900">🌱 Your Garden</h3>
+                    </div>
+                    
+                    <div class="flex flex-col items-center relative z-10">
+                        <!-- Plant Display -->
+                        <div class="w-20 h-20 flex items-center justify-center">
+                            <!-- STAGE 0: SEED/WILTED (< 25%) -->
+                            <div id="plant-stage-0" class="plant-stage hidden w-16 h-16 relative">
+                                <svg viewBox="0 0 100 100" class="w-full h-full opacity-80">
+                                    <path d="M30 80 L35 100 L65 100 L70 80 Z" fill="#9CA3AF" stroke="#6B7280" stroke-width="2"/>
+                                    <path d="M50 80 Q60 60 55 50" stroke="#9CA3AF" stroke-width="3" fill="none"/>
+                                    <path d="M55 50 Q40 55 45 65" stroke="#9CA3AF" stroke-width="2" fill="none"/>
+                                    <path d="M55 50 Q65 55 60 65" stroke="#9CA3AF" stroke-width="2" fill="none"/>
+                                </svg>
+                            </div>
+                            <!-- STAGE 1: SEEDLING (25-49%) -->
+                            <div id="plant-stage-1" class="plant-stage hidden w-16 h-16 relative">
+                                <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
+                                    <path d="M30 80 L35 100 L65 100 L70 80 Z" fill="#D97706" stroke="#92400E" stroke-width="2"/>
+                                    <path d="M50 80 Q50 70 50 65" stroke="#10B981" stroke-width="4" fill="none"/>
+                                    <path d="M50 65 Q40 60 40 50 M50 65 Q60 60 60 50" stroke="#10B981" stroke-width="3" fill="none" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                            <!-- STAGE 2: GROWING (50-74%) -->
+                            <div id="plant-stage-2" class="plant-stage hidden w-16 h-16 relative">
+                                <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
+                                    <path d="M30 80 L35 100 L65 100 L70 80 Z" fill="#D97706" stroke="#92400E" stroke-width="2"/>
+                                    <path d="M50 80 Q55 60 50 45" stroke="#10B981" stroke-width="4" fill="none"/>
+                                    <path d="M50 65 Q30 55 40 45 M50 65 Q70 55 60 45" stroke="#10B981" stroke-width="3" fill="none"/>
+                                </svg>
+                            </div>
+                            <!-- STAGE 3: BUDDING (75-99%) -->
+                            <div id="plant-stage-3" class="plant-stage hidden w-16 h-16 relative">
+                                <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
+                                    <path d="M30 80 L35 100 L65 100 L70 80 Z" fill="#D97706" stroke="#92400E" stroke-width="2"/>
+                                    <path d="M50 80 Q55 60 50 45" stroke="#10B981" stroke-width="4" fill="none"/>
+                                    <path d="M50 65 Q30 55 40 45 M50 65 Q70 55 60 45" stroke="#10B981" stroke-width="3" fill="none"/>
+                                    <circle cx="50" cy="40" r="8" fill="#FBCFE8" stroke="#DB2777" stroke-width="2"/>
+                                </svg>
+                            </div>
+                            <!-- STAGE 4: BLOOMING (100%) -->
+                            <div id="plant-stage-4" class="plant-stage hidden w-16 h-16 relative">
+                                <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-lg transition-transform duration-700 hover:scale-110">
+                                    <path d="M25 80 L30 100 L70 100 L75 80 Z" fill="#D97706" stroke="#92400E" stroke-width="2"/>
+                                    <path d="M50 80 Q50 60 50 40" stroke="#10B981" stroke-width="4" fill="none"/>
+                                    <path d="M50 60 Q30 50 40 40 M50 60 Q70 50 60 40" stroke="#10B981" stroke-width="3" fill="none"/>
+                                    <circle cx="50" cy="30" r="15" fill="#F472B6" stroke="#DB2777" stroke-width="2"/>
+                                    <path d="M50 30 L50 10 M50 30 L70 30 M50 30 L50 50 M50 30 L30 30" stroke="#DB2777" stroke-width="2"/>
+                                    <circle cx="50" cy="30" r="5" fill="#FCD34D"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Message & Progress -->
+                    <div class="mt-3">
+                        <p id="garden-message" class="font-bold text-emerald-800 text-sm leading-tight mb-2 text-center">Loading...</p>
+                        
+                        <!-- Water Bar -->
+                        <div class="w-full bg-white/50 rounded-full h-2.5 overflow-hidden border border-emerald-100 mb-3">
+                            <div id="garden-water-bar" class="h-full bg-blue-400 transition-all duration-1000" style="width: 0%"></div>
+                        </div>
+                        
+                        <!-- Metrics Row -->
+                        <div class="grid grid-cols-3 gap-2 text-center">
+                            <div class="bg-white/50 rounded-lg py-2 px-2">
+                                <div class="text-[10px] text-gray-500 font-bold">📋 Tasks</div>
+                                <div class="font-[900] text-sm text-emerald-800"><span id="metric-tasks">{{ $completedChecklists }}</span>/{{ $totalChecklists }}</div>
+                            </div>
+                            <div class="bg-white/50 rounded-lg py-2 px-2">
+                                <div class="text-[10px] text-gray-500 font-bold">💊 Meds</div>
+                                <div class="font-[900] text-sm text-emerald-800"><span id="metric-meds">{{ $takenMedicationDoses }}</span>/{{ $totalMedicationDoses }}</div>
+                            </div>
+                            <div class="bg-white/50 rounded-lg py-2 px-2">
+                                <div class="text-[10px] text-gray-500 font-bold">❤️ Vitals</div>
+                                <div class="font-[900] text-sm text-emerald-800"><span id="metric-vitals">{{ $completedVitals }}</span>/{{ $totalRequiredVitals }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- MEDICATION LIST (GREEN) - With Dose Tracking -->
                 <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-[24px] p-6 shadow-lg shadow-green-900/20 text-white flex flex-col">
                     <div class="flex justify-between items-center mb-2">
                         <div>
@@ -808,7 +793,7 @@
                 </div>
 
                 <!-- CHECKLIST WIDGET - Enhanced -->
-                <div class="bg-blue-50 rounded-[24px] p-6 shadow-sm border border-blue-200 relative overflow-hidden">
+                <div class="bg-blue-50 rounded-[24px] p-6 shadow-lg border border-blue-200 relative overflow-hidden">
                     <!-- Background decoration -->
                     <div class="absolute -bottom-8 -right-8 w-32 h-32 bg-blue-100 rounded-full opacity-50"></div>
                     

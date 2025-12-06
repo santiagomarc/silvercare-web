@@ -25,7 +25,7 @@
         .health-ring { transition: stroke-dashoffset 1s ease-out; }
     </style>
 </head>
-<body class="bg-[#F8FAFC] min-h-screen">
+<body class="bg-gray-100 min-h-screen">
 
 @php
     // Calculate health score based on latest readings and normal ranges
@@ -154,7 +154,7 @@
             
             <!-- Quick Stats -->
             <div class="lg:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <div class="bg-white rounded-2xl p-5 shadow-lg border border-gray-100">
                     <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center mb-3">
                         <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
@@ -164,7 +164,7 @@
                     <p class="text-2xl font-[900] text-gray-900 mt-1">{{ $totalReadings }}</p>
                 </div>
                 
-                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <div class="bg-white rounded-2xl p-5 shadow-lg border border-gray-100">
                     <div class="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center mb-3">
                         <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
@@ -177,7 +177,7 @@
                 @php
                     $consistencyScore = $totalReadings > 0 ? min(100, round(($readingsThisWeek / 28) * 100)) : 0;
                 @endphp
-                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <div class="bg-white rounded-2xl p-5 shadow-lg border border-gray-100">
                     <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center mb-3">
                         <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -187,7 +187,7 @@
                     <p class="text-2xl font-[900] text-gray-900 mt-1">{{ $consistencyScore }}%</p>
                 </div>
                 
-                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <div class="bg-white rounded-2xl p-5 shadow-lg border border-gray-100">
                     <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center mb-3">
                         <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -199,71 +199,221 @@
             </div>
         </div>
 
-        <!-- Insights Section -->
-        @if($totalFactors > 0)
-        <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-6 border border-indigo-100">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
-                    <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-                    </svg>
-                </div>
-                <h3 class="text-lg font-[900] text-gray-900">Personalized Insights</h3>
-            </div>
+        <!-- Insights Section (Now in Grid with BMI) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                @foreach($analyticsData as $type => $data)
-                    @if(($data['7days']['count'] ?? 0) > 0)
-                        @php
-                            $insight = '';
-                            $insightType = 'info';
-                            
-                            if ($type === 'blood_pressure') {
-                                $sys = $data['7days']['systolic_avg'] ?? 120;
-                                if ($sys < 120) { $insight = 'Your blood pressure is in the optimal range. Keep up the good work!'; $insightType = 'success'; }
-                                elseif ($sys < 130) { $insight = 'Blood pressure is normal. Consider reducing salt intake for even better results.'; $insightType = 'info'; }
-                                else { $insight = 'Blood pressure is elevated. Regular exercise and stress management can help.'; $insightType = 'warning'; }
-                            } elseif ($type === 'heart_rate') {
-                                $hr = $data['7days']['avg'] ?? 72;
-                                if ($hr >= 60 && $hr <= 80) { $insight = 'Your resting heart rate indicates good cardiovascular health!'; $insightType = 'success'; }
-                                elseif ($hr < 60) { $insight = 'Low heart rate detected. This may be normal if you\'re athletic.'; $insightType = 'info'; }
-                                else { $insight = 'Slightly elevated heart rate. Try relaxation techniques.'; $insightType = 'warning'; }
-                            } elseif ($type === 'temperature') {
-                                $temp = $data['7days']['avg'] ?? 36.5;
-                                if ($temp >= 36.1 && $temp <= 37.2) { $insight = 'Body temperature is perfectly normal.'; $insightType = 'success'; }
-                                else { $insight = 'Temperature variations detected. Monitor for any symptoms.'; $insightType = 'warning'; }
-                            } elseif ($type === 'sugar_level') {
-                                $sugar = $data['7days']['avg'] ?? 100;
-                                if ($sugar >= 70 && $sugar <= 100) { $insight = 'Blood sugar levels are in the healthy range!'; $insightType = 'success'; }
-                                elseif ($sugar < 70) { $insight = 'Blood sugar may be low. Ensure regular, balanced meals.'; $insightType = 'warning'; }
-                                else { $insight = 'Blood sugar is slightly elevated. Consider dietary adjustments.'; $insightType = 'warning'; }
-                            }
-                            
-                            $insightColors = [
-                                'success' => 'bg-green-100 border-green-200 text-green-800',
-                                'info' => 'bg-blue-100 border-blue-200 text-blue-800',
-                                'warning' => 'bg-amber-100 border-amber-200 text-amber-800',
-                            ];
-                        @endphp
-                        <div class="insights-card {{ $insightColors[$insightType] }} rounded-xl p-4 border">
-                            <div class="flex items-start gap-3">
-                                <span class="text-2xl">{{ $data['config']['icon'] }}</span>
-                                <div>
-                                    <h4 class="font-[800] text-sm mb-1">{{ $data['config']['name'] }}</h4>
-                                    <p class="text-xs font-[600] leading-relaxed">{{ $insight }}</p>
+            <!-- Personalized Insights Card (Swapped - now in big square) -->
+            @if($totalFactors > 0)
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                <div class="bg-gradient-to-r from-indigo-50 to-purple-100 p-5 border-b border-indigo-100">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                            <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-[900] text-gray-900">Personalized Insights</h3>
+                            <p class="text-sm font-[600] text-gray-500">Based on your vitals</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="space-y-3">
+                        @foreach($analyticsData as $type => $data)
+                            @if(($data['7days']['count'] ?? 0) > 0)
+                                @php
+                                    $insight = '';
+                                    $insightType = 'info';
+                                    
+                                    if ($type === 'blood_pressure') {
+                                        $sys = $data['7days']['systolic_avg'] ?? 120;
+                                        if ($sys < 120) { $insight = 'Your blood pressure is in the optimal range. Keep up the good work!'; $insightType = 'success'; }
+                                        elseif ($sys < 130) { $insight = 'Blood pressure is normal. Consider reducing salt intake for even better results.'; $insightType = 'info'; }
+                                        else { $insight = 'Blood pressure is elevated. Regular exercise and stress management can help.'; $insightType = 'warning'; }
+                                    } elseif ($type === 'heart_rate') {
+                                        $hr = $data['7days']['avg'] ?? 72;
+                                        if ($hr >= 60 && $hr <= 80) { $insight = 'Your resting heart rate indicates good cardiovascular health!'; $insightType = 'success'; }
+                                        elseif ($hr < 60) { $insight = 'Low heart rate detected. This may be normal if you\'re athletic.'; $insightType = 'info'; }
+                                        else { $insight = 'Slightly elevated heart rate. Try relaxation techniques.'; $insightType = 'warning'; }
+                                    } elseif ($type === 'temperature') {
+                                        $temp = $data['7days']['avg'] ?? 36.5;
+                                        if ($temp >= 36.1 && $temp <= 37.2) { $insight = 'Body temperature is perfectly normal.'; $insightType = 'success'; }
+                                        else { $insight = 'Temperature variations detected. Monitor for any symptoms.'; $insightType = 'warning'; }
+                                    } elseif ($type === 'sugar_level') {
+                                        $sugar = $data['7days']['avg'] ?? 100;
+                                        if ($sugar >= 70 && $sugar <= 100) { $insight = 'Blood sugar levels are in the healthy range!'; $insightType = 'success'; }
+                                        elseif ($sugar < 70) { $insight = 'Blood sugar may be low. Ensure regular, balanced meals.'; $insightType = 'warning'; }
+                                        else { $insight = 'Blood sugar is slightly elevated. Consider dietary adjustments.'; $insightType = 'warning'; }
+                                    }
+                                    
+                                    $insightColors = [
+                                        'success' => 'bg-green-50 border-green-200 text-green-800',
+                                        'info' => 'bg-blue-50 border-blue-200 text-blue-800',
+                                        'warning' => 'bg-amber-50 border-amber-200 text-amber-800',
+                                    ];
+                                @endphp
+                                <div class="{{ $insightColors[$insightType] }} rounded-xl p-3 border">
+                                    <div class="flex items-start gap-3">
+                                        <span class="text-xl">{{ $data['config']['icon'] }}</span>
+                                        <div>
+                                            <h4 class="font-[800] text-sm mb-0.5">{{ $data['config']['name'] }}</h4>
+                                            <p class="text-xs font-[600] leading-relaxed">{{ $insight }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            <!-- BMI Card -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                <div class="bg-gradient-to-r from-purple-50 to-violet-100 p-5 border-b border-purple-100">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shadow-sm">
+                            ⚖️
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-[900] text-gray-900">Body Metrics</h3>
+                            <p class="text-sm font-[600] text-gray-500">Weight, Height & BMI</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-5">
+                    @if($bmiData['bmi'])
+                        <!-- BMI Score Display -->
+                        <div class="text-center mb-6">
+                            <div class="inline-flex items-center justify-center w-28 h-28 rounded-full bg-{{ $bmiData['color'] }}-100 mb-3">
+                                <div class="text-center">
+                                    <p class="text-3xl font-[900] text-{{ $bmiData['color'] }}-600">{{ $bmiData['bmi'] }}</p>
+                                    <p class="text-xs font-[700] text-{{ $bmiData['color'] }}-500">BMI</p>
                                 </div>
                             </div>
+                            <p class="text-lg font-[900] text-gray-900">{{ $bmiData['category'] }}</p>
+                        </div>
+
+                        <!-- Weight & Height Cards -->
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <div class="bg-gray-50 rounded-xl p-4 text-center">
+                                <div class="text-2xl mb-1">📏</div>
+                                <p class="text-xs font-[700] text-gray-500 uppercase">Height</p>
+                                <p class="text-xl font-[900] text-gray-900">{{ $bmiData['height'] }} <span class="text-sm font-[600] text-gray-500">cm</span></p>
+                            </div>
+                            <div class="bg-gray-50 rounded-xl p-4 text-center">
+                                <div class="text-2xl mb-1">⚖️</div>
+                                <p class="text-xs font-[700] text-gray-500 uppercase">Weight</p>
+                                <p class="text-xl font-[900] text-gray-900">{{ $bmiData['weight'] }} <span class="text-sm font-[600] text-gray-500">kg</span></p>
+                            </div>
+                        </div>
+
+                        <!-- BMI Scale Reference -->
+                        <div class="bg-gray-50 rounded-xl p-3">
+                            <p class="text-xs font-[700] text-gray-500 mb-2 text-center">BMI Categories</p>
+                            <div class="flex justify-between text-xs font-[600]">
+                                <span class="text-blue-600">Under 18.5</span>
+                                <span class="text-green-600">18.5–24.9</span>
+                                <span class="text-amber-600">25–29.9</span>
+                                <span class="text-red-600">30+</span>
+                            </div>
+                            <div class="flex h-2 mt-1 rounded-full overflow-hidden">
+                                <div class="bg-blue-400 flex-1"></div>
+                                <div class="bg-green-400 flex-1"></div>
+                                <div class="bg-amber-400 flex-1"></div>
+                                <div class="bg-red-400 flex-1"></div>
+                            </div>
+                        </div>
+                    @else
+                        <!-- No BMI Data -->
+                        <div class="text-center py-8">
+                            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 text-3xl opacity-50">
+                                ⚖️
+                            </div>
+                            <h4 class="text-base font-[800] text-gray-400 mb-1">No Body Metrics</h4>
+                            <p class="text-xs text-gray-400 font-[600] mb-4">Update your profile with weight & height</p>
+                            <a href="{{ route('profile.edit') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-xl text-sm font-[700] hover:bg-purple-600 transition-colors">
+                                Update Profile
+                            </a>
                         </div>
                     @endif
-                @endforeach
+                </div>
             </div>
         </div>
-        @endif
+
+        <!-- Steps Section (Now horizontal rectangular card) -->
+        <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100 shadow-lg">
+            <div class="flex flex-col md:flex-row items-center gap-6">
+                <!-- Left: Icon and Title -->
+                <div class="flex items-center gap-4 flex-shrink-0">
+                    <div class="w-14 h-14 bg-white rounded-xl flex items-center justify-center text-3xl shadow-sm">
+                        👟
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-[900] text-gray-900">Daily Steps</h3>
+                        <p class="text-sm font-[600] text-gray-500">Track your activity</p>
+                    </div>
+                </div>
+                
+                @if($stepsData['today'])
+                    <!-- Center: Progress Ring -->
+                    <div class="flex-shrink-0">
+                        <div class="relative w-20 h-20">
+                            <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="42" stroke="#E5E7EB" stroke-width="8" fill="none"/>
+                                @php
+                                    $stepsPercent = min(100, ($stepsData['today']['value'] / $stepsData['today']['goal']) * 100);
+                                    $strokeOffset = 264 - (264 * $stepsPercent / 100);
+                                @endphp
+                                <circle cx="50" cy="50" r="42" stroke="#22C55E" stroke-width="8" fill="none" 
+                                    stroke-dasharray="264" 
+                                    stroke-dashoffset="{{ $strokeOffset }}"
+                                    stroke-linecap="round"
+                                    class="transition-all duration-1000"/>
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span class="text-sm font-[900] text-gray-900">{{ round($stepsPercent) }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right: Stats -->
+                    <div class="flex-1 grid grid-cols-3 gap-4">
+                        <div class="bg-white/80 rounded-xl p-3 text-center">
+                            <p class="text-xs font-[700] text-gray-500 uppercase">Today</p>
+                            <p class="text-xl font-[900] text-gray-900">{{ number_format($stepsData['today']['value']) }}</p>
+                        </div>
+                        <div class="bg-white/80 rounded-xl p-3 text-center">
+                            <p class="text-xs font-[700] text-gray-500 uppercase">Weekly</p>
+                            <p class="text-xl font-[900] text-gray-900">{{ number_format($stepsData['weeklyTotal']) }}</p>
+                        </div>
+                        <div class="bg-white/80 rounded-xl p-3 text-center">
+                            <p class="text-xs font-[700] text-gray-500 uppercase">Daily Avg</p>
+                            <p class="text-xl font-[900] text-gray-900">{{ number_format($stepsData['weeklyAvg']) }}</p>
+                        </div>
+                    </div>
+                    
+                    @if($stepsData['today']['source'] === 'google_fit')
+                    <div class="flex-shrink-0">
+                        <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full font-[700] text-xs">🔗 Google Fit</span>
+                    </div>
+                    @endif
+                @else
+                    <div class="flex-1 flex items-center justify-center py-4">
+                        <div class="text-center">
+                            <p class="text-gray-400 font-[700]">No steps data available</p>
+                            <p class="text-xs text-gray-400 font-[600]">Connect Google Fit to track steps</p>
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
 
         <!-- Vitals Analytics Cards -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             @foreach($analyticsData as $type => $data)
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden" id="card-{{ $type }}">
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden" id="card-{{ $type }}">
                 <!-- Card Header -->
                 <div class="bg-gradient-to-r from-{{ $data['config']['color'] }}-50 to-{{ $data['config']['color'] }}-100/50 p-5 border-b border-{{ $data['config']['color'] }}-100">
                     <div class="flex items-center justify-between">

@@ -1,6 +1,6 @@
 # SilverCare Web - Setup Progress 🚀
 
-**Last Updated:** Dec 5, 2025
+**Last Updated:** Dec 7, 2025
 
 ## ✅ Completed Steps
 
@@ -826,7 +826,7 @@ php artisan route:clear && php artisan config:clear && php artisan cache:clear &
 
 ---
 
-## ��� Session Notes (Dec 7, 2025) - Vitals Page Restoration & Analytics Refactor
+## ��� Session Notes (Dec 7, 2025) - Vitals Page Restoration & Analytics Refactor
 
 ### 1. **Vitals Show Page - Restoration**
 
@@ -896,3 +896,36 @@ php artisan route:clear && php artisan config:clear && php artisan cache:clear &
 - `lib/widgets/analytics/blood_pressure_analytics_card.dart` - Expandable card pattern
 - `lib/widgets/analytics/sugar_level_analytics_card.dart` - Insights format
 - `lib/widgets/analytics/temperature_analytics_card.dart` - Trend display
+
+---
+
+### 18. Dashboard & Analytics UI Enhancements ✅ (DEC 7 2025)
+
+**Dashboard Layout Refactor:**
+- ✅ 3-button top row: Wellness (pink), Schedule (orange), Analytics (purple)
+- ✅ Two-column layout: Left (8/12) for Mood + Vitals, Right (4/12) for Garden + Meds + Tasks
+- ✅ Mood card redesigned with fixed-position emoji, mood label, and slider
+- ✅ Stronger drop shadows (`shadow-lg`) on all cards for better contrast
+- ✅ Vital cards upgraded from `shadow-sm` to `shadow-md` with `hover:shadow-lg`
+
+**Mood Tracker Improvements:**
+- ✅ Thicker card with more padding (`p-6 md:p-8`)
+- ✅ Bigger emoji (`text-6xl md:text-7xl`) and mood label (`text-xl md:text-2xl`)
+- ✅ Fixed-width container prevents layout shift when mood text changes
+- ✅ Slider aligned right with question text
+
+**Analytics Page Enhancements:**
+- ✅ **Steps Card** - Daily steps with progress ring, weekly total/avg, Google Fit sync badge
+- ✅ **BMI Card** - Weight/Height display, BMI calculation with category (Underweight/Normal/Overweight/Obese)
+- ✅ Background changed to `bg-gray-100` for better card contrast
+- ✅ Swapped layout: Insights in square card (left), Steps in horizontal bar (full width)
+- ✅ All stat cards upgraded to `shadow-lg`
+
+**Controller Updates (`HealthMetricController`):**
+- ✅ Added `$stepsData` with today's steps, weekly total, weekly average
+- ✅ Added `$bmiData` with weight, height, calculated BMI, and category color
+
+**Files Modified:**
+- `resources/views/elderly/dashboard.blade.php` - Layout refactor + mood card styling
+- `resources/views/elderly/vitals/analytics.blade.php` - Steps/BMI cards + Insights swap
+- `app/Http/Controllers/HealthMetricController.php` - Added steps/BMI data to analytics
