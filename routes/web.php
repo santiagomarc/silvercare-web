@@ -47,6 +47,7 @@ Route::middleware(['auth', 'verified', 'elderly'])->group(function () {
     Route::delete('/my-vitals/{metric}', [HealthMetricController::class, 'destroy'])->name('elderly.vitals.destroy');
 
     // Individual Vital Screens
+    Route::get('/my-vitals/analytics', [HealthMetricController::class, 'analytics'])->name('elderly.vitals.analytics');
     Route::get('/my-vitals/blood-pressure', [HealthMetricController::class, 'bloodPressureScreen'])->name('elderly.vitals.blood_pressure');
     Route::get('/my-vitals/sugar-level', [HealthMetricController::class, 'sugarLevelScreen'])->name('elderly.vitals.sugar_level');
     Route::get('/my-vitals/temperature', [HealthMetricController::class, 'temperatureScreen'])->name('elderly.vitals.temperature');

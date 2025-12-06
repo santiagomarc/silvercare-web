@@ -394,6 +394,124 @@ class HealthMetricController extends Controller
     }
 
     /**
+     * Analytics Dashboard - comprehensive view of all health vitals
+     */
+    public function analytics()
+    {
+        $user = Auth::user();
+        $elderlyId = $user->profile?->id;
+
+        if (!$elderlyId) {
+            return redirect()->route('elderly.dashboard')->with('error', 'Profile not found');
+        }
+
+        // Get data for different time periods
+        $periods = [
+            '7days' => Carbon::now()->subDays(7),
+            '30days' => Carbon::now()->subDays(30),
+            '90days' => Carbon::now()->subDays(90),
+        ];
+
+        $analyticsData = [];
+
+        foreach (['blood_pressure', 'sugar_level', 'temperature', 'heart_rate'] as $type) {
+            $config = self::VITAL_TYPES[$type];
+            
+            // Get metrics for each period
+            $data = [
+                'config' => $config,
+                'type' => $type,
+            ];
+
+            foreach ($periods as $periodKey => $startDate) {
+                $metrics = HealthMetric::where('elderly_id', $elderlyId)
+                    ->where('type', $type)
+                    ->where('measured_at', '>=', $startDate)
+                    ->orderBy('measured_at', 'asc')
+                    ->get();
+
+                $periodData = [
+                    'count' => $metrics->count(),
+                    'metrics' => $metrics,
+                ];
+
+                if ($type === 'blood_pressure') {
+                    // Parse blood pressure readings
+                    $systolic = [];
+                    $diastolic = [];
+                    foreach ($metrics as $metric) {
+                        if ($metric->value_text && preg_match('/^(\d+)\/(\d+)$/', $metric->value_text, $matches)) {
+                            $systolic[] = intval($matches[1]);
+                            $diastolic[] = intval($matches[2]);
+                        }
+                    }
+                    if (!empty($systolic)) {
+                        $periodData['systolic_avg'] = round(array_sum($systolic) / count($systolic), 1);
+                        $periodData['systolic_min'] = min($systolic);
+                        $periodData['systolic_max'] = max($systolic);
+                        $periodData['diastolic_avg'] = round(array_sum($diastolic) / count($diastolic), 1);
+                        $periodData['diastolic_min'] = min($diastolic);
+                        $periodData['diastolic_max'] = max($diastolic);
+                    }
+                } else {
+                    // Numeric values
+                    if ($metrics->isNotEmpty()) {
+                        $values = $metrics->pluck('value')->map(fn($v) => floatval($v));
+                        $periodData['avg'] = round($values->avg(), 1);
+                        $periodData['min'] = $values->min();
+                        $periodData['max'] = $values->max();
+                        $periodData['trend'] = $this->calculateTrend($metrics);
+                    }
+                }
+
+                $data[$periodKey] = $periodData;
+            }
+
+            $analyticsData[$type] = $data;
+        }
+
+        // Overall statistics
+        $totalReadings = HealthMetric::where('elderly_id', $elderlyId)
+            ->whereIn('type', ['blood_pressure', 'sugar_level', 'temperature', 'heart_rate'])
+            ->where('measured_at', '>=', Carbon::now()->subDays(30))
+            ->count();
+
+        $readingsThisWeek = HealthMetric::where('elderly_id', $elderlyId)
+            ->whereIn('type', ['blood_pressure', 'sugar_level', 'temperature', 'heart_rate'])
+            ->where('measured_at', '>=', Carbon::now()->subDays(7))
+            ->count();
+
+        return view('elderly.vitals.analytics', compact(
+            'analyticsData',
+            'totalReadings',
+            'readingsThisWeek'
+        ));
+    }
+
+    /**
+     * Calculate trend (increasing, decreasing, stable)
+     */
+    private function calculateTrend($metrics)
+    {
+        if ($metrics->count() < 2) {
+            return 'stable';
+        }
+
+        $values = $metrics->pluck('value')->map(fn($v) => floatval($v))->values();
+        $firstHalf = $values->slice(0, ceil($values->count() / 2))->avg();
+        $secondHalf = $values->slice(ceil($values->count() / 2))->avg();
+
+        $diff = $secondHalf - $firstHalf;
+        $percentChange = $firstHalf > 0 ? ($diff / $firstHalf) * 100 : 0;
+
+        if (abs($percentChange) < 3) {
+            return 'stable';
+        }
+
+        return $percentChange > 0 ? 'increasing' : 'decreasing';
+    }
+
+    /**
      * Generic vital screen with history
      */
     private function vitalScreen(string $type)
