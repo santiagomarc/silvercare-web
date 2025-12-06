@@ -823,3 +823,76 @@ php artisan route:clear && php artisan config:clear && php artisan cache:clear &
 ### Files Modified:
 - `app/Http/Controllers/ElderlyDashboardController.php` - Added time validation to `undoMedication()`
 - `resources/views/elderly/dashboard.blade.php` - Added `data-can-undo` attribute and JS check
+
+---
+
+## Ì≥ù Session Notes (Dec 7, 2025) - Vitals Page Restoration & Analytics Refactor
+
+### 1. **Vitals Show Page - Restoration**
+
+**Problem:** Groupmate removed the stats hero card and action card from `vitals/show.blade.php` with commit message "Remove stats and action cards from vitals detail page, show only recent history"
+
+**Solution:** Restored both sections:
+- **Stats Hero Card (stagger-1):** Gradient card showing latest reading with AVG/MIN/MAX stats
+- **Unified Action Card (stagger-2):** Manual Record button + Google Fit sync (where applicable)
+
+**Files Restored:**
+- `resources/views/elderly/vitals/show.blade.php` - Added back lines 101-253
+
+---
+
+### 2. **Analytics Page - Comprehensive Refactor**
+
+**Problem:** Current analytics page has "View Details" buttons that navigate away to vitals pages. User wanted expandable modals like Flutter app instead, plus health insights.
+
+**Solution:** Complete redesign of `analytics.blade.php` inspired by Flutter widgets:
+
+**New Features Added:**
+
+1. **Health Score Card**
+   - Calculates overall health score (0-100) based on all tracked vitals
+   - Animated ring chart with score display
+   - Labels: Excellent (90+), Good (75-89), Fair (60-74), Needs Attention (<60)
+   - Color-coded based on score
+
+2. **Quick Stats Row**
+   - Total Readings, This Week count, Consistency %, Vitals Tracked
+
+3. **Personalized Insights Section**
+   - Per-vital insights based on actual readings
+   - Color-coded cards: success (green), info (blue), warning (amber)
+   - Recommendations like "reduce salt intake" or "try relaxation techniques"
+
+4. **Enhanced Vital Cards**
+   - Each card has mini Chart.js graph
+   - Key stats (avg/min/max/trend) in grid format
+   - Latest reading highlighted
+   - **"Details" button opens slide-out drawer** (no navigation!)
+
+5. **Detail Modal/Drawer**
+   - Slides in from right
+   - Full statistics for selected vital
+   - "Add New Reading" button
+   - Complete reading history (scrollable)
+   - Close with X button or Escape key
+
+6. **Global Period Selector**
+   - Week / Month / 3 Months toggle
+   - Updates all cards and modal data
+
+**Technical Implementation:**
+- Used Chart.js for all visualizations
+- Blade PHP for health score calculation (server-side)
+- JavaScript for modal management and chart initialization
+- CSS animations for smooth drawer transitions
+
+**Files Modified:**
+- `resources/views/elderly/vitals/analytics.blade.php` - Complete rewrite (395 ‚Üí 603 lines)
+
+---
+
+**Flutter Inspiration Files Referenced:**
+- `lib/widgets/analytics/health_score_card.dart` - Health score ring chart
+- `lib/widgets/analytics/blood_pressure_analytics_card.dart` - Expandable card pattern
+- `lib/widgets/analytics/sugar_level_analytics_card.dart` - Insights format
+- `lib/widgets/analytics/temperature_analytics_card.dart` - Trend display
