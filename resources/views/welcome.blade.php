@@ -36,8 +36,8 @@
             <div class="w-full max-w-sm flex flex-col items-center gap-y-8">
                 
                 <div class="fade-in-section transition-delay-100">
-                    <div class="w-[140px] h-[140px] bg-white rounded-[24px] shadow-[0_10px_25px_rgba(0,0,0,0.15)] flex items-center justify-center transform transition duration-500 hover:scale-110 hover:rotate-3 cursor-pointer">
-                        <img src="{{ asset('assets/icons/silvercare.png') }}" alt="Logo" class="w-24 h-24 object-contain drop-shadow-md">
+                    <div class="w-[180px] h-[180px] bg-white rounded-[24px] shadow-[0_10px_25px_rgba(0,0,0,0.15)] flex items-center justify-center p-4 transform transition duration-500 hover:scale-110 hover:rotate-3 cursor-pointer">
+                        <img src="{{ asset('assets/icons/silvercare.png') }}" alt="Logo" class="w-full h-full object-contain drop-shadow-md">
                     </div>
                 </div>
 

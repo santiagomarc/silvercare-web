@@ -13,6 +13,7 @@ use App\Http\Controllers\ElderlyDashboardController;
 use App\Http\Controllers\HealthMetricController;
 use App\Http\Controllers\GoogleFitController;
 use App\Http\Controllers\WellnessController; // <--- ADDED THIS
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 // Welcome landing page - redirect logged-in users to their dashboard
@@ -67,6 +68,17 @@ Route::middleware(['auth', 'verified', 'elderly'])->group(function () {
     Route::get('/wellness/memory-match', [WellnessController::class, 'memoryMatch'])->name('elderly.wellness.memory');
     Route::get('/wellness/morning-stretch', [WellnessController::class, 'morningStretch'])->name('elderly.wellness.stretch');
     Route::get('/wellness/word-of-day', [WellnessController::class, 'wordOfDay'])->name('elderly.wellness.word');
+
+    // ---------------------------------------------------------------------
+    // NOTIFICATION ROUTES
+    // ---------------------------------------------------------------------
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('elderly.notifications.index');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('elderly.notifications.read');
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('elderly.notifications.mark-all-read');
+    Route::delete('/notifications/{notification}', [NotificationController::class, 'delete'])->name('elderly.notifications.delete');
+    Route::post('/notifications/clear-all', [NotificationController::class, 'clearAll'])->name('elderly.notifications.clear-all');
+    Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('elderly.notifications.unread-count');
+    Route::get('/notifications/latest', [NotificationController::class, 'getLatest'])->name('elderly.notifications.latest');
 });
 
 // Caregiver Routes - Protected by 'caregiver' middleware
