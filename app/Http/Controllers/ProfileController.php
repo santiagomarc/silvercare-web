@@ -68,6 +68,7 @@ class ProfileController extends Controller
                 'phone_number'           => $request->phone_number,
                 'address'                => $request->address,
                 'username'               => $request->username ?? $user->name,
+                'relationship'           => $request->relationship,
                 
                 'medical_conditions'     => $medical_conditions,
                 'medications'            => $medications,

@@ -242,21 +242,36 @@
                         </div>
                         
                         <!-- Right: Question + Slider (fixed layout) -->
-                        <div class="flex-1 flex flex-col items-center md:items-end gap-2">
-                            <h3 class="font-[800] text-lg md:text-xl text-gray-800 text-center md:text-right whitespace-nowrap">How are you feeling today?</h3>
-                            <div class="flex items-center gap-4">
-                                <input 
-                                    type="range" 
-                                    id="moodSlider"
-                                    min="1" 
-                                    max="5" 
-                                    value="{{ $todayMood ?? 3 }}"
-                                    class="w-48 md:w-64 lg:w-80 h-3"
-                                    style="color: #6B7280;"
-                                >
-                                <span id="moodSaved" class="text-xs font-bold text-green-600 opacity-0 transition-opacity whitespace-nowrap">✓ Saved</span>
-                            </div>
-                        </div>
+                        <div class="flex-1 flex flex-col justify-center w-full">
+    <!-- Header Row: Text on Left, Saved Badge on Right -->
+    <div class="flex items-center justify-between mb-3 w-full">
+        <h3 class="font-[800] text-lg text-gray-800 truncate">
+            How are you feeling today?
+        </h3>
+        <span id="moodSaved" class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md opacity-0 transition-opacity duration-300">
+            ✓ Saved
+        </span>
+    </div>
+
+    <!-- Slider Row -->
+    <div class="relative w-full">
+        <input 
+            type="range" 
+            id="moodSlider" 
+            min="1" 
+            max="5" 
+            value="{{ $todayMood ?? 3 }}" 
+            class="w-full h-4 bg-gray-200 rounded-full appearance-none cursor-pointer"
+            style="color: #6B7280;"
+        >
+        
+        <!-- Optional: Labels below slider for clarity -->
+        <div class="flex justify-between mt-2 px-1">
+            <span class="text-[10px] font-bold text-gray-400 uppercase">Very Sad</span>
+            <span class="text-[10px] font-bold text-gray-400 uppercase">Very Happy</span>
+        </div>
+    </div>
+</div>
                     </div>
                 </div>
 

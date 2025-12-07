@@ -87,7 +87,35 @@
                                     </template>
                                 </div>
 
-                                <!-- Age -->
+                                @if($profile->isCaregiver())
+                                <!-- Relationship (Caregiver Only) -->
+                                <div>
+                                    <label class="mb-2 block text-xs font-[800] uppercase tracking-wider text-gray-400">Relationship to Elder</label>
+                                    <template x-if="!editMode">
+                                        <p class="px-5 py-4 font-[700] text-gray-900">{{ $profile->relationship ?: '—' }}</p>
+                                    </template>
+                                    <template x-if="editMode">
+                                        <div class="relative">
+                                            <select name="relationship" class="w-full appearance-none rounded-xl border-2 border-gray-100 bg-gray-50 px-5 py-4 font-[700] text-gray-900 transition-all focus:border-blue-500 focus:bg-white focus:ring-0 outline-none">
+                                                <option value="">Select...</option>
+                                                <option value="Son" {{ (old('relationship', $profile->relationship) == 'Son') ? 'selected' : '' }}>Son</option>
+                                                <option value="Daughter" {{ (old('relationship', $profile->relationship) == 'Daughter') ? 'selected' : '' }}>Daughter</option>
+                                                <option value="Spouse" {{ (old('relationship', $profile->relationship) == 'Spouse') ? 'selected' : '' }}>Spouse</option>
+                                                <option value="Sibling" {{ (old('relationship', $profile->relationship) == 'Sibling') ? 'selected' : '' }}>Sibling</option>
+                                                <option value="Friend" {{ (old('relationship', $profile->relationship) == 'Friend') ? 'selected' : '' }}>Friend</option>
+                                                <option value="Professional Caregiver" {{ (old('relationship', $profile->relationship) == 'Professional Caregiver') ? 'selected' : '' }}>Professional Caregiver</option>
+                                                <option value="Other" {{ (old('relationship', $profile->relationship) == 'Other') ? 'selected' : '' }}>Other</option>
+                                            </select>
+                                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                                @endif
+
+                                @if($profile->isCaregiver())
+                                <!-- Age (Caregiver) -->
                                 <div>
                                     <label class="mb-2 block text-xs font-[800] uppercase tracking-wider text-gray-400">Age</label>
                                     <template x-if="!editMode">
@@ -98,8 +126,20 @@
                                             class="w-full rounded-xl border-2 border-gray-100 bg-gray-50 px-5 py-4 font-[700] text-gray-900 transition-all focus:border-blue-500 focus:bg-white focus:ring-0 outline-none">
                                     </template>
                                 </div>
+                                @endif
 
-                                <!-- Sex -->
+                                @if($profile->isElderly())
+                                <!-- Age (Elderly Only) -->
+                                <div>
+                                    <label class="mb-2 block text-xs font-[800] uppercase tracking-wider text-gray-400">Age</label>
+                                    <template x-if="!editMode">
+                                        <p class="px-5 py-4 font-[700] text-gray-900">{{ $profile->age ?: '—' }}</p>
+                                    </template>
+                                    <template x-if="editMode">
+                                        <input type="number" name="age" value="{{ old('age', $profile->age) }}" 
+                                            class="w-full rounded-xl border-2 border-gray-100 bg-gray-50 px-5 py-4 font-[700] text-gray-900 transition-all focus:border-blue-500 focus:bg-white focus:ring-0 outline-none">
+                                    </template>
+                                </div>
                                 <div>
                                     <label class="mb-2 block text-xs font-[800] uppercase tracking-wider text-gray-400">Sex</label>
                                     <template x-if="!editMode">
@@ -119,7 +159,7 @@
                                     </template>
                                 </div>
 
-                                <!-- Height -->
+                                <!-- Height (Elderly Only) -->
                                 <div>
                                     <label class="mb-2 block text-xs font-[800] uppercase tracking-wider text-gray-400">Height (cm)</label>
                                     <template x-if="!editMode">
@@ -131,7 +171,7 @@
                                     </template>
                                 </div>
 
-                                <!-- Weight -->
+                                <!-- Weight (Elderly Only) -->
                                 <div>
                                     <label class="mb-2 block text-xs font-[800] uppercase tracking-wider text-gray-400">Weight (kg)</label>
                                     <template x-if="!editMode">
@@ -142,6 +182,7 @@
                                             class="w-full rounded-xl border-2 border-gray-100 bg-gray-50 px-5 py-4 font-[700] text-gray-900 transition-all focus:border-blue-500 focus:bg-white focus:ring-0 outline-none">
                                     </template>
                                 </div>
+                                @endif
 
                                 <!-- Address (full width) -->
                                 <div class="md:col-span-2 lg:col-span-3">
@@ -157,7 +198,8 @@
                         </div>
                     </div>
 
-                    <!-- CARD 2: Medical Information -->
+                    <!-- CARD 2: Medical Information (Elderly Only) -->
+                    @if($profile->isElderly())
                     @php
                         function safeImplode($value) {
                             if (is_array($value)) return implode(', ', $value);
@@ -272,8 +314,10 @@
                             </div>
                         </div>
                     </div>
+                    @endif
 
-                    <!-- CARD 3: Emergency Contact -->
+                    <!-- CARD 3: Emergency Contact (Elderly Only) -->
+                    @if($profile->isElderly())
                     <div class="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-gray-800 to-gray-900 p-8 text-white shadow-xl shadow-gray-900/20">
                         <div class="absolute top-0 right-0 -mr-8 -mt-8 h-32 w-32 rounded-full bg-white/5 blur-xl"></div>
                         <div class="absolute bottom-0 left-0 -ml-8 -mb-8 h-32 w-32 rounded-full bg-indigo-500/30 blur-xl"></div>
@@ -323,6 +367,7 @@
                             </div>
                         </div>
                     </div>
+                    @endif
 
                     <!-- ACTION BUTTONS (only show in edit mode) -->
                     <div x-show="editMode" class="flex justify-end gap-4">

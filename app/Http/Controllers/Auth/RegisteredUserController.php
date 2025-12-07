@@ -53,12 +53,16 @@ class RegisteredUserController extends Controller
             'phone_number' => ['required', 'string', 'max:20'],
             'sex' => ['required', 'in:Male,Female,male,female'],
             'address' => ['nullable', 'string', 'max:500'],
+            'age' => ['nullable', 'integer', 'min:1', 'max:150'],
             
             // Optional caregiver invitation
             'add_caregiver' => ['nullable', 'boolean'],
             'caregiver_name' => ['required_if:add_caregiver,true', 'string', 'max:255'],
             'caregiver_email' => ['required_if:add_caregiver,true', 'email', 'max:255', 'unique:users,email'],
             'caregiver_relationship' => ['required_if:add_caregiver,true', 'in:Spouse,Child,Professional Caregiver'],
+            'caregiver_phone' => ['nullable', 'string', 'max:20'],
+            'caregiver_address' => ['nullable', 'string', 'max:500'],
+            'caregiver_age' => ['nullable', 'integer', 'min:1', 'max:150'],
         ]);
 
         try {
@@ -79,6 +83,7 @@ class RegisteredUserController extends Controller
                 'phone_number' => $validated['phone_number'],
                 'sex' => ucfirst(strtolower($validated['sex'])),
                 'address' => $validated['address'] ?? null,
+                'age' => $validated['age'] ?? null,
                 'profile_completed' => false,
                 'is_active' => true,
             ]);
@@ -90,7 +95,10 @@ class RegisteredUserController extends Controller
                     elderlyUser: $elderlyUser,
                     caregiverName: $validated['caregiver_name'],
                     caregiverEmail: $validated['caregiver_email'],
-                    relationship: $validated['caregiver_relationship']
+                    relationship: $validated['caregiver_relationship'],
+                    phone: $validated['caregiver_phone'] ?? null,
+                    address: $validated['caregiver_address'] ?? null,
+                    age: $validated['caregiver_age'] ?? null
                 );
             }
 
@@ -126,7 +134,10 @@ class RegisteredUserController extends Controller
         User $elderlyUser,
         string $caregiverName,
         string $caregiverEmail,
-        string $relationship
+        string $relationship,
+        ?string $phone = null,
+        ?string $address = null,
+        ?int $age = null
     ): int {
         // Generate temporary secure password
         $tempPassword = Str::random(16);
@@ -142,7 +153,11 @@ class RegisteredUserController extends Controller
         $caregiverProfile = UserProfile::create([
             'user_id' => $caregiverUser->id,
             'user_type' => 'caregiver',
+            'username' => $caregiverName,
             'relationship' => $relationship,
+            'phone_number' => $phone,
+            'address' => $address,
+            'age' => $age,
             'profile_completed' => true, // Caregivers don't need profile completion
             'is_active' => true,
         ]);

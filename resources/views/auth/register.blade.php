@@ -131,6 +131,13 @@
                         </div>
 
                         <div>
+                            <label for="age" class="block text-sm font-bold text-gray-700 mb-2">Age</label>
+                            <input id="age" type="number" name="age" value="{{ old('age') }}" min="1" max="150"
+                                   class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#000080] focus:ring-2 focus:ring-[#000080]/20 transition-all duration-200 font-medium"
+                                   placeholder="65">
+                        </div>
+
+                        <div>
                             <label for="password_confirmation" class="block text-sm font-bold text-gray-700 mb-2">Confirm Password</label>
                             <input id="password_confirmation" type="password" name="password_confirmation" required
                                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#000080] focus:ring-2 focus:ring-[#000080]/20 transition-all duration-200 font-medium"
@@ -178,6 +185,29 @@
                                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#000080] focus:ring-2 focus:ring-[#000080]/20 transition-all duration-200 font-medium bg-white"
                                    placeholder="caregiver@example.com">
                         </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label for="caregiver_phone" class="block text-sm font-bold text-gray-700 mb-2">Caregiver's Phone</label>
+                            <input id="caregiver_phone" type="tel" name="caregiver_phone" value="{{ old('caregiver_phone') }}"
+                                   class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#000080] focus:ring-2 focus:ring-[#000080]/20 transition-all duration-200 font-medium bg-white"
+                                   placeholder="+1234567890">
+                        </div>
+
+                        <div>
+                            <label for="caregiver_age" class="block text-sm font-bold text-gray-700 mb-2">Caregiver's Age</label>
+                            <input id="caregiver_age" type="number" name="caregiver_age" value="{{ old('caregiver_age') }}" min="1" max="150"
+                                   class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#000080] focus:ring-2 focus:ring-[#000080]/20 transition-all duration-200 font-medium bg-white"
+                                   placeholder="45">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="caregiver_address" class="block text-sm font-bold text-gray-700 mb-2">Caregiver's Address</label>
+                        <input id="caregiver_address" type="text" name="caregiver_address" value="{{ old('caregiver_address') }}"
+                               class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#000080] focus:ring-2 focus:ring-[#000080]/20 transition-all duration-200 font-medium bg-white"
+                               placeholder="123 Main St, City">
                     </div>
 
                     <div>
