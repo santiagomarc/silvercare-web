@@ -5,15 +5,25 @@ namespace App\Http\Controllers;
 use App\Models\CalendarEvent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 
 class CalendarController extends Controller
 {
     public function index()
     {
         // Get events for the current user
-        $events = CalendarEvent::where('user_id', Auth::id())
-            ->orderBy('start_time')
-            ->get();
+        // Some environments may not yet have the `start_time` column
+        // (migration not run or schema differs). Guard the query to
+        // avoid throwing an SQL error by falling back to `created_at`.
+        if (Schema::hasColumn('calendar_events', 'start_time')) {
+            $events = CalendarEvent::where('user_id', Auth::id())
+                ->orderBy('start_time')
+                ->get();
+        } else {
+            $events = CalendarEvent::where('user_id', Auth::id())
+                ->orderBy('created_at')
+                ->get();
+        }
 
         return view('calendar.index', compact('events'));
     }
