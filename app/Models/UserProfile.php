@@ -20,6 +20,7 @@ class UserProfile extends Model
         'user_id',
         'user_type',
         'username',
+        'profile_photo',
         'phone_number',
         'sex',
         'age',

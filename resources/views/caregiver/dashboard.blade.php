@@ -48,8 +48,12 @@
                 <!-- PROFILE LINK -->
                 <a href="{{ route('profile.edit') }}" class="flex items-center gap-2 group hover:bg-gray-50 rounded-xl py-1.5 px-2 transition-all cursor-pointer" title="Manage Profile">
                     <div class="relative">
-                        <div class="w-9 h-9 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-[900] text-base group-hover:bg-purple-600 group-hover:text-white transition-colors">
-                            {{ substr(Auth::user()->name, 0, 1) }}
+                        <div class="w-9 h-9 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-[900] text-base group-hover:bg-purple-600 group-hover:text-white transition-colors overflow-hidden">
+                            @if(Auth::user()->profile && Auth::user()->profile->profile_photo)
+                                <img src="{{ Storage::url(Auth::user()->profile->profile_photo) }}" alt="{{ Auth::user()->name }}" class="w-full h-full object-cover">
+                            @else
+                                {{ substr(Auth::user()->name, 0, 1) }}
+                            @endif
                         </div>
                     </div>
                     <div class="hidden sm:block">
@@ -117,8 +121,12 @@
 
                 <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-5">
                     <!-- Avatar -->
-                    <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border-4 border-white/30 flex-shrink-0">
-                        <span class="text-4xl sm:text-5xl font-[900] text-white/90">{{ substr($elderlyUser->name ?? $elderly->username ?? 'E', 0, 1) }}</span>
+                    <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border-4 border-white/30 flex-shrink-0 overflow-hidden">
+                        @if($elderly->profile_photo)
+                            <img src="{{ Storage::url($elderly->profile_photo) }}" alt="{{ $elderlyUser->name ?? 'Elder' }}" class="w-full h-full object-cover">
+                        @else
+                            <span class="text-4xl sm:text-5xl font-[900] text-white/90">{{ substr($elderlyUser->name ?? $elderly->username ?? 'E', 0, 1) }}</span>
+                        @endif
                     </div>
 
                     <!-- Elder Details -->
@@ -493,9 +501,22 @@
                     </div>
                     
                     @if($recentActivity->count() > 0)
-                        <ul class="space-y-3 max-h-96 overflow-y-auto no-scrollbar">
+                        <ul class="space-y-3 max-h-[450px] overflow-y-auto no-scrollbar">
                             @foreach($recentActivity as $activity)
-                                <li class="flex items-start py-2 border-b border-gray-50 last:border-0">
+                                @php
+                                    // Determine border color based on severity or color
+                                    $severity = $activity['severity'] ?? null;
+                                    $color = $activity['color'] ?? 'gray';
+                                    
+                                    $borderClass = match($severity ?? $color) {
+                                        'positive', 'green' => 'border-l-green-400',
+                                        'warning', 'amber' => 'border-l-amber-400',
+                                        'negative', 'red' => 'border-l-red-400',
+                                        'reminder', 'blue' => 'border-l-blue-400',
+                                        default => 'border-l-gray-200',
+                                    };
+                                @endphp
+                                <li class="flex items-start py-2 pl-3 border-l-4 {{ $borderClass }} bg-gray-50/50 rounded-r-lg">
                                     <div class="text-xl mr-3 flex-shrink-0">{{ $activity['icon'] }}</div>
                                     <div class="flex-1 min-w-0">
                                         <p class="text-sm text-gray-800 font-[700] truncate">{{ $activity['title'] }}</p>

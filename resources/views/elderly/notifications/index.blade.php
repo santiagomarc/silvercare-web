@@ -68,8 +68,12 @@
             
             <div class="flex items-center gap-6">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-[#000080] font-[900] text-lg">
-                        {{ substr(Auth::user()->name, 0, 1) }}
+                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-[#000080] font-[900] text-lg overflow-hidden">
+                        @if(Auth::user()->profile && Auth::user()->profile->profile_photo)
+                            <img src="{{ Storage::url(Auth::user()->profile->profile_photo) }}" alt="{{ Auth::user()->name }}" class="w-full h-full object-cover">
+                        @else
+                            {{ substr(Auth::user()->name, 0, 1) }}
+                        @endif
                     </div>
                     <div class="hidden sm:block">
                         <p class="text-sm font-bold text-gray-900 leading-tight">{{ Auth::user()->name }}</p>

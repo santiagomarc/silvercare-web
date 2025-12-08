@@ -56,6 +56,64 @@
                                 <h3 class="font-[800] text-xl text-gray-900">Personal Details</h3>
                             </div>
 
+                            <!-- Profile Photo Section -->
+                            <div class="flex flex-col sm:flex-row items-center gap-6 mb-8 pb-8 border-b border-gray-100" x-data="{ photoUploading: false, photoError: null }">
+                                <!-- Photo Preview -->
+                                <div class="relative group">
+                                    <div class="w-24 h-24 rounded-full overflow-hidden bg-gradient-to-br from-[#000080] to-[#4040a0] shadow-lg shadow-blue-900/20 flex items-center justify-center">
+                                        @if($profile->profile_photo)
+                                            <img id="profile-photo-preview" src="{{ Storage::url($profile->profile_photo) }}" alt="Profile Photo" class="w-full h-full object-cover">
+                                        @else
+                                            <span id="profile-photo-initial" class="text-white text-3xl font-bold">{{ strtoupper(substr($user->name ?? 'U', 0, 1)) }}</span>
+                                        @endif
+                                    </div>
+                                    
+                                    <!-- Camera overlay on hover (only in edit mode) -->
+                                    <template x-if="editMode">
+                                        <label for="photo-upload" class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            </svg>
+                                        </label>
+                                    </template>
+                                </div>
+                                
+                                <!-- Photo Info & Controls -->
+                                <div class="flex flex-col gap-2">
+                                    <p class="text-sm font-[700] text-gray-900">Profile Photo</p>
+                                    
+                                    <!-- View mode: just show status -->
+                                    <template x-if="!editMode">
+                                        <p class="text-xs text-gray-500">{{ $profile->profile_photo ? 'Photo uploaded' : 'No photo uploaded' }}</p>
+                                    </template>
+                                    
+                                    <!-- Edit mode: show upload controls -->
+                                    <template x-if="editMode">
+                                        <div class="flex flex-col gap-2">
+                                            <input type="file" id="photo-upload" name="profile_photo" accept="image/jpeg,image/png,image/gif,image/webp" class="hidden" onchange="uploadProfilePhoto(this)">
+                                            
+                                            <div class="flex items-center gap-2">
+                                                <label for="photo-upload" class="flex items-center gap-1.5 bg-[#000080] text-white px-4 py-2 rounded-lg font-[600] text-sm shadow hover:-translate-y-0.5 transition-all cursor-pointer">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                                    {{ $profile->profile_photo ? 'Change' : 'Upload' }}
+                                                </label>
+                                                
+                                                @if($profile->profile_photo)
+                                                <button type="button" onclick="removeProfilePhoto()" class="flex items-center gap-1.5 bg-red-500 text-white px-4 py-2 rounded-lg font-[600] text-sm shadow hover:-translate-y-0.5 transition-all">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                    Remove
+                                                </button>
+                                                @endif
+                                            </div>
+                                            
+                                            <p class="text-xs text-gray-400">JPG, PNG, GIF or WebP. Max 5MB.</p>
+                                            <div id="photo-status"></div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
                             <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                                 <!-- Full Name -->
                                 <div class="md:col-span-2 lg:col-span-1">
@@ -415,4 +473,76 @@
             </form>
         </div>
     </div>
+
+    <script>
+        function uploadProfilePhoto(input) {
+            if (!input.files || !input.files[0]) return;
+            
+            const file = input.files[0];
+            const statusDiv = document.getElementById('photo-status');
+            
+            // Validate file type
+            const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                statusDiv.innerHTML = '<span class="text-red-500 text-xs">Please select a valid image (JPG, PNG, GIF, WebP)</span>';
+                return;
+            }
+            
+            // Validate file size (5MB max)
+            if (file.size > 5 * 1024 * 1024) {
+                statusDiv.innerHTML = '<span class="text-red-500 text-xs">Image must be less than 5MB</span>';
+                return;
+            }
+            
+            // Show uploading status
+            statusDiv.innerHTML = '<span class="text-blue-600 text-xs flex items-center gap-1"><svg class="animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Uploading...</span>';
+            
+            const formData = new FormData();
+            formData.append('profile_photo', file);
+            
+            fetch('{{ route("profile.photo.upload") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                },
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    statusDiv.innerHTML = '<span class="text-green-600 text-xs flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Photo updated!</span>';
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    statusDiv.innerHTML = '<span class="text-red-500 text-xs">Failed to upload. Please try again.</span>';
+                }
+            })
+            .catch(() => {
+                statusDiv.innerHTML = '<span class="text-red-500 text-xs">An error occurred. Please try again.</span>';
+            });
+        }
+        
+        function removeProfilePhoto() {
+            if (!confirm('Are you sure you want to remove your profile photo?')) return;
+            
+            const statusDiv = document.getElementById('photo-status');
+            statusDiv.innerHTML = '<span class="text-blue-600 text-xs">Removing...</span>';
+            
+            fetch('{{ route("profile.photo.remove") }}', {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    statusDiv.innerHTML = '<span class="text-green-600 text-xs">Photo removed!</span>';
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    statusDiv.innerHTML = '<span class="text-red-500 text-xs">Failed to remove. Please try again.</span>';
+                }
+            })
+            .catch(() => {
+                statusDiv.innerHTML = '<span class="text-red-500 text-xs">An error occurred. Please try again.</span>';
+            });
+        }
+    </script>
 </x-app-layout>

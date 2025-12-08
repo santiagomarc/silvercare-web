@@ -138,8 +138,12 @@
                 <!-- PROFILE LINK -->
                 <a href="{{ route('profile.edit') }}" class="flex items-center gap-2 group hover:bg-gray-50 rounded-xl py-1.5 px-2 transition-all cursor-pointer" title="Manage Profile">
                     <div class="relative">
-                        <div class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-[#000080] font-[900] text-base group-hover:bg-[#000080] group-hover:text-white transition-colors">
-                            {{ substr(Auth::user()->name, 0, 1) }}
+                        <div class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-[#000080] font-[900] text-base group-hover:bg-[#000080] group-hover:text-white transition-colors overflow-hidden">
+                            @if(Auth::user()->profile && Auth::user()->profile->profile_photo)
+                                <img src="{{ Storage::url(Auth::user()->profile->profile_photo) }}" alt="{{ Auth::user()->name }}" class="w-full h-full object-cover">
+                            @else
+                                {{ substr(Auth::user()->name, 0, 1) }}
+                            @endif
                         </div>
                     </div>
                     <div class="hidden sm:block">

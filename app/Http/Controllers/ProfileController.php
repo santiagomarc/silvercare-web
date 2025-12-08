@@ -6,6 +6,7 @@ use App\Models\UserProfile;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -81,6 +82,61 @@ class ProfileController extends Controller
         );
 
         return back()->with('status', 'profile-updated');
+    }
+
+    /**
+     * Upload profile photo
+     */
+    public function uploadPhoto(Request $request)
+    {
+        $request->validate([
+            'profile_photo' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // 5MB max
+        ]);
+
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $profile = UserProfile::where('user_id', $user->id)->first();
+
+        if (!$profile) {
+            return back()->with('error', 'Profile not found');
+        }
+
+        // Delete old photo if exists
+        if ($profile->profile_photo && Storage::disk('public')->exists($profile->profile_photo)) {
+            Storage::disk('public')->delete($profile->profile_photo);
+        }
+
+        // Store the new photo
+        $path = $request->file('profile_photo')->store('profile-photos', 'public');
+
+        // Update the profile
+        $profile->update(['profile_photo' => $path]);
+
+        return back()->with('status', 'photo-updated');
+    }
+
+    /**
+     * Remove profile photo
+     */
+    public function removePhoto(Request $request)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $profile = UserProfile::where('user_id', $user->id)->first();
+
+        if (!$profile) {
+            return back()->with('error', 'Profile not found');
+        }
+
+        // Delete the photo file if exists
+        if ($profile->profile_photo && Storage::disk('public')->exists($profile->profile_photo)) {
+            Storage::disk('public')->delete($profile->profile_photo);
+        }
+
+        // Clear the profile photo path
+        $profile->update(['profile_photo' => null]);
+
+        return back()->with('status', 'photo-removed');
     }
 
     /**

@@ -48,8 +48,12 @@
                                         {{ $isCaregiver ? 'Caregiver' : 'Patient' }}
                                     </div>
                                 </div>
-                                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-[#000080] font-black text-lg border-2 border-white shadow-sm group-hover:shadow-md transition-all">
-                                    {{ substr($user->name, 0, 1) }}
+                                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-[#000080] font-black text-lg border-2 border-white shadow-sm group-hover:shadow-md transition-all overflow-hidden">
+                                    @if($user->profile && $user->profile->profile_photo)
+                                        <img src="{{ Storage::url($user->profile->profile_photo) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
+                                    @else
+                                        {{ substr($user->name, 0, 1) }}
+                                    @endif
                                 </div>
                                 <div class="ms-1">
                                     <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">

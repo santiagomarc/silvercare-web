@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\HealthMetric;
 use App\Models\MedicationLog;
 use App\Models\Checklist;
+use App\Models\Notification;
 use Carbon\Carbon;
 
 class CaregiverDashboardController extends Controller
@@ -98,91 +99,123 @@ class CaregiverDashboardController extends Controller
     }
 
     /**
-     * Get recent activity for the elderly
+     * Get recent activity for the elderly (including notifications)
      */
     private function getRecentActivity($elderlyId)
     {
         $activities = collect();
         $sevenDaysAgo = Carbon::now()->subDays(7);
 
-        // Get medication logs (taken doses)
-        $medicationLogs = MedicationLog::with('medication')
-            ->where('elderly_id', $elderlyId)
-            ->where('is_taken', true)
-            ->where('taken_at', '>=', $sevenDaysAgo)
-            ->orderBy('taken_at', 'desc')
-            ->limit(10)
+        // Get elder's notifications (these are important alerts for caregivers)
+        $notifications = Notification::where('elderly_id', $elderlyId)
+            ->where('created_at', '>=', $sevenDaysAgo)
+            ->orderBy('created_at', 'desc')
+            ->limit(15)
             ->get();
 
-        foreach ($medicationLogs as $log) {
-            $activities->push([
-                'type' => 'medication_taken',
-                'title' => ($log->medication->name ?? 'Medication') . ' taken',
-                'subtitle' => $log->scheduled_time ? Carbon::parse($log->scheduled_time)->format('g:i A') . ' dose' : 'Dose taken',
-                'timestamp' => $log->taken_at,
-                'icon' => '💊',
-                'color' => 'green',
-            ]);
-        }
-
-        // Get completed checklists
-        $completedTasks = Checklist::where('elderly_id', $elderlyId)
-            ->where('is_completed', true)
-            ->where('completed_at', '>=', $sevenDaysAgo)
-            ->orderBy('completed_at', 'desc')
-            ->limit(10)
-            ->get();
-
-        foreach ($completedTasks as $task) {
-            $activities->push([
-                'type' => 'task_completed',
-                'title' => $task->task . ' completed',
-                'subtitle' => ucfirst($task->category ?? 'Task'),
-                'timestamp' => $task->completed_at,
-                'icon' => '✅',
-                'color' => 'green',
-            ]);
-        }
-
-        // Get recent vitals recordings
-        $recentVitals = HealthMetric::where('elderly_id', $elderlyId)
-            ->whereIn('type', ['heart_rate', 'blood_pressure', 'sugar_level', 'temperature'])
-            ->where('measured_at', '>=', $sevenDaysAgo)
-            ->orderBy('measured_at', 'desc')
-            ->limit(10)
-            ->get();
-
-        $vitalNames = [
-            'heart_rate' => 'Heart Rate',
-            'blood_pressure' => 'Blood Pressure',
-            'sugar_level' => 'Sugar Level',
-            'temperature' => 'Temperature',
+        // Map notification types to icons and colors for caregiver view
+        $notificationConfig = [
+            'medication_taken' => ['icon' => '💊', 'color' => 'green'],
+            'medication_taken_late' => ['icon' => '⚠️', 'color' => 'amber'],
+            'medication_missed' => ['icon' => '❌', 'color' => 'red'],
+            'task_completed' => ['icon' => '✅', 'color' => 'green'],
+            'vitals_recorded' => ['icon' => '📊', 'color' => 'blue'],
+            'daily_reminder' => ['icon' => '🔔', 'color' => 'blue'],
+            'health_alert' => ['icon' => '⚠️', 'color' => 'amber'],
         ];
 
-        $vitalIcons = [
-            'heart_rate' => '❤️',
-            'blood_pressure' => '🩺',
-            'sugar_level' => '🍬',
-            'temperature' => '🌡️',
-        ];
-
-        foreach ($recentVitals as $vital) {
-            $value = $vital->type === 'blood_pressure' 
-                ? $vital->value_text 
-                : ($vital->type === 'temperature' ? number_format($vital->value, 1) . '°C' : intval($vital->value));
+        foreach ($notifications as $notification) {
+            $config = $notificationConfig[$notification->type] ?? ['icon' => '🔔', 'color' => 'gray'];
+            
+            // Adapt the notification message for caregiver context
+            $caregiverTitle = $this->adaptNotificationForCaregiver($notification);
             
             $activities->push([
-                'type' => 'vital_recorded',
-                'title' => ($vitalNames[$vital->type] ?? 'Vital') . ' recorded',
-                'subtitle' => $value . ($vital->source === 'google_fit' ? ' • Google Fit' : ''),
-                'timestamp' => $vital->measured_at,
-                'icon' => $vitalIcons[$vital->type] ?? '📊',
-                'color' => 'blue',
+                'type' => 'notification_' . $notification->type,
+                'title' => $caregiverTitle,
+                'subtitle' => $this->formatNotificationSubtitle($notification),
+                'timestamp' => $notification->created_at,
+                'icon' => $config['icon'],
+                'color' => $config['color'],
+                'severity' => $notification->severity,
             ]);
         }
 
-        // Sort by timestamp and take the most recent 10
-        return $activities->sortByDesc('timestamp')->take(10)->values();
+        // Sort by timestamp and take the most recent 15
+        return $activities->sortByDesc('timestamp')->take(15)->values();
+    }
+
+    /**
+     * Adapt notification message for caregiver context
+     */
+    private function adaptNotificationForCaregiver(Notification $notification): string
+    {
+        $elderName = $notification->elderly?->user?->name ?? 'Patient';
+        $firstName = explode(' ', $elderName)[0];
+        
+        switch ($notification->type) {
+            case 'medication_taken':
+                $medName = $notification->metadata['medicationName'] ?? 'medication';
+                return "{$firstName} took {$medName}";
+                
+            case 'medication_taken_late':
+                $medName = $notification->metadata['medicationName'] ?? 'medication';
+                return "{$firstName} took {$medName} (late)";
+                
+            case 'medication_missed':
+                $medName = $notification->metadata['medicationName'] ?? 'medication';
+                return "{$firstName} missed {$medName}";
+                
+            case 'task_completed':
+                $taskName = $notification->metadata['taskName'] ?? 'a task';
+                return "{$firstName} completed {$taskName}";
+                
+            case 'vitals_recorded':
+                $vitalType = $notification->metadata['vitalType'] ?? 'vital';
+                return "{$firstName} recorded {$vitalType}";
+                
+            case 'daily_reminder':
+                return "Reminder sent to {$firstName}";
+                
+            case 'health_alert':
+                return "Health alert for {$firstName}";
+                
+            default:
+                // Use the original title but prefix with patient name
+                return "{$firstName}: " . $notification->title;
+        }
+    }
+
+    /**
+     * Format notification subtitle with relevant details
+     */
+    private function formatNotificationSubtitle(Notification $notification): string
+    {
+        $metadata = $notification->metadata ?? [];
+        
+        switch ($notification->type) {
+            case 'medication_taken':
+            case 'medication_taken_late':
+                if (isset($metadata['takenAt'])) {
+                    return Carbon::parse($metadata['takenAt'])->format('g:i A');
+                }
+                return 'Dose recorded';
+                
+            case 'medication_missed':
+                return $metadata['scheduledTime'] ?? 'Scheduled dose';
+                
+            case 'vitals_recorded':
+                $value = $metadata['value'] ?? '';
+                $type = $metadata['vitalType'] ?? '';
+                return $value ? "{$value}" : ucfirst(str_replace('_', ' ', $type));
+                
+            case 'task_completed':
+                return ucfirst($metadata['category'] ?? 'Task');
+                
+            default:
+                // Return severity-based subtitle
+                return ucfirst($notification->severity);
+        }
     }
 
     /**
