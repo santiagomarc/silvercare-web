@@ -49,6 +49,7 @@ Route::middleware(['auth', 'verified', 'elderly'])->group(function () {
 
     // Individual Vital Screens
     Route::get('/my-vitals/analytics', [HealthMetricController::class, 'analytics'])->name('elderly.vitals.analytics');
+    Route::get('/my-vitals/analytics/export', [HealthMetricController::class, 'exportPdf'])->name('elderly.vitals.export');
     Route::get('/my-vitals/blood-pressure', [HealthMetricController::class, 'bloodPressureScreen'])->name('elderly.vitals.blood_pressure');
     Route::get('/my-vitals/sugar-level', [HealthMetricController::class, 'sugarLevelScreen'])->name('elderly.vitals.sugar_level');
     Route::get('/my-vitals/temperature', [HealthMetricController::class, 'temperatureScreen'])->name('elderly.vitals.temperature');
@@ -89,6 +90,7 @@ Route::middleware(['auth', 'verified', 'caregiver'])->prefix('caregiver')->name(
     Route::patch('/profile', [CaregiverProfileController::class, 'update'])->name('profile.update');
     
     Route::get('/analytics', [CaregiverAnalyticsController::class, 'index'])->name('analytics');
+    Route::get('/analytics/export', [CaregiverAnalyticsController::class, 'exportPdf'])->name('analytics.export');
     
     Route::resource('medications', MedicationController::class);
     Route::resource('checklists', ChecklistController::class);

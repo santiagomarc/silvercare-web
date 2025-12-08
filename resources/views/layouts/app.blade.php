@@ -7,6 +7,10 @@
 
         <title>{{ config('app.name', 'SilverCare') }}</title>
 
+        <!-- Favicon -->
+        <link rel="icon" type="image/png" href="{{ asset('assets/icons/silvercare.png') }}">
+        <link rel="apple-touch-icon" href="{{ asset('assets/icons/silvercare.png') }}">
+
         <!-- LOAD MONTSERRAT (Tailwind needs this to display the font correctly) -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

@@ -81,7 +81,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🩺 SilverCare</h1>
+            <img src="{{ asset('assets/icons/silvercare.png') }}" alt="SilverCare" style="width: 60px; height: 60px; margin-bottom: 15px;">
+            <h1>SilverCare</h1>
         </div>
         
         <div class="content">

@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>SilverCare</title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('assets/icons/silvercare.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('assets/icons/silvercare.png') }}">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -36,8 +40,8 @@
             <div class="w-full max-w-sm flex flex-col items-center gap-y-8">
                 
                 <div class="fade-in-section transition-delay-100">
-                    <div class="w-[180px] h-[180px] bg-white rounded-[24px] shadow-[0_10px_25px_rgba(0,0,0,0.15)] flex items-center justify-center p-4 transform transition duration-500 hover:scale-110 hover:rotate-3 cursor-pointer">
-                        <img src="{{ asset('assets/icons/silvercare.png') }}" alt="Logo" class="w-full h-full object-contain drop-shadow-md">
+                    <div class="w-[180px] h-[180px] flex items-center justify-center transform transition duration-500 hover:scale-110 hover:rotate-3 cursor-pointer">
+                        <img src="{{ asset('assets/icons/silvercare.png') }}" alt="Logo" class="w-full h-full object-contain drop-shadow-lg">
                     </div>
                 </div>
 
@@ -72,9 +76,7 @@
                 
             </div>
 
-            <div class="absolute bottom-10 fade-in-section transition-delay-500">
-                 <p class="text-xs text-gray-400 font-semibold">v1.0.0 • WEB BETA</p>
-            </div>
+
         </div>
 
         <div class="hidden lg:block lg:w-7/12 relative overflow-hidden bg-gray-900">

@@ -64,30 +64,27 @@ class ProfileCompletionController extends Controller
             'allergies' => ['nullable', 'string'],
         ]);
 
-        // Prepare emergency contact data
-        $emergencyContact = null;
-        if ($validated['emergency_name'] && $validated['emergency_phone']) {
-            $emergencyContact = [
-                'name' => $validated['emergency_name'],
-                'phone' => $validated['emergency_phone'],
-                'relationship' => $validated['emergency_relationship'] ?? '',
-            ];
-        }
+        // Prepare medical info as separate arrays
+        $medicalConditions = $validated['conditions'] ? array_values(array_filter(array_map('trim', explode(',', $validated['conditions'])))) : [];
+        $medicationsArray = $validated['medications'] ? array_values(array_filter(array_map('trim', explode(',', $validated['medications'])))) : [];
+        $allergiesArray = $validated['allergies'] ? array_values(array_filter(array_map('trim', explode(',', $validated['allergies'])))) : [];
 
-        // Prepare medical info data
-        $medicalInfo = [
-            'conditions' => $validated['conditions'] ? array_filter(array_map('trim', explode(',', $validated['conditions']))) : [],
-            'medications' => $validated['medications'] ? array_filter(array_map('trim', explode(',', $validated['medications']))) : [],
-            'allergies' => $validated['allergies'] ? array_filter(array_map('trim', explode(',', $validated['allergies']))) : [],
-        ];
-
-        // Update profile
+        // Update profile with individual columns (not legacy JSON fields)
         $profile->update([
             'age' => $validated['age'],
             'weight' => $validated['weight'],
             'height' => $validated['height'],
-            'emergency_contact' => $emergencyContact,
-            'medical_info' => $medicalInfo,
+            
+            // Emergency Contact - Individual Columns
+            'emergency_name' => $validated['emergency_name'],
+            'emergency_phone' => $validated['emergency_phone'],
+            'emergency_relationship' => $validated['emergency_relationship'],
+            
+            // Medical Info - JSON Arrays
+            'medical_conditions' => $medicalConditions,
+            'medications' => $medicationsArray,
+            'allergies' => $allergiesArray,
+            
             'profile_completed' => true,
         ]);
 

@@ -6,6 +6,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Notifications - SilverCare</title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('assets/icons/silvercare.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('assets/icons/silvercare.png') }}">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -57,9 +61,7 @@
         <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 h-20 flex justify-between items-center">
             <div class="flex items-center gap-4">
                 <a href="{{ route('dashboard') }}" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                    <div class="w-10 h-10 bg-[#000080] rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/20">
-                        <span class="text-white font-[900] text-lg">SC</span>
-                    </div>
+                    <img src="{{ asset('assets/icons/silvercare.png') }}" alt="SilverCare" class="w-10 h-10 object-contain">
                     <h1 class="text-2xl font-[900] tracking-tight text-gray-900">SILVER<span class="text-[#000080]">CARE</span></h1>
                 </a>
             </div>
@@ -157,22 +159,37 @@
                                  data-read="{{ $notification->is_read ? 'true' : 'false' }}">
                                 <div class="flex items-start gap-4">
                                     <!-- Icon -->
-                                    <div class="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center
-                                        @if($notification->type === 'medication') bg-green-100 text-green-600
-                                        @elseif($notification->type === 'checklist') bg-blue-100 text-blue-600
-                                        @elseif($notification->type === 'health') bg-rose-100 text-rose-600
-                                        @elseif($notification->type === 'appointment') bg-purple-100 text-purple-600
-                                        @elseif($notification->severity === 'high') bg-red-100 text-red-600
-                                        @else bg-gray-100 text-gray-600
-                                        @endif">
-                                        @if($notification->type === 'medication')
+                                    @php
+                                        $iconClass = 'bg-gray-100 text-gray-600';
+                                        $type = $notification->type;
+                                        $severity = $notification->severity;
+                                        
+                                        if (str_contains($type, 'medication')) {
+                                            $iconClass = $severity === 'positive' ? 'bg-green-100 text-green-600' : 
+                                                        ($severity === 'warning' || $severity === 'negative' ? 'bg-amber-100 text-amber-600' : 'bg-green-100 text-green-600');
+                                        } elseif (str_contains($type, 'task') || str_contains($type, 'checklist')) {
+                                            $iconClass = $severity === 'positive' ? 'bg-blue-100 text-blue-600' : 'bg-blue-100 text-blue-600';
+                                        } elseif (str_contains($type, 'health') || str_contains($type, 'vitals')) {
+                                            $iconClass = 'bg-rose-100 text-rose-600';
+                                        } elseif (str_contains($type, 'reminder')) {
+                                            $iconClass = 'bg-purple-100 text-purple-600';
+                                        } elseif ($severity === 'negative') {
+                                            $iconClass = 'bg-red-100 text-red-600';
+                                        } elseif ($severity === 'warning') {
+                                            $iconClass = 'bg-amber-100 text-amber-600';
+                                        } elseif ($severity === 'positive') {
+                                            $iconClass = 'bg-green-100 text-green-600';
+                                        }
+                                    @endphp
+                                    <div class="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center {{ $iconClass }}">
+                                        @if(str_contains($notification->type, 'medication'))
                                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-                                        @elseif($notification->type === 'checklist')
+                                        @elseif(str_contains($notification->type, 'task') || str_contains($notification->type, 'checklist'))
                                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-                                        @elseif($notification->type === 'health')
+                                        @elseif(str_contains($notification->type, 'health') || str_contains($notification->type, 'vitals'))
                                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-                                        @elseif($notification->type === 'appointment')
-                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        @elseif(str_contains($notification->type, 'reminder'))
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                         @else
                                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
                                         @endif
@@ -194,11 +211,19 @@
                                         <!-- Priority Badge -->
                                         @if($notification->severity)
                                             <div class="flex items-center gap-2 mb-3">
-                                                @if($notification->severity === 'high')
+                                                @if($notification->severity === 'negative')
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-bold bg-red-100 text-red-700">⚠️ Urgent</span>
+                                                @elseif($notification->severity === 'warning')
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-bold bg-amber-100 text-amber-700">⚡ Important</span>
+                                                @elseif($notification->severity === 'positive')
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-bold bg-green-100 text-green-700">✓ Completed</span>
+                                                @elseif($notification->severity === 'reminder')
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-bold bg-blue-100 text-blue-700">🔔 Reminder</span>
+                                                @elseif($notification->severity === 'high')
                                                     <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-bold bg-red-100 text-red-700">🔴 High Priority</span>
                                                 @elseif($notification->severity === 'medium')
                                                     <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-bold bg-yellow-100 text-yellow-700">🟡 Medium Priority</span>
-                                                @else
+                                                @elseif($notification->severity === 'low')
                                                     <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-bold bg-gray-100 text-gray-600">🟢 Low Priority</span>
                                                 @endif
                                             </div>

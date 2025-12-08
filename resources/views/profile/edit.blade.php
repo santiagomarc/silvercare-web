@@ -201,6 +201,7 @@
                     <!-- CARD 2: Medical Information (Elderly Only) -->
                     @if($profile->isElderly())
                     @php
+                        // Helper to safely implode arrays or JSON strings
                         function safeImplode($value) {
                             if (is_array($value)) return implode(', ', $value);
                             if (is_string($value)) {
@@ -210,9 +211,31 @@
                             }
                             return '';
                         }
-                        $conditionsVal = safeImplode($profile->medical_conditions);
-                        $medsVal = safeImplode($profile->medications);
-                        $allergiesVal = safeImplode($profile->allergies);
+                        
+                        // Try individual columns first, fallback to legacy medical_info JSON
+                        $legacyMedical = $profile->medical_info ?? [];
+                        
+                        $conditionsVal = safeImplode($profile->medical_conditions) 
+                            ?: safeImplode($legacyMedical['conditions'] ?? []);
+                        $medsVal = safeImplode($profile->medications) 
+                            ?: safeImplode($legacyMedical['medications'] ?? []);
+                        $allergiesVal = safeImplode($profile->allergies) 
+                            ?: safeImplode($legacyMedical['allergies'] ?? []);
+                        
+                        // Emergency Contact: Try individual columns first, fallback to legacy JSON, then caregiver
+                        $legacyEmergency = $profile->emergency_contact ?? [];
+                        $caregiver = $profile->caregiver?->user ?? null;
+                        $caregiverProfile = $profile->caregiver ?? null;
+                        
+                        $emergencyName = $profile->emergency_name 
+                            ?: ($legacyEmergency['name'] ?? null)
+                            ?: ($caregiver?->name ?? '');
+                        $emergencyPhone = $profile->emergency_phone 
+                            ?: ($legacyEmergency['phone'] ?? null)
+                            ?: ($caregiverProfile?->phone_number ?? '');
+                        $emergencyRelationship = $profile->emergency_relationship 
+                            ?: ($legacyEmergency['relationship'] ?? null)
+                            ?: ($caregiverProfile?->relationship ?? '');
                     @endphp
 
                     <div class="relative overflow-hidden bg-white rounded-[24px] p-8 shadow-sm border border-gray-100">
@@ -333,10 +356,10 @@
                                 <div>
                                     <label class="mb-2 block text-xs font-[800] uppercase tracking-wider text-gray-400">Contact Name</label>
                                     <template x-if="!editMode">
-                                        <p class="px-5 py-4 font-[700] text-white">{{ $profile->emergency_name ?: '—' }}</p>
+                                        <p class="px-5 py-4 font-[700] text-white">{{ $emergencyName ?: '—' }}</p>
                                     </template>
                                     <template x-if="editMode">
-                                        <input type="text" name="emergency_name" value="{{ old('emergency_name', $profile->emergency_name) }}" placeholder="Contact Name"
+                                        <input type="text" name="emergency_name" value="{{ old('emergency_name', $emergencyName) }}" placeholder="Contact Name"
                                             class="w-full rounded-xl border-0 bg-white/10 px-5 py-3.5 text-white font-[600] placeholder-gray-400 backdrop-blur-sm transition-all focus:bg-white/20 focus:ring-2 focus:ring-yellow-400">
                                     </template>
                                 </div>
@@ -345,10 +368,10 @@
                                 <div>
                                     <label class="mb-2 block text-xs font-[800] uppercase tracking-wider text-gray-400">Phone Number</label>
                                     <template x-if="!editMode">
-                                        <p class="px-5 py-4 font-[700] text-white">{{ $profile->emergency_phone ?: '—' }}</p>
+                                        <p class="px-5 py-4 font-[700] text-white">{{ $emergencyPhone ?: '—' }}</p>
                                     </template>
                                     <template x-if="editMode">
-                                        <input type="text" name="emergency_phone" value="{{ old('emergency_phone', $profile->emergency_phone) }}" placeholder="Phone Number"
+                                        <input type="text" name="emergency_phone" value="{{ old('emergency_phone', $emergencyPhone) }}" placeholder="Phone Number"
                                             class="w-full rounded-xl border-0 bg-white/10 px-5 py-3.5 text-white font-[600] placeholder-gray-400 backdrop-blur-sm transition-all focus:bg-white/20 focus:ring-2 focus:ring-yellow-400">
                                     </template>
                                 </div>
@@ -357,10 +380,10 @@
                                 <div>
                                     <label class="mb-2 block text-xs font-[800] uppercase tracking-wider text-gray-400">Relationship</label>
                                     <template x-if="!editMode">
-                                        <p class="px-5 py-4 font-[700] text-white">{{ $profile->emergency_relationship ?: '—' }}</p>
+                                        <p class="px-5 py-4 font-[700] text-white">{{ $emergencyRelationship ?: '—' }}</p>
                                     </template>
                                     <template x-if="editMode">
-                                        <input type="text" name="emergency_relationship" value="{{ old('emergency_relationship', $profile->emergency_relationship) }}" placeholder="Relationship"
+                                        <input type="text" name="emergency_relationship" value="{{ old('emergency_relationship', $emergencyRelationship) }}" placeholder="Relationship"
                                             class="w-full rounded-xl border-0 bg-white/10 px-5 py-3.5 text-white font-[600] placeholder-gray-400 backdrop-blur-sm transition-all focus:bg-white/20 focus:ring-2 focus:ring-yellow-400">
                                     </template>
                                 </div>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Checklist;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -138,10 +139,21 @@ class ChecklistController extends Controller
             abort(403);
         }
 
+        $newStatus = !$checklist->is_completed;
+
         $checklist->update([
-            'is_completed' => !$checklist->is_completed,
-            'completed_at' => !$checklist->is_completed ? now() : null,
+            'is_completed' => $newStatus,
+            'completed_at' => $newStatus ? now() : null,
         ]);
+
+        // Create notification if task was completed
+        if ($newStatus) {
+            app(NotificationService::class)->createTaskCompletedNotification(
+                $checklist->elderly_id,
+                $checklist->task,
+                $checklist->category ?? 'General'
+            );
+        }
 
         return redirect()->route('caregiver.checklists.index')->with('success', 'Task status updated.');
     }

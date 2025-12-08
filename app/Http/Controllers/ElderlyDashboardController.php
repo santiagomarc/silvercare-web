@@ -7,6 +7,7 @@ use App\Models\MedicationLog;
 use App\Models\Checklist;
 use App\Models\HealthMetric;
 use App\Models\GoogleFitToken;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -277,6 +278,15 @@ class ElderlyDashboardController extends Controller
             'completed_at' => $newStatus ? now() : null,
         ]);
 
+        // Create notification if task was completed
+        if ($newStatus) {
+            app(NotificationService::class)->createTaskCompletedNotification(
+                $elderlyId,
+                $checklist->task,
+                $checklist->category ?? 'General'
+            );
+        }
+
         // Return JSON for AJAX requests
         if (request()->wantsJson() || request()->ajax()) {
             return response()->json([
@@ -360,6 +370,13 @@ class ElderlyDashboardController extends Controller
                 'is_taken' => true,
                 'taken_at' => $now,
             ]
+        );
+
+        // Create notification for medication taken (with late flag)
+        app(NotificationService::class)->createMedicationTakenNotification(
+            $elderlyId,
+            $medication->name,
+            $takenLate
         );
 
         return response()->json([

@@ -6,6 +6,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Add Medication - SilverCare</title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('assets/icons/silvercare.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('assets/icons/silvercare.png') }}">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -23,9 +27,7 @@
         <div class="max-w-[1600px] mx-auto px-6 lg:px-12 h-16 flex justify-between items-center">
             <div class="flex items-center gap-6">
                 <a href="{{ route('caregiver.dashboard') }}" class="flex items-center gap-3 group">
-                    <div class="w-9 h-9 bg-[#000080] rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/20 group-hover:scale-105 transition-transform">
-                        <span class="text-white font-[900] text-sm">SC</span>
-                    </div>
+                    <img src="{{ asset('assets/icons/silvercare.png') }}" alt="SilverCare" class="w-9 h-9 object-contain group-hover:scale-105 transition-transform">
                     <h1 class="text-xl font-[900] tracking-tight text-gray-900 hidden sm:block">SILVER<span class="text-[#000080]">CARE</span></h1>
                 </a>
                 <div class="h-6 w-[1px] bg-gray-200 hidden md:block"></div>

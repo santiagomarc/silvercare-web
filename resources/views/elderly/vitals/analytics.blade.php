@@ -91,10 +91,20 @@
                 </div>
                 
                 <!-- Global Time Period Selector -->
-                <div class="flex bg-gray-100 rounded-xl p-1">
-                    <button onclick="changePeriod('7days')" class="period-btn active px-4 py-2 rounded-lg text-sm font-[700] transition-all" data-period="7days">Week</button>
-                    <button onclick="changePeriod('30days')" class="period-btn px-4 py-2 rounded-lg text-sm font-[700] transition-all" data-period="30days">Month</button>
-                    <button onclick="changePeriod('90days')" class="period-btn px-4 py-2 rounded-lg text-sm font-[700] transition-all" data-period="90days">3 Months</button>
+                <div class="flex items-center gap-3">
+                    <div class="flex bg-gray-100 rounded-xl p-1">
+                        <button onclick="changePeriod('7days')" class="period-btn active px-4 py-2 rounded-lg text-sm font-[700] transition-all" data-period="7days">Week</button>
+                        <button onclick="changePeriod('30days')" class="period-btn px-4 py-2 rounded-lg text-sm font-[700] transition-all" data-period="30days">Month</button>
+                        <button onclick="changePeriod('90days')" class="period-btn px-4 py-2 rounded-lg text-sm font-[700] transition-all" data-period="90days">3 Months</button>
+                    </div>
+                    
+                    <!-- Export PDF Button -->
+                    <a href="{{ route('elderly.vitals.export') }}" class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#000080] to-blue-700 hover:from-blue-800 hover:to-blue-600 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <span class="hidden sm:inline">Export</span>
+                    </a>
                 </div>
             </div>
         </div>

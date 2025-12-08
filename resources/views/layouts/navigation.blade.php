@@ -17,9 +17,7 @@
             <!-- LEFT: Logo (Clicking goes to Dashboard) -->
             <div class="flex items-center">
                 <a href="{{ route($dashboardRoute) }}" class="flex items-center gap-3 group transition-all">
-                    <div class="w-10 h-10 bg-[#000080] rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/20 text-white font-black text-lg group-hover:scale-105 transition-transform">
-                        SC
-                    </div>
+                    <img src="{{ asset('assets/icons/silvercare.png') }}" alt="SilverCare" class="w-10 h-10 object-contain group-hover:scale-105 transition-transform">
                     <h1 class="text-2xl font-black tracking-tight text-gray-900 group-hover:opacity-80 transition-opacity">
                         SILVER<span class="text-[#000080]">CARE</span>
                     </h1>

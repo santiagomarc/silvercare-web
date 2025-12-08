@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\HealthMetric;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -643,4 +644,155 @@ class HealthMetricController extends Controller
             'supportsGoogleFit'
         ));
     }
+
+    /**
+     * Export health analytics as PDF for elderly user
+     */
+    public function exportPdf()
+    {
+        $user = Auth::user();
+        $elderlyId = $user->profile?->id;
+
+        if (!$elderlyId) {
+            return redirect()->route('dashboard')->with('error', 'Profile not found');
+        }
+
+        // Get data for 7 days
+        $startDate = Carbon::now()->subDays(7);
+
+        $analyticsData = [];
+        $healthScore = 0;
+        $healthFactors = [];
+        $totalFactors = 0;
+
+        foreach (['blood_pressure', 'sugar_level', 'temperature', 'heart_rate'] as $type) {
+            $config = self::VITAL_TYPES[$type];
+            
+            $data = [
+                'config' => $config,
+                'type' => $type,
+            ];
+
+            $metrics = HealthMetric::where('elderly_id', $elderlyId)
+                ->where('type', $type)
+                ->where('measured_at', '>=', $startDate)
+                ->orderBy('measured_at', 'asc')
+                ->get();
+
+            $periodData = [
+                'count' => $metrics->count(),
+                'metrics' => $metrics,
+            ];
+
+            if ($type === 'blood_pressure') {
+                $systolic = [];
+                $diastolic = [];
+                foreach ($metrics as $metric) {
+                    if ($metric->value_text && preg_match('/^(\d+)\/(\d+)$/', $metric->value_text, $matches)) {
+                        $systolic[] = intval($matches[1]);
+                        $diastolic[] = intval($matches[2]);
+                    }
+                }
+                if (!empty($systolic)) {
+                    $periodData['systolic_avg'] = round(array_sum($systolic) / count($systolic), 1);
+                    $periodData['systolic_min'] = min($systolic);
+                    $periodData['systolic_max'] = max($systolic);
+                    $periodData['diastolic_avg'] = round(array_sum($diastolic) / count($diastolic), 1);
+                    $periodData['diastolic_min'] = min($diastolic);
+                    $periodData['diastolic_max'] = max($diastolic);
+                }
+            } else {
+                if ($metrics->isNotEmpty()) {
+                    $values = $metrics->pluck('value')->map(fn($v) => floatval($v));
+                    $periodData['avg'] = round($values->avg(), 1);
+                    $periodData['min'] = $values->min();
+                    $periodData['max'] = $values->max();
+                }
+            }
+
+            $data['7days'] = $periodData;
+            $analyticsData[$type] = $data;
+            
+            // Calculate health score contribution
+            if (($data['7days']['count'] ?? 0) > 0) {
+                $totalFactors++;
+                $score = 0;
+                $status = 'unknown';
+                
+                if ($type === 'blood_pressure') {
+                    $sys = $data['7days']['systolic_avg'] ?? 120;
+                    $dia = $data['7days']['diastolic_avg'] ?? 80;
+                    if ($sys < 120 && $dia < 80) { $score = 100; $status = 'Optimal'; }
+                    elseif ($sys < 130 && $dia < 85) { $score = 85; $status = 'Normal'; }
+                    elseif ($sys < 140 && $dia < 90) { $score = 70; $status = 'Elevated'; }
+                    else { $score = 50; $status = 'High'; }
+                } elseif ($type === 'heart_rate') {
+                    $hr = $data['7days']['avg'] ?? 72;
+                    if ($hr >= 60 && $hr <= 100) { $score = 100; $status = 'Optimal'; }
+                    elseif ($hr >= 50 && $hr <= 110) { $score = 80; $status = 'Normal'; }
+                    else { $score = 60; $status = 'Attention'; }
+                } elseif ($type === 'temperature') {
+                    $temp = $data['7days']['avg'] ?? 36.5;
+                    if ($temp >= 36.1 && $temp <= 37.2) { $score = 100; $status = 'Normal'; }
+                    elseif ($temp >= 35.5 && $temp <= 37.8) { $score = 75; $status = 'Mild'; }
+                    else { $score = 50; $status = 'Attention'; }
+                } elseif ($type === 'sugar_level') {
+                    $sugar = $data['7days']['avg'] ?? 100;
+                    if ($sugar >= 70 && $sugar <= 100) { $score = 100; $status = 'Optimal'; }
+                    elseif ($sugar >= 60 && $sugar <= 125) { $score = 80; $status = 'Normal'; }
+                    else { $score = 60; $status = 'Attention'; }
+                }
+                
+                $healthScore += $score;
+                $healthFactors[$type] = ['score' => $score, 'status' => $status];
+            }
+        }
+        
+        $healthScore = $totalFactors > 0 ? round($healthScore / $totalFactors) : 0;
+        $healthLabel = $healthScore >= 90 ? 'Excellent' : ($healthScore >= 75 ? 'Good' : ($healthScore >= 60 ? 'Fair' : 'Needs Attention'));
+
+        // Overall reading counts
+        $totalReadings = HealthMetric::where('elderly_id', $elderlyId)
+            ->whereIn('type', ['blood_pressure', 'sugar_level', 'temperature', 'heart_rate'])
+            ->count();
+
+        $readingsThisWeek = HealthMetric::where('elderly_id', $elderlyId)
+            ->whereIn('type', ['blood_pressure', 'sugar_level', 'temperature', 'heart_rate'])
+            ->where('measured_at', '>=', Carbon::now()->subDays(7))
+            ->count();
+
+        // For elderly PDF, we don't have medication/task summary (that's caregiver data)
+        // So we create empty placeholders
+        $medicationSummary = [
+            'totalMedications' => 0,
+            'adherenceRate' => null,
+            'medications' => [],
+            'lowStockCount' => 0,
+        ];
+        $taskSummary = [
+            'total' => 0,
+            'completionRate' => null,
+        ];
+
+        $elderly = $user->profile;
+        $elderlyUser = $user;
+
+        $pdf = Pdf::loadView('caregiver.analytics_pdf', compact(
+            'elderly',
+            'elderlyUser',
+            'analyticsData',
+            'healthScore',
+            'healthLabel',
+            'healthFactors',
+            'totalReadings',
+            'readingsThisWeek',
+            'medicationSummary',
+            'taskSummary'
+        ));
+
+        $filename = 'SilverCare_My_Health_Report_' . now()->format('Y-m-d') . '.pdf';
+
+        return $pdf->download($filename);
+    }
 }
+

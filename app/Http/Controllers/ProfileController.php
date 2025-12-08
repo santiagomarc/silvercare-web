@@ -17,8 +17,8 @@ class ProfileController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
         
-        // Direct Database Query (Like Calendar)
-        $profile = UserProfile::where('user_id', $user->id)->first();
+        // Direct Database Query - Include caregiver relationship for emergency contact fallback
+        $profile = UserProfile::with(['caregiver.user'])->where('user_id', $user->id)->first();
 
         // If no profile, create a blank instance so the view doesn't crash
         if (!$profile) {
