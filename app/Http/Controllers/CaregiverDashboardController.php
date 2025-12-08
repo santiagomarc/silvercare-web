@@ -141,8 +141,8 @@ class CaregiverDashboardController extends Controller
             ]);
         }
 
-        // Sort by timestamp and take the most recent 15
-        return $activities->sortByDesc('timestamp')->take(15)->values();
+        // Sort by timestamp and take the most recent 30
+        return $activities->sortByDesc('timestamp')->take(30)->values();
     }
 
     /**

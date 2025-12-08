@@ -494,14 +494,14 @@
             <div class="lg:col-span-4 space-y-6">
                 
                 <!-- Recent Activity -->
-                <div class="bg-white rounded-[24px] shadow-md border border-gray-100 p-6">
-                    <div class="flex items-center justify-between mb-4">
+                <div class="bg-white rounded-[24px] shadow-md border border-gray-100 p-6 flex flex-col" style="height: 490px;">
+                    <div class="flex items-center justify-between mb-4 flex-shrink-0">
                         <h3 class="font-[800] text-lg text-gray-900">Recent Activity</h3>
                         <span class="text-xs text-gray-400 font-bold">Last 7 days</span>
                     </div>
                     
                     @if($recentActivity->count() > 0)
-                        <ul class="space-y-3 max-h-[450px] overflow-y-auto no-scrollbar">
+                        <ul class="space-y-3 flex-1 overflow-y-auto pr-2" style="scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent;">
                             @foreach($recentActivity as $activity)
                                 @php
                                     // Determine border color based on severity or color
