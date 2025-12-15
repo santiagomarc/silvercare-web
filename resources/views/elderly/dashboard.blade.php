@@ -744,8 +744,8 @@
                                     // Calculate time window status
                                     $now = now();
                                     $scheduledTime = \Carbon\Carbon::parse(today()->format('Y-m-d') . ' ' . $time);
-                                    $windowStart = $scheduledTime->copy()->subMinutes(60);
-                                    $windowEnd = $scheduledTime->copy()->addMinutes(60);
+                                    $windowStart = $scheduledTime->copy(); // Window starts AT scheduled time
+                                    $windowEnd = $scheduledTime->copy()->addMinutes(60); // 1 hour grace period after
                                     
                                     $isWithinWindow = $now->between($windowStart, $windowEnd);
                                     $isPastWindow = $now->gt($windowEnd);
