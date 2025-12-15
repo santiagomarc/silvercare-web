@@ -1,4 +1,4 @@
-# 🏥 SilverCare Web Application
+# 🏥 SilverCare - SMART COMPANION FOR SENIORS
 
 **A comprehensive healthcare management ecosystem designed to bridge the gap between independent elderly living and proactive caregiving.**
 
