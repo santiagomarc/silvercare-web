@@ -2,7 +2,7 @@
 
 **A comprehensive healthcare management ecosystem designed to bridge the gap between independent elderly living and proactive caregiving.**
 
-SilverCare is an advanced web application engineered with **Laravel 11, PostgreSQL, and Tailwind CSS**. It addresses the critical challenge of managing complex health regimens for the aging population by unifying medication adherence, vital monitoring, and caregiver oversight into a single, synchronized platform.
+SilverCare is an advanced web application engineered with **Laravel 11, PHP, PostgreSQL, JavaScript, and Tailwind CSS**. It addresses the critical challenge of managing complex health regimens for the aging population by unifying medication adherence, vital monitoring, caregiver oversight, and wellness tracking into a single, synchronized platform. It also provides caregivers with real-time insights and management tools to ensure the well-being of their loved ones. 
 
 ### 🎯 Project Vision
 **The Problem:**
